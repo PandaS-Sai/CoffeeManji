@@ -191,7 +191,7 @@
         <div class="control-group">
           <label>Select Dripper</label>
           <select id="calcBrewerSelect" onchange="calculateRecipe()">
-            <option value="auto">✨ Auto-Select Best Paired Brewer</option>
+            <option value="auto">✨ Auto-Select Best Paired Brewer (AI Pick)</option>
           </select>
         </div>
 
@@ -210,9 +210,7 @@
   <!-- TAB 2: LIVE PANTRY -->
   <div id="livePantry" class="app-section">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-      <div>
-        <h2 style="font-size:18px; font-weight:800;">📋 Live Bean Pantry</h2>
-      </div>
+      <h2 style="font-size:18px; font-weight:800;">📋 Live Bean Pantry</h2>
       <button class="btn" onclick="switchTab('addCoffeeTab')">+ Add Bean</button>
     </div>
     <div class="grid-3" id="pantryGrid"></div>
@@ -229,9 +227,9 @@
         <div style="display:flex; gap:8px; flex-direction:column;">
           <input type="text" id="newBrewerName" placeholder="e.g. Hario Switch 03, April Dripper...">
           <select id="newBrewerDrainage">
-            <option value="fast">Fast Conical Flow</option>
-            <option value="medium">Medium Flat-bed Flow</option>
-            <option value="restricted">Restricted / Wedge Flow</option>
+            <option value="fast">Fast Conical Flow (Low restriction)</option>
+            <option value="medium">Medium Flat-bed Flow (Moderate restriction)</option>
+            <option value="restricted">Restricted / Wedge Flow (High resistance)</option>
           </select>
           <button class="btn" onclick="addNewDripper()">+ Add Dripper</button>
         </div>
@@ -244,17 +242,19 @@
     </div>
   </div>
 
-  <!-- TAB 4: ADD COFFEE FORM -->
+  <!-- TAB 4: ADD COFFEE FORM (CLEANED - AUTO DETERMINES BEST BREWER) -->
   <div id="addCoffeeTab" class="app-section">
     <div class="calc-box" style="max-width:600px; margin:0 auto;">
-      <h2 style="font-size:16px; font-weight:800; margin-bottom:14px;">➕ Add Coffee Lot</h2>
+      <h2 style="font-size:16px; font-weight:800; margin-bottom:8px;">➕ Add Coffee Lot</h2>
+      <p style="font-size:12px; color:var(--text-sub); margin-bottom:14px;">Just enter basic bag specs. The engine will automatically determine the best brewer, grind, temperature, and ratio for all 3 methods.</p>
+      
       <div class="control-group" style="margin-bottom:10px;">
         <label>Coffee Name & Lot</label>
-        <input type="text" id="addName" placeholder="e.g. Melkodige Obata">
+        <input type="text" id="addName" placeholder="e.g. Melkodige Obata or Ratnagiri Lot 12">
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Roaster</label>
-        <input type="text" id="addRoaster" placeholder="e.g. Subko, Grey Soul, Broot">
+        <input type="text" id="addRoaster" placeholder="e.g. Subko, Grey Soul, Broot, Blue Tokai">
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Roast Level</label>
@@ -268,25 +268,21 @@
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Process</label>
-        <input type="text" id="addProcess" placeholder="e.g. Wine Yeast Anoxic, Washed">
+        <input type="text" id="addProcess" placeholder="e.g. Wine Yeast Anoxic, Washed, Anaerobic Natural, Honey">
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Varietal</label>
-        <input type="text" id="addVarietal" placeholder="e.g. Obata, SLN 795, Peaberry">
+        <input type="text" id="addVarietal" placeholder="e.g. Obata, SLN 795, Peaberry, Robusta">
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Roast Date</label>
         <input type="date" id="addRoastDate">
       </div>
-      <div class="control-group" style="margin-bottom:10px;">
-        <label>Tasting Notes</label>
-        <input type="text" id="addNotes" placeholder="e.g. Mango, Jasmine, Plum">
-      </div>
       <div class="control-group" style="margin-bottom:16px;">
-        <label>Best Matched Dripper</label>
-        <select id="addDefaultDripper"></select>
+        <label>Tasting Notes</label>
+        <input type="text" id="addNotes" placeholder="e.g. Mango, Jasmine, Plum, Fudge">
       </div>
-      <button class="btn" style="width:100%; padding:12px;" onclick="saveNewCoffee()">Save to Pantry</button>
+      <button class="btn" style="width:100%; padding:12px;" onclick="saveNewCoffee()">Save to Live Pantry</button>
     </div>
   </div>
 
@@ -319,16 +315,16 @@ var storedCoffees = defaultCoffees.slice();
 var storedDrippers = Object.assign({}, defaultDrippers);
 
 try {
-  var c = localStorage.getItem('sai_coffees_v2');
+  var c = localStorage.getItem('sai_coffees_v3');
   if (c) storedCoffees = JSON.parse(c);
-  var d = localStorage.getItem('sai_drippers_v2');
+  var d = localStorage.getItem('sai_drippers_v3');
   if (d) storedDrippers = JSON.parse(d);
 } catch(err) {}
 
 function saveState() {
   try {
-    localStorage.setItem('sai_coffees_v2', JSON.stringify(storedCoffees));
-    localStorage.setItem('sai_drippers_v2', JSON.stringify(storedDrippers));
+    localStorage.setItem('sai_coffees_v3', JSON.stringify(storedCoffees));
+    localStorage.setItem('sai_drippers_v3', JSON.stringify(storedDrippers));
   } catch(err) {}
 }
 
@@ -346,11 +342,8 @@ function switchTab(tabId) {
 
 function renderBrewerDropdowns() {
   var calcSelect = document.getElementById('calcBrewerSelect');
-  var addSelect = document.getElementById('addDefaultDripper');
-  if (!calcSelect || !addSelect) return;
-  
-  calcSelect.innerHTML = '<option value="auto">✨ Auto-Select Best Paired Brewer</option>';
-  addSelect.innerHTML = '';
+  if (!calcSelect) return;
+  calcSelect.innerHTML = '<option value="auto">✨ Auto-Select Best Paired Brewer (AI Pick)</option>';
 
   for (var k in storedDrippers) {
     if (storedDrippers.hasOwnProperty(k)) {
@@ -358,11 +351,6 @@ function renderBrewerDropdowns() {
       opt.value = k;
       opt.textContent = storedDrippers[k].name;
       calcSelect.appendChild(opt);
-
-      var opt2 = document.createElement('option');
-      opt2.value = k;
-      opt2.textContent = storedDrippers[k].name;
-      addSelect.appendChild(opt2);
     }
   }
 }
@@ -389,7 +377,7 @@ function renderEquipmentList() {
       var item = document.createElement('div');
       item.className = 'arsenal-item';
       var isDefault = defaultDrippers.hasOwnProperty(k);
-      item.innerHTML = '<div><b>' + storedDrippers[k].name + '</b> <span style="font-size:11px; color:var(--text-sub); margin-left:8px;">[' + storedDrippers[k].flow + ']</span></div>' +
+      item.innerHTML = '<div><b>' + storedDrippers[k].name + '</b> <span style="font-size:11px; color:var(--text-sub); margin-left:8px;">[' + storedDrippers[k].flow + ' flow]</span></div>' +
         (!isDefault ? '<button class="btn-danger" onclick="deleteDripper(\'' + k + '\')">Remove</button>' : '');
       container.appendChild(item);
     }
@@ -410,7 +398,7 @@ function addNewDripper() {
 }
 
 function deleteDripper(k) {
-  if (confirm("Remove this dripper?")) {
+  if (confirm("Remove this dripper from arsenal?")) {
     delete storedDrippers[k];
     saveState();
     renderBrewerDropdowns();
@@ -444,9 +432,9 @@ function renderPantry() {
       '</div>' +
       '<h3 style="font-size:14px; font-weight:700; margin-bottom:4px;">' + c.name + '</h3>' +
       '<p style="font-size:12px; color:var(--text-sub); margin-bottom:6px;">' + c.roaster + ' • ' + c.process + '</p>' +
-      '<p style="font-size:12px; color:var(--purple); font-style:italic; margin-bottom:10px;">' + c.notes + '</p>' +
+      '<p style="font-size:12px; color:var(--purple); font-style:italic; margin-bottom:10px;">Notes: ' + c.notes + '</p>' +
       '<div style="background:var(--card-inner); padding:8px 10px; border-radius:6px; font-size:11.5px; border:1px solid var(--border); margin-bottom:10px;">' +
-      '<div><b>Best Dripper:</b> <span style="color:var(--blue);">' + dripperName + '</span></div>' +
+      '<div><b>Best Paired Dripper:</b> <span style="color:var(--blue);">' + dripperName + '</span></div>' +
       '<div><b>Hot Dial:</b> C3S: ' + c.c3sHot + ' clk | ZP6: ' + c.zp6Hot + ' @ ' + c.hotTemp + '°C</div>' +
       '</div>' +
       '<div style="display:flex; gap:8px;">' +
@@ -474,16 +462,55 @@ function saveNewCoffee() {
   var varietal = document.getElementById('addVarietal').value.trim();
   var rDate = document.getElementById('addRoastDate').value || new Date().toISOString().split('T')[0];
   var notes = document.getElementById('addNotes').value.trim();
-  var brewer = document.getElementById('addDefaultDripper').value;
 
   if (!name || !roaster) return alert("Enter Coffee Name & Roaster");
 
+  var chosenBrewer = "origami";
   var temp = 92; var ratio = 16; var c3s = 14; var zp6 = 4.5;
-  if (roast === 'Ultra-Light') { temp = 96; ratio = 15; c3s = 12; zp6 = 4.0; }
-  else if (roast === 'Medium-Light') { temp = 93; ratio = 16; c3s = 13; zp6 = 4.3; }
-  else if (roast === 'Medium') { temp = 90; ratio = 16; c3s = 14; zp6 = 4.8; }
-  else if (roast === 'Medium-Dark') { temp = 89; ratio = 15.5; c3s = 15; zp6 = 5.2; }
-  else if (roast === 'Dark') { temp = 87; ratio = 14.5; c3s = 17; zp6 = 5.8; }
+  var rationale = "";
+
+  var lowerProc = process.toLowerCase();
+  var lowerVar = varietal.toLowerCase();
+
+  if (roast === 'Ultra-Light') {
+    chosenBrewer = "origami";
+    temp = 96; ratio = 15; c3s = 11; zp6 = 3.9;
+    rationale = "Ultra-light density requires near-boiling water (96°C) and fast vertical Origami drainage to prevent under-extraction and savory lentil defect.";
+  } else if (roast === 'Medium-Light') {
+    if (lowerVar.indexOf('peaberry') !== -1 || lowerProc.indexOf('aerobic') !== -1) {
+      chosenBrewer = "neo";
+      temp = 92; ratio = 16; c3s = 14; zp6 = 4.5;
+      rationale = "Spherical peaberry / aerobic processing thrives with Amber Neo V60's rapid spiral ribs for maximum sweetness.";
+    } else {
+      chosenBrewer = "origami";
+      temp = 92; ratio = 16.3; c3s = 13; zp6 = 4.3;
+      rationale = "Origami fast drain lets delicate fruit esters and floral aromatics lift cleanly without boozy astringency.";
+    }
+  } else if (roast === 'Medium') {
+    if (lowerProc.indexOf('natural') !== -1 || lowerProc.indexOf('honey') !== -1) {
+      chosenBrewer = "balloon";
+      temp = 90; ratio = 16; c3s = 15; zp6 = 5.0;
+      rationale = "Balloon-Glass V60 bulbous reservoir accentuates syrupy mouthfeel and candied sugars.";
+    } else {
+      chosenBrewer = "ceramic";
+      temp = 91; ratio = 16; c3s = 14; zp6 = 4.8;
+      rationale = "Ceramic thermal stability balances citric/malic acidity with caramelized sweetness.";
+    }
+  } else if (roast === 'Medium-Dark') {
+    if (lowerVar.indexOf('robusta') !== -1) {
+      chosenBrewer = "kalita";
+      temp = 87; ratio = 14; c3s = 17; zp6 = 6.0;
+      rationale = "Robusta thrives at 87°C on Kalita 102 with short ratio to draw dark cacao and warm spices without ash.";
+    } else {
+      chosenBrewer = "balloon";
+      temp = 89; ratio = 15.5; c3s = 15; zp6 = 5.2;
+      rationale = "Balloon-glass rounds body and pulls deep plum and chocolate while suppressing bitterness.";
+    }
+  } else if (roast === 'Dark') {
+    chosenBrewer = "kalita";
+    temp = 88; ratio = 15; c3s = 17; zp6 = 5.8;
+    rationale = "Brittle dark roast needs coarse grind, 88°C water, and Kalita wedge oval pour to prevent astringency.";
+  }
 
   var newBean = {
     id: "bean_" + Date.now(),
@@ -493,13 +520,13 @@ function saveNewCoffee() {
     process: process || "Natural",
     varietal: varietal || "Arabica",
     roastDate: rDate,
-    defaultBrewer: brewer,
-    notes: notes || "Fresh roast",
+    defaultBrewer: chosenBrewer,
+    notes: notes || "Fresh specialty roast",
     hotTemp: temp,
     hotRatio: ratio,
     c3sHot: c3s,
     zp6Hot: zp6,
-    flowNote: "First-principles calibrated recipe generated automatically."
+    flowNote: rationale
   };
 
   storedCoffees.unshift(newBean);
@@ -507,6 +534,7 @@ function saveNewCoffee() {
   renderCoffeeDropdown();
   renderPantry();
   brewSpecificCoffee(newBean.id);
+  alert("Coffee analyzed! Best dripper & recipes calculated and loaded into the Recipe Engine.");
 }
 
 function deleteCoffee(id) {
@@ -539,7 +567,8 @@ function calculateRecipe() {
     }
   }
 
-  var activeBrewerKey = brewerChoice === "auto" ? coffee.defaultBrewer : brewerChoice;
+  var isAuto = (brewerChoice === "auto");
+  var activeBrewerKey = isAuto ? coffee.defaultBrewer : brewerChoice;
   var brewerObj = storedDrippers[activeBrewerKey] || defaultDrippers.origami;
 
   var c3s = coffee.c3sHot;
@@ -550,15 +579,19 @@ function calculateRecipe() {
   var iceGrams = 0;
   var hotWaterGrams = totalWater;
 
+  var dripperAdjustmentNote = "";
   if (brewerObj.flow === 'restricted') {
     c3s += 2;
     zp6 = (zp6 + 0.8).toFixed(1);
     temp = Math.max(86, temp - 2);
+    dripperAdjustmentNote = "Restricted-flow wedge dripper detected: Grind loosened +2 clicks (ZP6 +0.8) and temperature lowered by 2°C to prevent bed stalling and astringent bitterness.";
   } else if (brewerObj.flow === 'medium') {
     c3s += 1;
     zp6 = (zp6 + 0.3).toFixed(1);
+    dripperAdjustmentNote = "Medium-flow brewer detected: Grind loosened +1 click (ZP6 +0.3) for optimum thermal extraction and balanced sweetness.";
   } else {
     zp6 = zp6.toFixed(1);
+    dripperAdjustmentNote = "High-velocity bypass dripper detected: Baseline tight grind utilized to maximize kinetic clarity.";
   }
 
   if (method === 'iced') {
@@ -579,7 +612,7 @@ function calculateRecipe() {
 
   var specBanner = document.getElementById('specBanner');
   if (specBanner) {
-    specBanner.innerHTML = '<div class="item">Active Brewer<b>' + brewerObj.name + '</b></div>' +
+    specBanner.innerHTML = '<div class="item">Active Brewer<b>' + brewerObj.name + (isAuto ? ' <span style="font-size:10px; color:var(--accent-light);">[Best Match]</span>' : '') + '</b></div>' +
       '<div class="item">Coffee Dose<b>' + dose.toFixed(1) + 'g</b></div>' +
       '<div class="item">Total Liquid<b>' + totalWater + 'g</b></div>' +
       '<div class="item">Water Temp<b>' + (typeof temp === 'number' ? temp + '°C' : temp) + '</b></div>' +
@@ -595,19 +628,19 @@ function calculateRecipe() {
     var p1 = Math.round((hotWaterGrams - bloom) * 0.48);
     var p2 = hotWaterGrams - bloom - p1;
 
-    var action1 = brewerObj.flow === 'restricted' ? "Oval racetrack pour along wedge seam" : "Concentric spiral from center outward";
-    var action2 = brewerObj.flow === 'restricted' ? "Gentle center pulse. Lift before stall" : "Gentle laminar center pour (low turbulence)";
+    var action1 = brewerObj.flow === 'restricted' ? "Oval racetrack line back and forth along long wedge seam" : "Concentric circular spirals from center outward";
+    var action2 = brewerObj.flow === 'restricted' ? "Gentle center pulse stream. Lift kettle before draw stalls" : "Gentle laminar center pour (low spout height, minimal turbulence)";
 
     if (timeline) {
       timeline.innerHTML = '<table class="pour-table">' +
         '<tr><th>Stage & Time</th><th>Water Dose</th><th>Total Water</th><th>Pour Dynamics (' + brewerObj.name + ')</th></tr>' +
-        '<tr><td><b>Bloom:</b> 0:00 – 0:40</td><td>' + bloom + 'g</td><td>' + bloom + 'g</td><td>Rapid wetting. 1-2 swirls to exhaust gas.</td></tr>' +
-        '<tr><td><b>Pour 1:</b> 0:40 – 1:15</td><td>+' + p1 + 'g</td><td>' + (bloom + p1) + 'g</td><td>' + action1 + '.</td></tr>' +
-        '<tr><td><b>Pour 2:</b> 1:20 – 1:55</td><td>+' + p2 + 'g</td><td>' + hotWaterGrams + 'g</td><td>' + action2 + '. Target: 2:20–2:45.</td></tr>' +
+        '<tr><td><b>Stage 1 (Bloom):</b> 0:00 – 0:40</td><td>' + bloom + 'g</td><td>' + bloom + 'g</td><td>Rapid wetting. ' + (brewerObj.flow === 'restricted' ? 'No swirl (avoids choking bottom holes).' : '1-2 gentle swirls to exhaust CO2.') + '</td></tr>' +
+        '<tr><td><b>Stage 2 (Acidity):</b> 0:40 – 1:15</td><td>+' + p1 + 'g</td><td>' + (bloom + p1) + 'g</td><td>' + action1 + '.</td></tr>' +
+        '<tr><td><b>Stage 3 (Sweetness):</b> 1:20 – 1:55</td><td>+' + p2 + 'g</td><td>' + hotWaterGrams + 'g</td><td>' + action2 + '. Target Drawdown: 2:20–2:45.</td></tr>' +
         '</table>';
     }
     if (rationale) {
-      rationale.innerHTML = '<b>Extraction Dynamics:</b> ' + (coffee.flowNote || 'Standard extraction.') + ' (' + brewerObj.name + ' flow dynamics applied).';
+      rationale.innerHTML = '<b>Extraction Strategy:</b> ' + (coffee.flowNote || '') + '<br/><span style="color:var(--blue); font-size:11.5px; margin-top:4px; display:block;">⚙️ ' + dripperAdjustmentNote + '</span>';
     }
   } else if (method === 'iced') {
     var bloom = Math.round(dose * 2.5);
@@ -617,32 +650,31 @@ function calculateRecipe() {
     if (timeline) {
       timeline.innerHTML = '<table class="pour-table">' +
         '<tr><th>Stage & Time</th><th>Water Dose</th><th>Total Liquid</th><th>Japanese Flash Mechanics</th></tr>' +
-        '<tr><td><b>Prep</b></td><td>' + iceGrams + 'g Ice</td><td>' + iceGrams + 'g</td><td>Place hard ice cubes directly inside carafe.</td></tr>' +
-        '<tr><td><b>Bloom:</b> 0:00 – 0:40</td><td>' + bloom + 'g Hot</td><td>' + (iceGrams + bloom) + 'g</td><td>Saturate bed. Fast swirl over ice.</td></tr>' +
-        '<tr><td><b>Pour 1:</b> 0:40 – 1:10</td><td>+' + p1 + 'g Hot</td><td>' + (iceGrams + bloom + p1) + 'g</td><td>Slow tight circles for high concentration.</td></tr>' +
-        '<tr><td><b>Pour 2:</b> 1:15 – 1:45</td><td>+' + p2 + 'g Hot</td><td>' + totalWater + 'g Total</td><td>Laminar center stream. Swirl carafe 15s to chill.</td></tr>' +
+        '<tr><td><b>Prep</b></td><td>' + iceGrams + 'g Ice</td><td>' + iceGrams + 'g</td><td>Place ' + iceGrams + 'g hard ice cubes directly inside carafe.</td></tr>' +
+        '<tr><td><b>Stage 1:</b> 0:00 – 0:40</td><td>' + bloom + 'g Hot</td><td>' + (iceGrams + bloom) + 'g</td><td>Saturate bed. Fast single swirl to start extraction over ice.</td></tr>' +
+        '<tr><td><b>Stage 2:</b> 0:40 – 1:10</td><td>+' + p1 + 'g Hot</td><td>' + (iceGrams + bloom + p1) + 'g</td><td>Slow tight concentric pulses to elevate dissolved solids.</td></tr>' +
+        '<tr><td><b>Stage 3:</b> 1:15 – 1:45</td><td>+' + p2 + 'g Hot</td><td>' + totalWater + 'g Total</td><td>Laminar center stream. Swirl carafe 15s to shock-cool aromatics.</td></tr>' +
         '</table>';
     }
     if (rationale) {
-      rationale.innerHTML = '<b>Japanese Flash Rationale:</b> Grinding 2 clicks finer (C3S: ' + c3s + ' / ZP6: ' + zp6 + ') and brewing hot onto ' + iceGrams + 'g ice locks volatile fruit aromatics.';
+      rationale.innerHTML = '<b>Japanese Flash Rationale:</b> Grinding 2 clicks finer (C3S: ' + c3s + ' / ZP6: ' + zp6 + ') and brewing hot onto ' + iceGrams + 'g ice locks volatile fruit aromatics without dilution bitterness.<br/><span style="color:var(--blue); font-size:11.5px; margin-top:4px; display:block;">⚙️ ' + dripperAdjustmentNote + '</span>';
     }
   } else {
     if (timeline) {
       timeline.innerHTML = '<table class="pour-table">' +
         '<tr><th>Step</th><th>Ratio / Specs</th><th>Protocol</th></tr>' +
-        '<tr><td><b>1. Grind & Load</b></td><td>' + dose + 'g @ ' + c3s + ' clicks (ZP6: ' + zp6 + ')</td><td>Coarse grind prevents astringency.</td></tr>' +
-        '<tr><td><b>2. Saturate</b></td><td>' + totalWater + 'g Water</td><td>Pour room temp water, stir 3 times.</td></tr>' +
+        '<tr><td><b>1. Grind & Load</b></td><td>' + dose + 'g @ ' + c3s + ' clicks (ZP6: ' + zp6 + ')</td><td>Coarse grind prevents astringency and silt.</td></tr>' +
+        '<tr><td><b>2. Saturate</b></td><td>' + totalWater + 'g Water</td><td>Pour room temp filtered water, stir 3 times.</td></tr>' +
         '<tr><td><b>3. Cold Steep</b></td><td>14 – 16 Hours in Fridge</td><td>Cap tightly in refrigerator.</td></tr>' +
         '<tr><td><b>4. Filtration</b></td><td>Paper V60 Filter</td><td>Strain through paper cone for tea-like clarity.</td></tr>' +
         '</table>';
     }
     if (rationale) {
-      rationale.innerHTML = '<b>Cold Immersion Rationale:</b> 14 hours of cold steeping extracts rich sweetness without extracting harsh tannins.';
+      rationale.innerHTML = '<b>Cold Immersion Rationale:</b> 14 hours of cold steeping extracts rich sucrose without extracting harsh chlorogenic acid compounds.';
     }
   }
 }
 
-// Fail-safe initialization
 function start() {
   renderBrewerDropdowns();
   renderCoffeeDropdown();
