@@ -1,0 +1,2 @@
+# CoffeeManji
+Daily brew usage
