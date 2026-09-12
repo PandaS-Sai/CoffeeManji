@@ -13,7 +13,6 @@
     --accent: #d97706;
     --accent-light: #f59e0b;
     --blue: #38bdf8;
-    --green: #34d399;
     --purple: #a78bfa;
     --text-main: #f8fafc;
     --text-sub: #94a3b8;
@@ -35,7 +34,7 @@
     gap: 12px;
   }
   .brand { display: flex; align-items: center; gap: 10px; }
-  .brand h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.5px; }
+  .brand h1 { font-size: 16px; font-weight: 800; }
   .brand span { font-size: 11px; background: rgba(217, 119, 6, 0.2); color: var(--accent-light); padding: 3px 8px; border-radius: 6px; font-weight: 600; }
   
   .nav-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -48,9 +47,7 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
   }
-  .tab-btn:hover { background: #222538; color: #fff; }
   .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
   .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
@@ -63,9 +60,7 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 16px;
-    transition: border-color 0.15s;
   }
-  .card:hover { border-color: #3b4263; }
   
   .badge { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; display: inline-block; }
   .badge-light { background: #78350f; color: #fde68a; }
@@ -79,7 +74,7 @@
     padding: 22px;
     margin-bottom: 24px;
   }
-  .calc-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .calc-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; display: flex; justify-content: space-between; }
   
   .control-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
   .control-group label { display: block; font-size: 11.5px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; text-transform: uppercase; }
@@ -93,7 +88,6 @@
     font-size: 13px;
     outline: none;
   }
-  select:focus, input:focus { border-color: var(--accent); }
 
   .spec-banner {
     display: grid;
@@ -107,8 +101,336 @@
   }
   .spec-banner .item { font-size: 12px; color: var(--text-sub); }
   .spec-banner .item b { display: block; font-size: 15px; color: #fff; margin-top: 2px; }
-  .spec-banner .item b span { color: var(--accent-light); font-size: 12px; }
 
+  .pour-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+  .pour-table th { background: #1a1c2b; color: var(--blue); text-align: left; padding: 9px 12px; border: 1px solid var(--border); }
+  .pour-table td { padding: 9px 12px; border: 1px solid var(--border); background: #12131f; }
+  .pour-table tr:nth-child(even) td { background: #161725; }
+
+  .callout {
+    background: rgba(217, 119, 6, 0.1);
+    border-left: 3px solid var(--accent);
+    padding: 12px 14px;
+    border-radius: 0 8px 8px 0;
+    font-size: 12.5px;
+    color: #cbd5e1;
+    margin-top: 16px;
+  }
+
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 9px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-danger { background: #991b1b; color: white; padding: 3px 7px; font-size: 10.5px; border-radius: 4px; border: none; cursor: pointer; }
+
+  .arsenal-item {
+    background: #191b28;
+    border: 1px solid var(--border);
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="brand">
+    <h1>☕ COFFEE LAB OS</h1>
+    <span>From Sai' Competition Lab</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" id="btn-recipeEngine" onclick="switchTab('recipeEngine')">🎯 Recipe Engine</button>
+    <button class="tab-btn" id="btn-livePantry" onclick="switchTab('livePantry')">📋 Live Pantry</button>
+    <button class="tab-btn" id="btn-equipmentTab" onclick="switchTab('equipmentTab')">⚙️ Equipment Arsenal</button>
+    <button class="tab-btn" id="btn-addCoffeeTab" onclick="switchTab('addCoffeeTab')">➕ Add New Coffee</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TAB 1: RECIPE ENGINE -->
+  <div id="recipeEngine" class="app-section active">
+    <div class="calc-box">
+      <div class="calc-title">
+        <span>⚡ Dynamic Extraction Calculator</span>
+      </div>
+
+      <div class="control-grid">
+        <div class="control-group">
+          <label>Select Coffee</label>
+          <select id="calcCoffeeSelect" onchange="calculateRecipe()"></select>
+        </div>
+
+        <div class="control-group">
+          <label>Brew Method</label>
+          <select id="calcMethodSelect" onchange="calculateRecipe()">
+            <option value="hot">🔥 Hot Pour-Over</option>
+            <option value="iced">❄️ Japanese Iced Flash Brew</option>
+            <option value="cold">🧊 Cold Immersion / Toddy</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Select Dripper / Brewer</label>
+          <select id="calcBrewerSelect" onchange="calculateRecipe()">
+            <option value="auto">✨ Auto-Select Best Paired Brewer</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label>Dose (Grams)</label>
+          <input type="number" id="calcDoseInput" value="15.0" step="0.5" min="10" max="40" onchange="calculateRecipe()">
+        </div>
+      </div>
+
+      <div class="spec-banner" id="specBanner"></div>
+      <div id="timelineContainer"></div>
+      <div class="callout" id="calloutRationale"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: LIVE PANTRY -->
+  <div id="livePantry" class="app-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h2 style="font-size:20px; font-weight:800;">📋 Live Bean Pantry</h2>
+        <p style="color:var(--text-sub); font-size:13px;">Tracks resting time & integrates directly with recipes</p>
+      </div>
+      <button class="btn" onclick="switchTab('addCoffeeTab')">+ Add New Bag</button>
+    </div>
+    <div class="grid-3" id="pantryGrid"></div>
+  </div>
+
+  <!-- TAB 3: EQUIPMENT ARSENAL -->
+  <div id="equipmentTab" class="app-section">
+    <h2 style="font-size:20px; font-weight:800; margin-bottom:12px;">⚙️ Equipment Arsenal</h2>
+    <div class="calc-box">
+      <h3 style="font-size:15px; margin-bottom:12px; color:var(--blue);">Active Pour-Over Drippers</h3>
+      <div id="drippersListContainer"></div>
+      <div style="margin-top:16px; border-top:1px solid var(--border); padding-top:14px;">
+        <h4 style="font-size:13px; margin-bottom:8px; color:var(--text-sub);">Add New Dripper to Arsenal</h4>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <input type="text" id="newBrewerName" placeholder="e.g. Hario Switch, April Dripper..." style="flex:2; min-width:200px;">
+          <select id="newBrewerDrainage" style="flex:1; min-width:140px;">
+            <option value="fast">Fast Conical Flow</option>
+            <option value="medium">Medium Flat-bed Flow</option>
+            <option value="restricted">Restricted / Wedge Flow</option>
+          </select>
+          <button class="btn" onclick="addNewDripper()">+ Add Dripper</button>
+        </div>
+      </div>
+    </div>
+    <div class="calc-box">
+      <h3 style="font-size:15px; margin-bottom:10px; color:var(--accent-light);">Manual Grinders Configured</h3>
+      <div class="arsenal-item">
+        <div><b>Timemore C3S:</b> 38mm S2C Burrs • Internal Adjustment</div>
+      </div>
+      <div class="arsenal-item">
+        <div><b>1Zpresso ZP6 Special:</b> 48mm Hexagonal Burrs • External Top Collar</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: ADD COFFEE FORM -->
+  <div id="addCoffeeTab" class="app-section">
+    <div class="calc-box" style="max-width:700px; margin:0 auto;">
+      <h2 style="font-size:18px; font-weight:800; margin-bottom:16px;">➕ Add Coffee Lot to Live Pantry</h2>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+        <div class="control-group">
+          <label>Coffee Name & Lot</label>
+          <input type="text" id="addName" placeholder="e.g. Ratnagiri Estate Lot 12">
+        </div>
+        <div class="control-group">
+          <label>Roaster</label>
+          <input type="text" id="addRoaster" placeholder="e.g. Subko, Grey Soul, Broot">
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+        <div class="control-group">
+          <label>Roast Level</label>
+          <select id="addRoast">
+            <option value="Ultra-Light">Ultra-Light</option>
+            <option value="Medium-Light">Medium-Light</option>
+            <option value="Medium">Medium</option>
+            <option value="Medium-Dark">Medium-Dark</option>
+            <option value="Dark">Dark</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Process</label>
+          <input type="text" id="addProcess" placeholder="e.g. Wine Yeast Anoxic, Washed, Honey">
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+        <div class="control-group">
+          <label>Varietal</label>
+          <input type="text" id="addVarietal" placeholder="e.g. Obata, SLN 795, Peaberry">
+        </div>
+        <div class="control-group">
+          <label>Roast Date</label>
+          <input type="date" id="addRoastDate">
+        </div>
+      </div>
+      <div class="control-group" style="margin-bottom:14px;">
+        <label>Tasting Notes</label>
+        <input type="text" id="addNotes" placeholder="e.g. Mango, Jasmine, Plum, Fudge">
+      </div>
+      <div class="control-group" style="margin-bottom:20px;">
+        <label>Best Matched Dripper</label>
+        <select id="addDefaultDripper"></select>
+      </div>
+      <button class="btn" style="width:100%; padding:12px;" onclick="saveNewCoffee()">Save to Pantry & Storage</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var defaultCoffees = [
+  { id: "subko-ratnagiri", name: "Subko - Ratnagiri Estate (Pearl)", roaster: "Subko", roast: "Ultra-Light", process: "Culture Naturals + Anaerobic", varietal: "Catuai & Hemavathi", roastDate: "2026-08-28", defaultBrewer: "origami", notes: "Marigold, Dragon Fruit, Peach Iced-Tea", hotTemp: 92, hotRatio: 17, c3sHot: 13, zp6Hot: 4.2, flowNote: "Origami flutes maximize peach florals while bypassing heavy ferment funk." },
+  { id: "pink-lemonade", name: "Grey Soul - Pink Lemonade (#5)", roaster: "Grey Soul", roast: "Ultra-Light", process: "Sun-Dried Anaerobic Natural", varietal: "Specialty Arabica Lot #5", roastDate: "2026-08-25", defaultBrewer: "origami", notes: "Candied Strawberry, Citrus Malic, Fig Base", hotTemp: 96, hotRatio: 15, c3sHot: 11, zp6Hot: 3.9, flowNote: "Dense cells require near-boiling water (96-97°C) & 5 pulses to dissolve berry sugars." },
+  { id: "broot-sur-lie", name: "Broot - SUR LIE (Melkodige)", roaster: "Broot Coffee", roast: "Medium-Light", process: "Wine Yeast Anoxic Natural", varietal: "Obata", roastDate: "2026-09-03", defaultBrewer: "origami", notes: "Red Grape, Dried Fig, Jasmine Lift, Wine Finish", hotTemp: 92, hotRatio: 16.3, c3sHot: 13, zp6Hot: 4.3, flowNote: "Origami fast drain lets delicate wine yeast jasmine & grape volatiles lift cleanly." },
+  { id: "moss-theory", name: "Broot - Moss Theory (Kerehaklu)", roaster: "Broot Coffee", roast: "Medium-Light", process: "Extended Aerobic SLN9 Peaberry", varietal: "SLN9 Peaberry", roastDate: "2026-08-26", defaultBrewer: "neo", notes: "Golden Mango, Pink Guava Nectar, Syrupy Body", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.5, flowNote: "Neo V60's rapid spiral channels accelerate tropical mango extraction on peaberries." },
+  { id: "salawara-estate", name: "Blue Tokai - Salawara Estate", roaster: "Blue Tokai", roast: "Light", process: "Anaerobic Natural", varietal: "SLN 795", roastDate: "2026-08-20", defaultBrewer: "ceramic", notes: "Crisp Red Apple, Stewed Pear, Toasted Almond", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.4, flowNote: "Ceramic V60 converts malic apple acidity into baked, sweet caramel warmth." },
+  { id: "raxidi-lobo", name: "Roastery - Raxidi Lobo Estate", roaster: "Roastery Coffee", roast: "Medium", process: "5B Block Anaerobic Natural", varietal: "SLN 5B", roastDate: "2026-08-18", defaultBrewer: "origami", notes: "Dark Cherry Jam, Boozy Plum, Cocoa, Grapefruit", hotTemp: 90, hotRatio: 16, c3sHot: 14, zp6Hot: 4.8, flowNote: "Origami prevents stalling; center laminar stream skips bitter tannins." },
+  { id: "mizoram-reserve", name: "Grey Soul - Mizoram Reserve (#4)", roaster: "Grey Soul", roast: "Medium-Dark", process: "Sun-Dried Natural", varietal: "Regional Natural Lot", roastDate: "2026-08-15", defaultBrewer: "balloon", notes: "Watermelon Candy, Ripe Plum, Hazelnut Cocoa", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.2, flowNote: "Balloon glass bulb enhances body, pulling out juicy watermelon candy sweetness." },
+  { id: "sholiga", name: "Veer Attikan - Sholiga", roaster: "Veer Attikan", roast: "Light-Medium", process: "Washed Arabica", varietal: "Single Origin BR Hills", roastDate: "2026-08-10", defaultBrewer: "ceramic", notes: "Honeyed Jackfruit, Dried Dates, Brown Sugar", hotTemp: 91, hotRatio: 16, c3sHot: 15, zp6Hot: 4.8, flowNote: "Uniform concentric spirals in ceramic cone give comforting dates and brown sugar." },
+  { id: "aramse-bold", name: "Aramse - Bold Edition #2", roaster: "Aramse", roast: "Dark", process: "Salawara Honey / Washed", varietal: "Specialty Dark Blend", roastDate: "2026-08-12", defaultBrewer: "kalita", notes: "Dark Fudge, Molasses, Stewed Plum, Zero Ash", hotTemp: 88, hotRatio: 15, c3sHot: 17, zp6Hot: 5.8, flowNote: "Kalita 102 wedge with oval racetrack pour and 88°C water pulls dense fudge." },
+  { id: "ph-seven-robusta", name: "PH-Seven - 100% Robusta-AA", roaster: "PH-Seven", roast: "Medium-Dark", process: "High-Grown Washed Robusta", varietal: "Robusta-AA", roastDate: "2026-08-05", defaultBrewer: "kalita", notes: "Dark Cacao, Clove, Nutmeg, Velvety Crema", hotTemp: 87, hotRatio: 14, c3sHot: 17, zp6Hot: 6.0, flowNote: "Low temp (87°C) & short ratio (1:14) extract warm baking spices without ash." },
+  { id: "tim-hortons-signature", name: "Tim Hortons - Signature India", roaster: "Tim Hortons", roast: "Medium", process: "Commercial Washed Blend", varietal: "Whole Bean Blend", roastDate: "2026-08-01", defaultBrewer: "neo", notes: "Milk Chocolate, Toasted Cereal, Mellow Acidity", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.0, flowNote: "Amber Neo V60 flutes flush out clean morning chocolate without bitter over-steep." }
+];
+
+var defaultDrippers = {
+  origami: { name: "Ivory Origami 02 (Conical)", flow: "fast" },
+  neo: { name: "Amber Neo V60 (Spiral Ribs)", flow: "fast" },
+  balloon: { name: "Balloon-Glass V60 (Curved Body)", flow: "medium" },
+  ceramic: { name: "Ceramic V60 (Thermal Mass)", flow: "medium" },
+  kalita: { name: "Kalita 102-D (Wedge 3-Hole)", flow: "restricted" }
+};
+
+var storedCoffees = defaultCoffees;
+var storedDrippers = defaultDrippers;
+
+try {
+  var c = localStorage.getItem('sai_coffees');
+  if (c) storedCoffees = JSON.parse(c);
+  var d = localStorage.getItem('sai_drippers');
+  if (d) storedDrippers = JSON.parse(d);
+} catch(e) {}
+
+function saveState() {
+  try {
+    localStorage.setItem('sai_coffees', JSON.stringify(storedCoffees));
+    localStorage.setItem('sai_drippers', JSON.stringify(storedDrippers));
+  } catch(e) {}
+}
+
+function switchTab(tabId) {
+  var btns = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  var secs = document.querySelectorAll('.app-section');
+  for (var j = 0; j < secs.length; j++) secs[j].classList.remove('active');
+  
+  var targetSec = document.getElementById(tabId);
+  if (targetSec) targetSec.classList.add('active');
+  var targetBtn = document.getElementById('btn-' + tabId);
+  if (targetBtn) targetBtn.classList.add('active');
+}
+
+function initApp() {
+  renderBrewerDropdowns();
+  renderCoffeeDropdown();
+  renderPantry();
+  renderEquipmentList();
+  calculateRecipe();
+}
+
+function renderBrewerDropdowns() {
+  var calcSelect = document.getElementById('calcBrewerSelect');
+  var addSelect = document.getElementById('addDefaultDripper');
+  if (!calcSelect || !addSelect) return;
+  calcSelect.innerHTML = '<option value="auto">✨ Auto-Select Best Paired Brewer</option>';
+  addSelect.innerHTML = '';
+
+  var keys = Object.keys(storedDrippers);
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    var opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = storedDrippers[k].name;
+    calcSelect.appendChild(opt);
+
+    var opt2 = document.createElement('option');
+    opt2.value = k;
+    opt2.textContent = storedDrippers[k].name;
+    addSelect.appendChild(opt2);
+  }
+}
+
+function renderCoffeeDropdown() {
+  var select = document.getElementById('calcCoffeeSelect');
+  if (!select) return;
+  select.innerHTML = '';
+  for (var i = 0; i < storedCoffees.length; i++) {
+    var c = storedCoffees[i];
+    var opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name + " (" + c.roast + ")";
+    select.appendChild(opt);
+  }
+}
+
+function renderEquipmentList() {
+  var container = document.getElementById('drippersListContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  var keys = Object.keys(storedDrippers);
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    var item = document.createElement('div');
+    item.className = 'arsenal-item';
+    var isDefault = !!defaultDrippers[k];
+    item.innerHTML = '<div><b>' + storedDrippers[k].name + '</b> <span style="font-size:11px; color:var(--text-sub); margin-left:8px;">[Flow: ' + storedDrippers[k].flow + ']</span></div>' +
+      (!isDefault ? '<button class="btn-danger" onclick="deleteDripper(\'' + k + '\')">Remove</button>' : '');
+    container.appendChild(item);
+  }
+}
+
+function addNewDripper() {
+  var name = document.getElementById('newBrewerName').value.trim();
+  var flow = document.getElementById('newBrewerDrainage').value;
+  if (!name) return alert("Please enter dripper name");
+  var id = "drip_" + Date.now();
+  storedDrippers[id] = { name: name, flow: flow };
+  saveState();
+  document.getElementById('newBrewerName').value = '';
+  renderBrewerDropdowns();
+  renderEquipmentList();
+  calculateRecipe();
+}
+
+function deleteDripper(k) {
+  if (confirm("Remove this dripper?")) {
+    delete storedDrippers[k];
+    saveState();
+    renderBrewerDropdowns();
+    renderEquipmentList();
+    calculateRecipe();
+  }
+}
+
+function renderPantry() {
+  var gri
   .pour-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
   .pour-table th { background: #1a1c2b; color: var(--blue); text-align: left; padding: 9px 12px; border: 1px solid var(--border); }
   .pour-table td { padding: 9px 12px; border: 1px solid var(--border); background: #12131f; }
