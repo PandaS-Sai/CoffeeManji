@@ -16,6 +16,7 @@
     --green: #10b981;
     --purple: #a78bfa;
     --pink: #f43f5e;
+    --yellow: #facc15;
     --text-main: #f8fafc;
     --text-sub: #94a3b8;
   }
@@ -250,8 +251,8 @@
   <div class="nav-tabs">
     <button class="tab-btn active" id="btn-recipeEngine" onclick="switchTab('recipeEngine')">⏱️ Brew</button>
     <button class="tab-btn" id="btn-livePantry" onclick="switchTab('livePantry')">📋 Pantry</button>
+    <button class="tab-btn" id="btn-masterVaultTab" onclick="switchTab('masterVaultTab')">📦 Master Vault (26)</button>
     <button class="tab-btn" id="btn-cafeLogTab" onclick="switchTab('cafeLogTab')">☕ Tried / Cafés</button>
-    <button class="tab-btn" id="btn-masterVaultTab" onclick="switchTab('masterVaultTab')">📦 Master Vault</button>
     <button class="tab-btn" id="btn-savedRecipesTab" onclick="switchTab('savedRecipesTab')">⭐ Recipes</button>
     <button class="tab-btn" id="btn-equipmentTab" onclick="switchTab('equipmentTab')">⚙️ Arsenal</button>
     <button class="tab-btn" id="btn-addCoffeeTab" onclick="switchTab('addCoffeeTab')">➕ Add Bean</button>
@@ -260,7 +261,7 @@
 
 <div class="container">
 
-  <!-- TAB 1: BREW ASSISTANT -->
+  <!-- TAB 1: BREW ASSISTANT & RECIPE BUILDER -->
   <div id="recipeEngine" class="app-section active">
     <div class="brew-hero">
       <div class="timer-display-box">
@@ -296,7 +297,7 @@
 
       <div class="control-grid">
         <div class="control-group">
-          <label>Select Coffee (Pantry, Tried, or Vault)</label>
+          <label>Select Coffee (Pantry, Vault, or Tried)</label>
           <select id="calcCoffeeSelect" onchange="calculateRecipe()"></select>
         </div>
 
@@ -338,7 +339,7 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
       <div>
         <h2 style="font-size:18px; font-weight:800;">📋 Active Live Bean Pantry</h2>
-        <p style="font-size:12px; color:var(--text-sub);">Bags currently open on your coffee bar with rest timers</p>
+        <p style="font-size:12px; color:var(--text-sub);">Current opened bags on your brew bar with rest tracking</p>
       </div>
       <div style="display:flex; gap:6px;">
         <button class="btn" style="background:#0284c7;" onclick="openSyncModal()">🔄 Sync & Share</button>
@@ -355,7 +356,30 @@
     <div class="grid-3" id="pantryGrid"></div>
   </div>
 
-  <!-- TAB 3: CAFÉ & TRIED LOG -->
+  <!-- TAB 3: MASTER INVENTORY VAULT (COMPLETE ARCHIVE OF ALL COFFEES) -->
+  <div id="masterVaultTab" class="app-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+      <div>
+        <h2 style="font-size:18px; font-weight:800;">📦 Coffee Master Vault</h2>
+        <p style="font-size:12px; color:var(--text-sub);">All coffees logged across your history (Active, Finished bags, & Roaster archive)</p>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn" style="background:#0284c7;" onclick="openSyncModal()">🔄 Sync & Share Data</button>
+        <button class="btn btn-sec" onclick="resetToMasterDefault()">♻️ Restore Default Master List</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="chip active" id="vaultFilter-all" onclick="filterVault('all')">All Records (26+)</div>
+      <div class="chip" id="vaultFilter-active" onclick="filterVault('active')">Currently In Pantry</div>
+      <div class="chip" id="vaultFilter-finished" onclick="filterVault('finished')">Archived / Past Bags</div>
+      <div class="chip chip-interloper" id="vaultFilter-interloper" onclick="filterVault('interloper')">Interloper Records</div>
+    </div>
+
+    <div class="grid-3" id="vaultGrid"></div>
+  </div>
+
+  <!-- TAB 4: CAFÉ & TRIED LOG -->
   <div id="cafeLogTab" class="app-section">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
       <div>
@@ -372,26 +396,6 @@
     </div>
 
     <div class="grid-3" id="triedGrid"></div>
-  </div>
-
-  <!-- TAB 4: MASTER INVENTORY VAULT -->
-  <div id="masterVaultTab" class="app-section">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-      <div>
-        <h2 style="font-size:18px; font-weight:800;">📦 Master Inventory Vault</h2>
-        <p style="font-size:12px; color:var(--text-sub);">Full historical record of every bean logged, drank, or shared</p>
-      </div>
-      <button class="btn" style="background:#0284c7;" onclick="openSyncModal()">🔄 Sync & Share Data</button>
-    </div>
-
-    <div class="filter-bar">
-      <div class="chip active" id="vaultFilter-all" onclick="filterVault('all')">All Records</div>
-      <div class="chip" id="vaultFilter-active" onclick="filterVault('active')">Currently In Pantry</div>
-      <div class="chip" id="vaultFilter-finished" onclick="filterVault('finished')">Archived / Finished</div>
-      <div class="chip chip-interloper" id="vaultFilter-interloper" onclick="filterVault('interloper')">Interloper Records</div>
-    </div>
-
-    <div class="grid-3" id="vaultGrid"></div>
   </div>
 
   <!-- TAB 5: SAVED RECIPES LIBRARY -->
@@ -634,7 +638,7 @@
     </div>
 
     <p style="font-size:12px; color:var(--text-sub); margin-bottom:14px;">
-      Because GitHub Pages runs directly on each person's phone, use this bridge to share your Master Vault or import beans and recipes created by other people (Interlopers).
+      Use this bridge to share your Master Vault or import beans and recipes created by other people (Interlopers).
     </p>
 
     <div style="margin-bottom:16px;">
@@ -654,7 +658,11 @@
 </div>
 
 <script>
+// =========================================================================
+// COMPLETE MASTER INVENTORY DATABASE (26 PRE-LOADED SPECIALTY COFFEES)
+// =========================================================================
 var defaultCoffees = [
+  // ── ACTIVE IN LIVE PANTRY (11 BEANS) ──
   { id: "subko-ratnagiri", name: "Subko - Ratnagiri Estate (Pearl)", roaster: "Subko", roast: "Ultra-Light", process: "Culture Naturals + Anaerobic", varietal: "Catuai & Hemavathi", roastDate: "2026-08-28", defaultBrewer: "origami", notes: "Marigold, Dragon Fruit, Peach Iced-Tea", hotTemp: 92, hotRatio: 17, c3sHot: 13, zp6Hot: 4.2, inPantry: true, source: "lab", flowNote: "Origami flutes maximize peach florals while bypassing heavy ferment funk." },
   { id: "pink-lemonade", name: "Grey Soul - Pink Lemonade (#5)", roaster: "Grey Soul", roast: "Ultra-Light", process: "Sun-Dried Anaerobic Natural", varietal: "Specialty Arabica Lot #5", roastDate: "2026-08-25", defaultBrewer: "origami", notes: "Candied Strawberry, Citrus Malic, Fig Base", hotTemp: 96, hotRatio: 15, c3sHot: 11, zp6Hot: 3.9, inPantry: true, source: "lab", flowNote: "Dense cells require near-boiling water (96-97°C) & 5 pulses to dissolve berry sugars." },
   { id: "broot-sur-lie", name: "Broot - SUR LIE (Melkodige)", roaster: "Broot Coffee", roast: "Medium-Light", process: "Wine Yeast Anoxic Natural", varietal: "Obata", roastDate: "2026-09-03", defaultBrewer: "origami", notes: "Red Grape, Dried Fig, Jasmine Lift, Wine Finish", hotTemp: 92, hotRatio: 16.3, c3sHot: 13, zp6Hot: 4.3, inPantry: true, source: "lab", flowNote: "Origami fast drain lets delicate wine yeast jasmine & grape volatiles lift cleanly." },
@@ -662,10 +670,27 @@ var defaultCoffees = [
   { id: "salawara-estate", name: "Blue Tokai - Salawara Estate", roaster: "Blue Tokai", roast: "Light", process: "Anaerobic Natural", varietal: "SLN 795", roastDate: "2026-08-20", defaultBrewer: "ceramic", notes: "Crisp Red Apple, Stewed Pear, Toasted Almond", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.4, inPantry: true, source: "lab", flowNote: "Ceramic V60 converts malic apple acidity into baked, sweet caramel warmth." },
   { id: "raxidi-lobo", name: "Roastery - Raxidi Lobo Estate", roaster: "Roastery Coffee", roast: "Medium", process: "5B Block Anaerobic Natural", varietal: "SLN 5B", roastDate: "2026-08-18", defaultBrewer: "origami", notes: "Dark Cherry Jam, Boozy Plum, Cocoa, Grapefruit", hotTemp: 90, hotRatio: 16, c3sHot: 14, zp6Hot: 4.8, inPantry: true, source: "lab", flowNote: "Origami prevents stalling; center laminar stream skips bitter tannins." },
   { id: "mizoram-reserve", name: "Grey Soul - Mizoram Reserve (#4)", roaster: "Grey Soul", roast: "Medium-Dark", process: "Sun-Dried Natural", varietal: "Regional Natural Lot", roastDate: "2026-08-15", defaultBrewer: "balloon", notes: "Watermelon Candy, Ripe Plum, Hazelnut Cocoa", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.2, inPantry: true, source: "lab", flowNote: "Balloon glass bulb enhances body, pulling out juicy watermelon candy sweetness." },
-  { id: "sholiga", name: "Veer Attikan - Sholiga", roaster: "Veer Attikan", roast: "Light-Medium", process: "Washed Arabica", varietal: "Single Origin BR Hills", roastDate: "2026-08-10", defaultBrewer: "ceramic", notes: "Honeyed Jackfruit, Dried Dates, Brown Sugar", hotTemp: 91, hotRatio: 16, c3sHot: 15, zp6Hot: 4.8, flowNote: "Uniform concentric spirals in ceramic cone give comforting dates and brown sugar." },
+  { id: "sholiga", name: "Veer Attikan - Sholiga", roaster: "Veer Attikan", roast: "Light-Medium", process: "Washed Arabica", varietal: "Single Origin BR Hills", roastDate: "2026-08-10", defaultBrewer: "ceramic", notes: "Honeyed Jackfruit, Dried Dates, Brown Sugar", hotTemp: 91, hotRatio: 16, c3sHot: 15, zp6Hot: 4.8, inPantry: true, source: "lab", flowNote: "Uniform concentric spirals in ceramic cone give comforting dates and brown sugar." },
   { id: "bold-edition", name: "Bold Edition #2", roaster: "Specialty Roasters", roast: "Dark", process: "Salawara Honey / Washed", varietal: "Specialty Dark Blend", roastDate: "2026-08-12", defaultBrewer: "kalita", notes: "Dark Fudge, Molasses, Stewed Plum, Zero Ash", hotTemp: 88, hotRatio: 15, c3sHot: 17, zp6Hot: 5.8, inPantry: true, source: "lab", flowNote: "Kalita 102 wedge with oval racetrack pour and 88°C water pulls dense fudge." },
   { id: "ph-seven-robusta", name: "PH-Seven - 100% Robusta-AA", roaster: "PH-Seven", roast: "Medium-Dark", process: "High-Grown Washed Robusta", varietal: "Robusta-AA", roastDate: "2026-08-05", defaultBrewer: "kalita", notes: "Dark Cacao, Clove, Nutmeg, Velvety Crema", hotTemp: 87, hotRatio: 14, c3sHot: 17, zp6Hot: 6.0, inPantry: true, source: "lab", flowNote: "Low temp (87°C) & short ratio (1:14) extract warm baking spices without ash." },
-  { id: "tim-hortons-signature", name: "Tim Hortons - Signature India", roaster: "Tim Hortons", roast: "Medium", process: "Commercial Washed Blend", varietal: "Whole Bean Blend", roastDate: "2026-08-01", defaultBrewer: "neo", notes: "Milk Chocolate, Toasted Cereal, Mellow Acidity", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.0, inPantry: true, source: "lab", flowNote: "Amber Neo V60 flutes flush out clean morning chocolate without bitter over-steep." }
+  { id: "tim-hortons-signature", name: "Tim Hortons - Signature India", roaster: "Tim Hortons", roast: "Medium", process: "Commercial Washed Blend", varietal: "Whole Bean Blend", roastDate: "2026-08-01", defaultBrewer: "neo", notes: "Milk Chocolate, Toasted Cereal, Mellow Acidity", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.0, inPantry: true, source: "lab", flowNote: "Amber Neo V60 flutes flush out clean morning chocolate without bitter over-steep." },
+
+  // ── HISTORICAL MASTER VAULT / PAST DRANK ARCHIVE (15 LOTS) ──
+  { id: "araku-selection", name: "Araku - Selection", roaster: "Araku Coffee", roast: "Medium-Light", process: "Washed Arabica", varietal: "High-Elevation Micro-lot", roastDate: "2026-06-15", defaultBrewer: "ceramic", notes: "Citric, Red Apple, Sweet Cane Sugar, Silky Mouthfeel", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.5, inPantry: false, source: "lab", flowNote: "Classic washed biodynamic profile; ceramic cone stabilizes brew temperature to highlight bright malic sweetness." },
+  { id: "araku-monsoon", name: "Araku - Monsoon Edit", roaster: "Araku Coffee", roast: "Medium", process: "Monsoon Natural / Pulped", varietal: "Arabica Selection", roastDate: "2026-06-20", defaultBrewer: "balloon", notes: "Heavy Cocoa, Dried Plum, Dark Treacle", hotTemp: 90, hotRatio: 15.5, c3sHot: 15, zp6Hot: 5.0, inPantry: false, source: "lab", flowNote: "Heavy, low-acid profile; balloon-glass body retains heat and unlocks rich dried-fruit complexity." },
+  { id: "araku-microclimate", name: "Araku - Micro Climate", roaster: "Araku Coffee", roast: "Light-Medium", process: "Washed Biodynamic", varietal: "Pure Arabica", roastDate: "2026-07-01", defaultBrewer: "origami", notes: "Sweet Lime, Delicate White Florals, Cane Sugar", hotTemp: 93, hotRatio: 16.5, c3sHot: 13, zp6Hot: 4.3, inPantry: false, source: "lab", flowNote: "Fast bypass on Origami lets delicate lime acidity sparkle without earthy astringency." },
+  { id: "corridor-baarbara", name: "Corridor Seven - Baarbara Estate", roaster: "Corridor Seven", roast: "Medium", process: "Washed Arabica", varietal: "SLN 795", roastDate: "2026-05-10", defaultBrewer: "ceramic", notes: "Roasted Hazelnut, Milk Chocolate, Dried Dates", hotTemp: 91, hotRatio: 16, c3sHot: 14, zp6Hot: 4.7, inPantry: false, source: "lab", flowNote: "Balanced, comforting profile; steady concentric pour highlights caramelized sugars and toasted nuts." },
+  { id: "corridor-divenchi", name: "Corridor Seven - Divenchi Estate", roaster: "Corridor Seven", roast: "Medium-Light", process: "Extended Ferment Natural", varietal: "Single Estate Arabica", roastDate: "2026-05-28", defaultBrewer: "origami", notes: "Ripe Mixed Berries, Stewed Plum, Dark Cacao", hotTemp: 91, hotRatio: 16, c3sHot: 14, zp6Hot: 4.6, inPantry: false, source: "lab", flowNote: "Laminar center pour on Origami avoids over-agitating ferment mucilage fines." },
+  { id: "tulum-swell", name: "Tulum - Swell", roaster: "Tulum Coffee", roast: "Medium-Light", process: "Specialty Natural Blend", varietal: "House Blend", roastDate: "2026-04-12", defaultBrewer: "neo", notes: "Wild Berry, Honey Sweetness, Silky Finish", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.5, inPantry: false, source: "lab", flowNote: "Amber Neo V60 fluting speeds extraction through berry layers for round mouthfeel." },
+  { id: "tulum-lumen", name: "Tulum - Lumen", roaster: "Tulum Coffee", roast: "Light-Medium", process: "Washed Specialty", varietal: "Specialty Lot", roastDate: "2026-04-18", defaultBrewer: "origami", notes: "Crisp Peach, Jasmine Floral, Clean Citrus Finish", hotTemp: 93, hotRatio: 16.5, c3sHot: 13, zp6Hot: 4.2, inPantry: false, source: "lab", flowNote: "High clarity pour-over recipe; tight grind pulls crisp tea-like florals." },
+  { id: "tulum-baarbara", name: "Tulum - Baarbara Estate", roaster: "Tulum Coffee", roast: "Medium", process: "Washed Single Origin", varietal: "SLN 795", roastDate: "2026-04-22", defaultBrewer: "ceramic", notes: "Dark Honey, Roasted Almonds, Caramelized Sugar", hotTemp: 91, hotRatio: 16, c3sHot: 14, zp6Hot: 4.8, inPantry: false, source: "lab", flowNote: "Concentric spirals in ceramic V60 pull deep toffee and nut complexity." },
+  { id: "bloom-vinvangogh", name: "Bloom - Vin Van Gogh", roaster: "Bloom Coffee Roasters", roast: "Light-Medium", process: "Anaerobic Wine Ferment", varietal: "Experimental Lot", roastDate: "2026-03-10", defaultBrewer: "origami", notes: "Red Wine, Concord Grape, Sweet Fig, Floral Ester", hotTemp: 91, hotRatio: 16.3, c3sHot: 13, zp6Hot: 4.3, inPantry: false, source: "lab", flowNote: "Temperature capped at 91°C to lock in wine yeast grape esters without harsh tannin bitterness." },
+  { id: "bilihu-aghora", name: "Bili Hu - Aghora Estate", roaster: "Bili Hu", roast: "Medium", process: "Hand-Sorted Arabica", varietal: "Selection 9", roastDate: "2026-02-14", defaultBrewer: "balloon", notes: "Dark Toffee, Brown Sugar, Baker's Cocoa", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.0, inPantry: false, source: "lab", flowNote: "Balloon glass enhances caramelized sweetness and gives comforting chocolate body." },
+  { id: "bilihu-arabica-blend", name: "Bili Hu - 100% Arabica Blend", roaster: "Bili Hu", roast: "Medium", process: "Commercial Washed Blend", varietal: "Arabica Blend", roastDate: "2026-02-20", defaultBrewer: "neo", notes: "Smooth Milk Chocolate, Roasted Cereal, Light Acidity", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.0, inPantry: false, source: "lab", flowNote: "Fast drain on Neo V60 flushes clean chocolate notes without astringent over-steeping." },
+  { id: "halflight-salawara", name: "Half Light - Salawara Naturals #02", roaster: "Half Light Roasters", roast: "Medium-Light", process: "Sun-Dried Natural", varietal: "SLN 795", roastDate: "2026-01-18", defaultBrewer: "neo", notes: "Stewed Nectarine, Dried Fig, Cane Caramel", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.6, inPantry: false, source: "lab", flowNote: "Spiral channels accelerate extraction through sticky fruit mucilage sugars." },
+  { id: "toise-enchanter", name: "Toise Brewstudio - The Enchanter", roaster: "Toise Brewstudio", roast: "Light-Medium", process: "Aerobic / Experimental Natural", varietal: "Specialty Lot", roastDate: "2026-01-25", defaultBrewer: "origami", notes: "Purple Berries, Sweet Jasmine Florality, Candied Sugar", hotTemp: 92, hotRatio: 16, c3sHot: 13, zp6Hot: 4.3, inPantry: false, source: "lab", flowNote: "Origami cone lets fragile berry top-notes escape freely while keeping body clean." },
+  { id: "elbueno-goldenglow", name: "El Bueno - Golden Glow (Ratnagiri)", roaster: "El Bueno Coffee", roast: "Light", process: "Anaerobic Yeast Ferment", varietal: "Catuai", roastDate: "2026-01-05", defaultBrewer: "origami", notes: "White Peach, Elderflower, Blossom Honey", hotTemp: 93, hotRatio: 16.5, c3sHot: 12, zp6Hot: 4.0, inPantry: false, source: "lab", flowNote: "Gentle laminar stream preserves delicate white florals and peach nectar clarity." },
+  { id: "starbucks-benchmark", name: "Starbucks - Roast Baseline Benchmark", roaster: "Starbucks", roast: "Dark", process: "Washed Commercial", varietal: "Commercial Whole Bean", roastDate: "2025-12-01", defaultBrewer: "kalita", notes: "Dark Roasted Cacao, Smoky Molasses, Heavy Body", hotTemp: 86, hotRatio: 14.5, c3sHot: 17, zp6Hot: 6.0, inPantry: false, source: "lab", flowNote: "Low water temp (86°C) and coarse Kalita racetrack pour suppresses roasty carbon bitterness." }
 ];
 
 var defaultDrippers = {
@@ -682,44 +707,37 @@ var savedCustomRecipes = [];
 var triedCafeCoffees = [];
 
 try {
-  var c = localStorage.getItem('sai_master_coffees_v7');
+  var c = localStorage.getItem('sai_master_coffees_v8');
   if (c) {
     storedCoffees = JSON.parse(c);
-  } else {
-    var oldC = localStorage.getItem('sai_master_coffees_v6') || localStorage.getItem('sai_coffees_v5');
-    if (oldC) {
-      storedCoffees = JSON.parse(oldC);
-      for (var i = 0; i < storedCoffees.length; i++) {
-        if (storedCoffees[i].inPantry === undefined) storedCoffees[i].inPantry = true;
-        if (!storedCoffees[i].source) storedCoffees[i].source = "lab";
-      }
-    }
   }
-  var d = localStorage.getItem('sai_drippers_v7');
+  var d = localStorage.getItem('sai_drippers_v8');
   if (d) storedDrippers = JSON.parse(d);
-  var r = localStorage.getItem('sai_saved_recipes_v7');
+  var r = localStorage.getItem('sai_saved_recipes_v8');
   if (r) savedCustomRecipes = JSON.parse(r);
-  var t = localStorage.getItem('sai_tried_cafes_v7');
+  var t = localStorage.getItem('sai_tried_cafes_v8');
   if (t) triedCafeCoffees = JSON.parse(t);
 } catch(err) {}
 
-var isInterloperDevice = window.location.search.indexOf('mode=interloper') !== -1;
-if (isInterloperDevice) {
-  setTimeout(function() {
-    var b = document.getElementById('userModeBadge');
-    if (b) { b.textContent = "Interloper Station"; b.style.background = "rgba(190, 24, 93, 0.3)"; b.style.color = "#fbcfe8"; }
-    var chk = document.getElementById('addAsInterloper');
-    if (chk) chk.checked = true;
-  }, 100);
-}
-
 function saveState() {
   try {
-    localStorage.setItem('sai_master_coffees_v7', JSON.stringify(storedCoffees));
-    localStorage.setItem('sai_drippers_v7', JSON.stringify(storedDrippers));
-    localStorage.setItem('sai_saved_recipes_v7', JSON.stringify(savedCustomRecipes));
-    localStorage.setItem('sai_tried_cafes_v7', JSON.stringify(triedCafeCoffees));
+    localStorage.setItem('sai_master_coffees_v8', JSON.stringify(storedCoffees));
+    localStorage.setItem('sai_drippers_v8', JSON.stringify(storedDrippers));
+    localStorage.setItem('sai_saved_recipes_v8', JSON.stringify(savedCustomRecipes));
+    localStorage.setItem('sai_tried_cafes_v8', JSON.stringify(triedCafeCoffees));
   } catch(err) {}
+}
+
+function resetToMasterDefault() {
+  if (confirm("Restore all 26 coffees into your Master Vault? This will ensure all historical lots from Araku, Corridor Seven, Tulum, Bloom, Bili Hu, etc. are loaded.")) {
+    storedCoffees = defaultCoffees.slice();
+    saveState();
+    renderCoffeeDropdown();
+    renderPantry();
+    renderMasterVault();
+    calculateRecipe();
+    alert("Master Vault restored with all 26 coffees!");
+  }
 }
 
 function switchTab(tabId) {
@@ -734,8 +752,8 @@ function switchTab(tabId) {
   if (targetBtn) targetBtn.classList.add('active');
 
   if (tabId === 'livePantry') renderPantry();
-  if (tabId === 'cafeLogTab') renderTriedCafes();
   if (tabId === 'masterVaultTab') renderMasterVault();
+  if (tabId === 'cafeLogTab') renderTriedCafes();
   if (tabId === 'savedRecipesTab') renderSavedRecipes();
 }
 
@@ -769,11 +787,11 @@ function renderCoffeeDropdown() {
   select.innerHTML = '';
 
   var optGroupPantry = document.createElement('optgroup');
-  optGroupPantry.label = "── In Live Pantry ──";
+  optGroupPantry.label = "── In Live Pantry (11 Active) ──";
+  var optGroupVault = document.createElement('optgroup');
+  optGroupVault.label = "── Master Vault Archive (Past Bags) ──";
   var optGroupTried = document.createElement('optgroup');
   optGroupTried.label = "── Tried / Café Passport ──";
-  var optGroupVault = document.createElement('optgroup');
-  optGroupVault.label = "── Master Vault (Past / Archive) ──";
 
   for (var i = 0; i < storedCoffees.length; i++) {
     var c = storedCoffees[i];
@@ -795,8 +813,8 @@ function renderCoffeeDropdown() {
   }
 
   select.appendChild(optGroupPantry);
-  if (optGroupTried.children.length > 0) select.appendChild(optGroupTried);
   if (optGroupVault.children.length > 0) select.appendChild(optGroupVault);
+  if (optGroupTried.children.length > 0) select.appendChild(optGroupTried);
 }
 
 function renderEquipmentList() {
@@ -897,7 +915,7 @@ function renderPantry() {
 
   if (count === 0) {
     grid.innerHTML = '<div style="grid-column:1/-1; background:#141624; border:1px solid #26293d; padding:24px; border-radius:12px; text-align:center; color:#94a3b8;">' +
-      '<h3>No Coffees in Live Pantry</h3><p style="font-size:12px; margin-top:6px;">Add a new bag or restock from your Master Inventory Vault!</p>' +
+      '<h3>No Coffees in Live Pantry</h3><p style="font-size:12px; margin-top:6px;">Restock any coffee from your Master Vault or add a new bag!</p>' +
       '</div>';
   }
 }
@@ -912,7 +930,8 @@ function archiveBag(id) {
   saveState();
   renderCoffeeDropdown();
   renderPantry();
-  alert("Bag finished! Moved to Master Vault history. You can restock it anytime.");
+  renderMasterVault();
+  alert("Bag finished! Coffee moved to Master Vault history. You can restock it anytime.");
 }
 
 function deleteCoffeePermanently(id) {
@@ -926,6 +945,89 @@ function deleteCoffeePermanently(id) {
   }
 }
 
+// ==========================================
+// 2. MASTER INVENTORY VAULT (26 LOTS)
+// ==========================================
+var activeVaultFilter = 'all';
+
+function filterVault(type) {
+  activeVaultFilter = type;
+  document.querySelectorAll('#masterVaultTab .chip').forEach(function(c) { c.classList.remove('active'); });
+  var activeChip = document.getElementById('vaultFilter-' + type);
+  if (activeChip) activeChip.classList.add('active');
+  renderMasterVault();
+}
+
+function renderMasterVault() {
+  var grid = document.getElementById('vaultGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  for (var i = 0; i < storedCoffees.length; i++) {
+    var c = storedCoffees[i];
+
+    if (activeVaultFilter === 'active' && !c.inPantry) continue;
+    if (activeVaultFilter === 'finished' && c.inPantry) continue;
+    if (activeVaultFilter === 'interloper' && c.source !== 'interloper') continue;
+
+    var card = document.createElement('div');
+    card.className = 'card';
+    var isInterloper = (c.source === 'interloper');
+
+    card.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">' +
+      '<div>' +
+      '<span class="badge ' + (c.inPantry ? 'badge-med' : 'badge-archive') + '">' + (c.inPantry ? 'In Live Pantry' : 'Archived Bag') + '</span> ' +
+      (isInterloper ? '<span class="badge badge-interloper">Interloper</span>' : '') +
+      '</div>' +
+      '<span style="font-size:11px; color:var(--text-sub);">' + c.roast + '</span>' +
+      '</div>' +
+      '<h3 style="font-size:15px; font-weight:700; margin-bottom:4px;">' + (isInterloper ? '[Interloper] ' : '') + c.name + '</h3>' +
+      '<p style="font-size:12px; color:var(--text-sub); margin-bottom:4px;"><b>Roaster:</b> ' + c.roaster + ' • <b>Process:</b> ' + c.process + '</p>' +
+      '<p style="font-size:12px; color:var(--blue); margin-bottom:8px;">Varietal: ' + (c.varietal || 'Specialty Arabica') + '</p>' +
+      '<p style="font-size:12px; color:var(--purple); font-style:italic; margin-bottom:12px;">Notes: ' + c.notes + '</p>' +
+      '<div style="background:var(--card-inner); padding:8px 10px; border-radius:6px; font-size:11.5px; border:1px solid var(--border); margin-bottom:12px;">' +
+      '<div><b>Default Brewer:</b> ' + (storedDrippers[c.defaultBrewer] ? storedDrippers[c.defaultBrewer].name : 'Origami 02') + '</div>' +
+      '<div><b>Calibrated Dial:</b> C3S: ' + c.c3sHot + ' clk | ZP6: ' + c.zp6Hot + ' @ ' + c.hotTemp + '°C</div>' +
+      '</div>' +
+      '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
+      '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\'' + c.id + '\')">⚡ Get Recipe</button>' +
+      (!c.inPantry ? '<button class="btn" style="background:var(--green); flex:1.2;" onclick="restockToPantry(\'' + c.id + '\')">➕ Restock to Pantry</button>' : '') +
+      '</div>';
+    grid.appendChild(card);
+  }
+}
+
+function restockToPantry(id) {
+  var newDate = prompt("Enter new roast date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+  if (!newDate) return;
+
+  for (var i = 0; i < storedCoffees.length; i++) {
+    if (storedCoffees[i].id === id) {
+      storedCoffees[i].inPantry = true;
+      storedCoffees[i].roastDate = newDate;
+      break;
+    }
+  }
+  saveState();
+  renderCoffeeDropdown();
+  renderPantry();
+  renderMasterVault();
+  switchTab('livePantry');
+  alert("Bean successfully restocked back into your Live Pantry!");
+}
+
+function brewSpecificCoffee(id) {
+  var select = document.getElementById('calcCoffeeSelect');
+  if (select) select.value = id;
+  var bSelect = document.getElementById('calcBrewerSelect');
+  if (bSelect) bSelect.value = "auto";
+  switchTab('recipeEngine');
+  calculateRecipe();
+}
+
+// ==========================================
+// 3. CAFÉ & TRIED LOG
+// ==========================================
 var activeTriedFilter = 'all';
 
 function filterTried(type) {
@@ -1028,7 +1130,7 @@ function renderTriedCafes() {
       '<p style="font-size:12px; color:var(--purple); font-style:italic; margin-bottom:12px;">Impressions: ' + t.notes + '</p>' +
       '<div style="background:var(--card-inner); padding:8px 10px; border-radius:6px; font-size:11.5px; border:1px solid var(--border); margin-bottom:12px;">' +
       '<div style="color:var(--accent-light); font-weight:700; margin-bottom:2px;">Target Home Recipe if Bought:</div>' +
-      '<div>' + storedDrippers[t.defaultBrewer].name + ' | ' + t.c3sHot + ' C3S / ' + t.zp6Hot + ' ZP6 @ ' + t.hotTemp + '°C</div>' +
+      '<div>' + (storedDrippers[t.defaultBrewer] ? storedDrippers[t.defaultBrewer].name : 'Origami 02') + ' | ' + t.c3sHot + ' C3S / ' + t.zp6Hot + ' ZP6 @ ' + t.hotTemp + '°C</div>' +
       '</div>' +
       '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
       '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\'' + t.id + '\')">⚡ Get Recipe</button>' +
@@ -1077,7 +1179,7 @@ function graduateTriedToPantry(id) {
   renderPantry();
   renderMasterVault();
   switchTab('livePantry');
-  alert("'" + t.name + "' has been added as a live bag in your Live Pantry with fresh rest-day tracking!");
+  alert("'" + t.name + "' added to Live Pantry with active rest tracking!");
 }
 
 function deleteTriedCoffee(id) {
@@ -1089,79 +1191,9 @@ function deleteTriedCoffee(id) {
   }
 }
 
-var activeVaultFilter = 'all';
-
-function filterVault(type) {
-  activeVaultFilter = type;
-  document.querySelectorAll('#masterVaultTab .chip').forEach(function(c) { c.classList.remove('active'); });
-  var activeChip = document.getElementById('vaultFilter-' + type);
-  if (activeChip) activeChip.classList.add('active');
-  renderMasterVault();
-}
-
-function renderMasterVault() {
-  var grid = document.getElementById('vaultGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  for (var i = 0; i < storedCoffees.length; i++) {
-    var c = storedCoffees[i];
-
-    if (activeVaultFilter === 'active' && !c.inPantry) continue;
-    if (activeVaultFilter === 'finished' && c.inPantry) continue;
-    if (activeVaultFilter === 'interloper' && c.source !== 'interloper') continue;
-
-    var card = document.createElement('div');
-    card.className = 'card';
-    var isInterloper = (c.source === 'interloper');
-
-    card.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">' +
-      '<div>' +
-      '<span class="badge ' + (c.inPantry ? 'badge-med' : 'badge-archive') + '">' + (c.inPantry ? 'In Live Pantry' : 'Archived Bag') + '</span> ' +
-      (isInterloper ? '<span class="badge badge-interloper">Interloper</span>' : '') +
-      '</div>' +
-      '<span style="font-size:11px; color:var(--text-sub);">' + c.roast + '</span>' +
-      '</div>' +
-      '<h3 style="font-size:15px; font-weight:700; margin-bottom:4px;">' + (isInterloper ? '[Interloper] ' : '') + c.name + '</h3>' +
-      '<p style="font-size:12px; color:var(--text-sub); margin-bottom:4px;"><b>Roaster:</b> ' + c.roaster + ' • <b>Process:</b> ' + c.process + '</p>' +
-      '<p style="font-size:12px; color:var(--blue); margin-bottom:8px;">Varietal: ' + (c.varietal || 'Specialty Arabica') + '</p>' +
-      '<p style="font-size:12px; color:var(--purple); font-style:italic; margin-bottom:12px;">Notes: ' + c.notes + '</p>' +
-      '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
-      '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\'' + c.id + '\')">⚡ Get Recipe</button>' +
-      (!c.inPantry ? '<button class="btn" style="background:var(--green); flex:1;" onclick="restockToPantry(\'' + c.id + '\')">➕ Restock to Pantry</button>' : '') +
-      '</div>';
-    grid.appendChild(card);
-  }
-}
-
-function restockToPantry(id) {
-  var newDate = prompt("Enter new roast date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
-  if (!newDate) return;
-
-  for (var i = 0; i < storedCoffees.length; i++) {
-    if (storedCoffees[i].id === id) {
-      storedCoffees[i].inPantry = true;
-      storedCoffees[i].roastDate = newDate;
-      break;
-    }
-  }
-  saveState();
-  renderCoffeeDropdown();
-  renderPantry();
-  renderMasterVault();
-  switchTab('livePantry');
-  alert("Bean successfully restocked back into your Live Pantry!");
-}
-
-function brewSpecificCoffee(id) {
-  var select = document.getElementById('calcCoffeeSelect');
-  if (select) select.value = id;
-  var bSelect = document.getElementById('calcBrewerSelect');
-  if (bSelect) bSelect.value = "auto";
-  switchTab('recipeEngine');
-  calculateRecipe();
-}
-
+// ==========================================
+// 4. ADD NEW COFFEE LOT
+// ==========================================
 function saveNewCoffee() {
   var name = document.getElementById('addName').value.trim();
   var roaster = document.getElementById('addRoaster').value.trim();
@@ -1183,7 +1215,7 @@ function saveNewCoffee() {
 
   if (roast === 'Ultra-Light') {
     chosenBrewer = "origami"; temp = 96; ratio = 15; c3s = 11; zp6 = 3.9;
-    rationale = "Ultra-light density requires near-boiling water (96°C) and fast vertical Origami drainage to prevent under-extraction.";
+    rationale = "Ultra-light density requires near-boiling water (96°C) and fast vertical Origami drainage.";
   } else if (roast === 'Medium-Light') {
     if (lowerVar.indexOf('peaberry') !== -1 || lowerProc.indexOf('aerobic') !== -1) {
       chosenBrewer = "neo"; temp = 92; ratio = 16; c3s = 14; zp6 = 4.5;
@@ -1241,6 +1273,9 @@ function saveNewCoffee() {
   alert("Coffee added to Live Pantry and Master Vault!");
 }
 
+// ==========================================
+// 5. SYNC & SHARE (INTERLOPER MULTI-DEVICE BRIDGE)
+// ==========================================
 function openSyncModal() {
   document.getElementById('syncModal').style.display = 'block';
 }
@@ -1323,6 +1358,9 @@ function importSyncBundle() {
   }
 }
 
+// ==========================================
+// 6. SAVED CUSTOM RECIPES
+// ==========================================
 function promptSaveCurrentRecipe() {
   var title = prompt("Enter a title for this recipe:", "Competition Dial-In");
   if (!title) return;
@@ -1549,6 +1587,9 @@ function renderSavedRecipes() {
   container.innerHTML = html;
 }
 
+// ==========================================
+// 7. TIMER & REAL-TIME BREW SCHEDULE
+// ==========================================
 var timerInterval = null;
 var timerSeconds = 0;
 var isTimerRunning = false;
@@ -1813,8 +1854,8 @@ function start() {
   renderBrewerDropdowns();
   renderCoffeeDropdown();
   renderPantry();
-  renderTriedCafes();
   renderMasterVault();
+  renderTriedCafes();
   renderEquipmentList();
   calculateRecipe();
 }
