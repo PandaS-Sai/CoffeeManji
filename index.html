@@ -13,13 +13,14 @@
     --accent: #d97706;
     --accent-light: #f59e0b;
     --blue: #38bdf8;
+    --green: #10b981;
     --purple: #a78bfa;
     --text-main: #f8fafc;
     --text-sub: #94a3b8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: var(--bg); color: var(--text-main); line-height: 1.5; padding-bottom: 60px; }
-  
+  body { background: var(--bg); color: var(--text-main); line-height: 1.5; padding-bottom: 70px; }
+
   .navbar {
     background: #0d0e17;
     border-bottom: 1px solid var(--border);
@@ -34,7 +35,7 @@
     gap: 10px;
   }
   .brand { display: flex; align-items: center; gap: 8px; }
-  .brand h1 { font-size: 15px; font-weight: 800; }
+  .brand h1 { font-size: 15px; font-weight: 800; letter-spacing: -0.5px; }
   .brand span { font-size: 10px; background: rgba(217, 119, 6, 0.2); color: var(--accent-light); padding: 2px 6px; border-radius: 4px; font-weight: 600; }
   
   .nav-tabs { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-top: 6px; }
@@ -53,38 +54,86 @@
   }
   .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-  .container { max-width: 1200px; margin: 16px auto; padding: 0 14px; }
+  .container { max-width: 1100px; margin: 16px auto; padding: 0 14px; }
   .app-section { display: none; }
   .app-section.active { display: block; }
 
-  .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 14px; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
+  /* Aramse-Style Brew Assistant / Timer Hero */
+  .brew-hero {
+    background: linear-gradient(180deg, #161826 0%, #10111a 100%);
+    border: 1px solid #2e334d;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   }
-  
-  .badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; }
-  .badge-light { background: #78350f; color: #fde68a; }
-  .badge-med { background: #065f46; color: #a7f3d0; }
-  .badge-dark { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+  .timer-display-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #25283d;
+    padding-bottom: 16px;
+  }
+  .timer-time {
+    font-size: 48px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -1px;
+    color: #ffffff;
+  }
+  .timer-target-box { text-align: right; }
+  .timer-target-weight { font-size: 32px; font-weight: 800; color: var(--blue); }
+  .timer-stage-name { font-size: 14px; color: var(--accent-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .timer-instruction { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
+
+  .progress-track {
+    width: 100%;
+    height: 10px;
+    background: #1e2133;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%);
+    transition: width 0.2s linear;
+  }
+
+  .timer-btn-row { display: flex; gap: 10px; }
+  .timer-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .btn-start { background: var(--green); color: white; }
+  .btn-pause { background: var(--accent); color: white; }
+  .btn-reset { background: #2a2d42; color: var(--text-sub); }
 
   .calc-box {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 16px;
+    padding: 18px;
     margin-bottom: 20px;
   }
-  .calc-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; }
-  
   .control-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
   @media(min-width: 600px) {
     .control-grid { grid-template-columns: 1fr 1fr; }
   }
   .control-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; }
-  select, input {
+  select, input, textarea {
     width: 100%;
     background: var(--card-inner);
     border: 1px solid var(--border);
@@ -94,6 +143,7 @@
     font-size: 14px;
     outline: none;
   }
+  select:focus, input:focus, textarea:focus { border-color: var(--accent); }
 
   .spec-banner {
     display: grid;
@@ -111,10 +161,33 @@
   .spec-banner .item { font-size: 11px; color: var(--text-sub); }
   .spec-banner .item b { display: block; font-size: 14px; color: #fff; margin-top: 2px; }
 
-  .pour-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-  .pour-table th { background: #1a1c2b; color: var(--blue); text-align: left; padding: 8px 10px; border: 1px solid var(--border); }
-  .pour-table td { padding: 8px 10px; border: 1px solid var(--border); background: #12131f; }
-  .pour-table tr:nth-child(even) td { background: #161725; }
+  .step-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .step-row {
+    background: #151724;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+  }
+  .step-row.active-step {
+    border-color: var(--accent);
+    background: rgba(217, 119, 6, 0.12);
+    box-shadow: 0 0 12px rgba(217, 119, 6, 0.2);
+  }
+  .step-time { font-size: 13px; font-weight: 800; color: var(--blue); width: 85px; }
+  .step-desc { font-size: 12.5px; color: var(--text-main); flex: 1; padding: 0 10px; }
+  .step-weight { font-size: 14px; font-weight: 800; color: #fff; width: 70px; text-align: right; }
+
+  .badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+  .badge-light { background: #78350f; color: #fde68a; }
+  .badge-med { background: #065f46; color: #a7f3d0; }
+  .badge-dark { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+  
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 14px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
 
   .callout {
     background: rgba(217, 119, 6, 0.1);
@@ -125,7 +198,6 @@
     color: #cbd5e1;
     margin-top: 14px;
   }
-
   .btn {
     background: var(--accent);
     color: white;
@@ -136,18 +208,16 @@
     font-weight: 700;
     cursor: pointer;
   }
+  .btn-sec { background: #26293d; color: var(--text-main); }
   .btn-danger { background: #991b1b; color: white; padding: 4px 8px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; }
+  .arsenal-item { background: #191b28; border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 
-  .arsenal-item {
-    background: #191b28;
+  .saved-recipe-card {
+    background: #161826;
     border: 1px solid var(--border);
-    padding: 10px 12px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
   }
 </style>
 </head>
@@ -159,7 +229,8 @@
     <span>Sai' Competition Lab</span>
   </div>
   <div class="nav-tabs">
-    <button class="tab-btn active" id="btn-recipeEngine" onclick="switchTab('recipeEngine')">🎯 Recipe</button>
+    <button class="tab-btn active" id="btn-recipeEngine" onclick="switchTab('recipeEngine')">⏱️ Brew Assistant</button>
+    <button class="tab-btn" id="btn-savedRecipesTab" onclick="switchTab('savedRecipesTab')">⭐ Saved Recipes</button>
     <button class="tab-btn" id="btn-livePantry" onclick="switchTab('livePantry')">📋 Pantry</button>
     <button class="tab-btn" id="btn-equipmentTab" onclick="switchTab('equipmentTab')">⚙️ Arsenal</button>
     <button class="tab-btn" id="btn-addCoffeeTab" onclick="switchTab('addCoffeeTab')">➕ Add Bean</button>
@@ -168,10 +239,41 @@
 
 <div class="container">
 
-  <!-- TAB 1: RECIPE ENGINE -->
+  <!-- TAB 1: BREW ASSISTANT & RECIPE BUILDER -->
   <div id="recipeEngine" class="app-section active">
+    
+    <div class="brew-hero">
+      <div class="timer-display-box">
+        <div>
+          <div style="font-size:11px; font-weight:700; color:var(--text-sub); text-transform:uppercase; letter-spacing:0.5px;">Live Brew Timer</div>
+          <div class="timer-time" id="timerDisplay">00:00</div>
+        </div>
+        <div class="timer-target-box">
+          <div class="timer-stage-name" id="currentStageLabel">Ready to Brew</div>
+          <div class="timer-target-weight" id="currentTargetWeight">0g</div>
+          <div class="timer-instruction" id="currentInstruction">Press Start Bloom to begin pour</div>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="timer-btn-row">
+        <button class="timer-btn btn-start" id="startBtn" onclick="toggleTimer()">Start Bloom</button>
+        <button class="timer-btn btn-reset" onclick="resetTimer()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Parameter Config & Real-Time Scale Ticker -->
     <div class="calc-box">
-      <div class="calc-title">⚡ Dynamic Extraction Calculator</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+        <div>
+          <h3 style="font-size:15px; font-weight:800;">⚡ Extraction Config & Scale</h3>
+          <span style="font-size:11px; color:var(--accent-light); font-weight:600;">Auto-syncs with timer</span>
+        </div>
+        <button class="btn" style="background:#2563eb;" onclick="promptSaveCurrentRecipe()">💾 Save Recipe to Library</button>
+      </div>
 
       <div class="control-grid">
         <div class="control-group">
@@ -196,18 +298,36 @@
         </div>
 
         <div class="control-group">
-          <label>Dose (Grams)</label>
+          <label>Coffee Dose (Grams)</label>
           <input type="number" id="calcDoseInput" value="15.0" step="0.5" min="10" max="40" oninput="calculateRecipe()">
         </div>
       </div>
 
       <div class="spec-banner" id="specBanner"></div>
-      <div id="timelineContainer"></div>
+
+      <div style="margin-top:16px;">
+        <h4 style="font-size:12px; color:var(--text-sub); text-transform:uppercase; font-weight:700; margin-bottom:8px;">Staged Pour Target Schedule</h4>
+        <div class="step-list" id="stepListContainer"></div>
+      </div>
+
       <div class="callout" id="calloutRationale"></div>
     </div>
   </div>
 
-  <!-- TAB 2: LIVE PANTRY -->
+  <!-- TAB 2: SAVED RECIPES LIBRARY -->
+  <div id="savedRecipesTab" class="app-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h2 style="font-size:18px; font-weight:800;">⭐ My Saved Recipes Library</h2>
+        <p style="font-size:12px; color:var(--text-sub);">Custom dial-in profiles with saved pour schedule, grind, and temperature</p>
+      </div>
+      <button class="btn" onclick="openNewRecipeModal()">➕ Create Detailed Recipe</button>
+    </div>
+
+    <div id="savedRecipesContainer"></div>
+  </div>
+
+  <!-- TAB 3: LIVE PANTRY -->
   <div id="livePantry" class="app-section">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
       <h2 style="font-size:18px; font-weight:800;">📋 Live Bean Pantry</h2>
@@ -216,7 +336,7 @@
     <div class="grid-3" id="pantryGrid"></div>
   </div>
 
-  <!-- TAB 3: EQUIPMENT ARSENAL -->
+  <!-- TAB 4: ARSENAL -->
   <div id="equipmentTab" class="app-section">
     <h2 style="font-size:18px; font-weight:800; margin-bottom:12px;">⚙️ Equipment Arsenal</h2>
     <div class="calc-box">
@@ -242,11 +362,11 @@
     </div>
   </div>
 
-  <!-- TAB 4: ADD COFFEE FORM (CLEANED - AUTO DETERMINES BEST BREWER) -->
+  <!-- TAB 5: ADD BEAN -->
   <div id="addCoffeeTab" class="app-section">
     <div class="calc-box" style="max-width:600px; margin:0 auto;">
       <h2 style="font-size:16px; font-weight:800; margin-bottom:8px;">➕ Add Coffee Lot</h2>
-      <p style="font-size:12px; color:var(--text-sub); margin-bottom:14px;">Just enter basic bag specs. The engine will automatically determine the best brewer, grind, temperature, and ratio for all 3 methods.</p>
+      <p style="font-size:12px; color:var(--text-sub); margin-bottom:14px;">Enter basic bag specs. The engine automatically computes optimal dripper, grind sizes, and temperatures.</p>
       
       <div class="control-group" style="margin-bottom:10px;">
         <label>Coffee Name & Lot</label>
@@ -268,7 +388,7 @@
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Process</label>
-        <input type="text" id="addProcess" placeholder="e.g. Wine Yeast Anoxic, Washed, Anaerobic Natural, Honey">
+        <input type="text" id="addProcess" placeholder="e.g. Wine Yeast Anoxic, Washed, Anaerobic Natural">
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Varietal</label>
@@ -286,6 +406,71 @@
     </div>
   </div>
 
+</div>
+
+<!-- DETAILED RECIPE CREATOR MODAL -->
+<div id="recipeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; padding:20px; overflow-y:auto;">
+  <div class="calc-box" style="max-width:650px; margin:30px auto; background:#141624; border:1px solid #333852;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="font-size:16px; font-weight:800;">✍️ Create Detailed Custom Recipe</h3>
+      <button onclick="closeNewRecipeModal()" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
+    </div>
+
+    <div class="control-group" style="margin-bottom:10px;">
+      <label>Recipe Title</label>
+      <input type="text" id="customRecTitle" placeholder="e.g. Aramse 5-Pulse Clarity / Kasuya 4:6">
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+      <div class="control-group">
+        <label>Coffee Dose (g)</label>
+        <input type="number" id="customRecDose" value="15.0" step="0.5">
+      </div>
+      <div class="control-group">
+        <label>Total Water (g)</label>
+        <input type="number" id="customRecWater" value="240" step="5">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+      <div class="control-group">
+        <label>Water Temp (°C)</label>
+        <input type="number" id="customRecTemp" value="92">
+      </div>
+      <div class="control-group">
+        <label>Brewer</label>
+        <select id="customRecBrewer"></select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+      <div class="control-group">
+        <label>Timemore C3S Clicks</label>
+        <input type="number" id="customRecC3S" value="13">
+      </div>
+      <div class="control-group">
+        <label>1Zpresso ZP6 Dial</label>
+        <input type="text" id="customRecZP6" value="4.2">
+      </div>
+    </div>
+
+    <div class="control-group" style="margin-bottom:12px;">
+      <label>Pour Stages (One per line: "TimeRange | TargetWeight | Instruction")</label>
+      <textarea id="customRecStages" rows="4" style="font-family:monospace; font-size:12px;" placeholder="0:00-0:40 | 45g | Rapid bloom with gentle swirl
+0:40-1:15 | 140g | Racetrack spiral pour
+1:15-2:40 | 240g | Gentle center laminar pour"></textarea>
+    </div>
+
+    <div class="control-group" style="margin-bottom:16px;">
+      <label>Tasting / Extraction Notes</label>
+      <input type="text" id="customRecNotes" placeholder="e.g. Maximizes floral sweetness and high clarity">
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn" style="flex:1;" onclick="saveCustomDetailedRecipe()">Save to My Library</button>
+      <button class="btn btn-sec" onclick="closeNewRecipeModal()">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -313,18 +498,22 @@ var defaultDrippers = {
 
 var storedCoffees = defaultCoffees.slice();
 var storedDrippers = Object.assign({}, defaultDrippers);
+var savedCustomRecipes = [];
 
 try {
-  var c = localStorage.getItem('sai_coffees_v3');
+  var c = localStorage.getItem('sai_coffees_v5');
   if (c) storedCoffees = JSON.parse(c);
-  var d = localStorage.getItem('sai_drippers_v3');
+  var d = localStorage.getItem('sai_drippers_v5');
   if (d) storedDrippers = JSON.parse(d);
+  var r = localStorage.getItem('sai_saved_recipes_v1');
+  if (r) savedCustomRecipes = JSON.parse(r);
 } catch(err) {}
 
 function saveState() {
   try {
-    localStorage.setItem('sai_coffees_v3', JSON.stringify(storedCoffees));
-    localStorage.setItem('sai_drippers_v3', JSON.stringify(storedDrippers));
+    localStorage.setItem('sai_coffees_v5', JSON.stringify(storedCoffees));
+    localStorage.setItem('sai_drippers_v5', JSON.stringify(storedDrippers));
+    localStorage.setItem('sai_saved_recipes_v1', JSON.stringify(savedCustomRecipes));
   } catch(err) {}
 }
 
@@ -338,12 +527,16 @@ function switchTab(tabId) {
   if (targetSec) targetSec.classList.add('active');
   var targetBtn = document.getElementById('btn-' + tabId);
   if (targetBtn) targetBtn.classList.add('active');
+
+  if (tabId === 'savedRecipesTab') renderSavedRecipes();
 }
 
 function renderBrewerDropdowns() {
   var calcSelect = document.getElementById('calcBrewerSelect');
+  var customBrewerSelect = document.getElementById('customRecBrewer');
   if (!calcSelect) return;
   calcSelect.innerHTML = '<option value="auto">✨ Auto-Select Best Paired Brewer (AI Pick)</option>';
+  if (customBrewerSelect) customBrewerSelect.innerHTML = '';
 
   for (var k in storedDrippers) {
     if (storedDrippers.hasOwnProperty(k)) {
@@ -351,6 +544,13 @@ function renderBrewerDropdowns() {
       opt.value = k;
       opt.textContent = storedDrippers[k].name;
       calcSelect.appendChild(opt);
+
+      if (customBrewerSelect) {
+        var opt2 = document.createElement('option');
+        opt2.value = k;
+        opt2.textContent = storedDrippers[k].name;
+        customBrewerSelect.appendChild(opt2);
+      }
     }
   }
 }
@@ -547,7 +747,319 @@ function deleteCoffee(id) {
   }
 }
 
+// ==========================================
+// SAVED RECIPES SYSTEM
+// ==========================================
+function promptSaveCurrentRecipe() {
+  var title = prompt("Enter a title for this recipe:", "Competition Dial-In");
+  if (!title) return;
+
+  var coffeeSelect = document.getElementById('calcCoffeeSelect');
+  var methodSelect = document.getElementById('calcMethodSelect');
+  var brewerSelect = document.getElementById('calcBrewerSelect');
+  var doseInput = document.getElementById('calcDoseInput');
+
+  var coffeeId = coffeeSelect.value;
+  var method = methodSelect.value;
+  var brewerChoice = brewerSelect.value;
+  var dose = parseFloat(doseInput.value) || 15.0;
+
+  var coffee = storedCoffees[0];
+  for (var i = 0; i < storedCoffees.length; i++) {
+    if (storedCoffees[i].id === coffeeId) { coffee = storedCoffees[i]; break; }
+  }
+
+  var isAuto = (brewerChoice === "auto");
+  var activeBrewerKey = isAuto ? coffee.defaultBrewer : brewerChoice;
+  var brewerObj = storedDrippers[activeBrewerKey] || defaultDrippers.origami;
+
+  var currentSpec = {
+    id: "rec_" + Date.now(),
+    title: title,
+    coffeeName: coffee.name,
+    coffeeId: coffee.id,
+    method: method,
+    brewerKey: activeBrewerKey,
+    brewerName: brewerObj.name,
+    dose: dose,
+    ratio: coffee.hotRatio,
+    temp: coffee.hotTemp,
+    c3s: coffee.c3sHot,
+    zp6: coffee.zp6Hot,
+    stages: currentBrewStages.slice(),
+    notes: coffee.flowNote || "Custom user dialed profile."
+  };
+
+  savedCustomRecipes.unshift(currentSpec);
+  saveState();
+  alert("Recipe '" + title + "' saved to your Library! View it under the '⭐ Saved Recipes' tab.");
+}
+
+function openNewRecipeModal() {
+  renderBrewerDropdowns();
+  document.getElementById('recipeModal').style.display = 'block';
+}
+
+function closeNewRecipeModal() {
+  document.getElementById('recipeModal').style.display = 'none';
+}
+
+function saveCustomDetailedRecipe() {
+  var title = document.getElementById('customRecTitle').value.trim();
+  var dose = parseFloat(document.getElementById('customRecDose').value) || 15.0;
+  var water = parseFloat(document.getElementById('customRecWater').value) || 240;
+  var temp = parseInt(document.getElementById('customRecTemp').value) || 92;
+  var brewerKey = document.getElementById('customRecBrewer').value;
+  var c3s = parseInt(document.getElementById('customRecC3S').value) || 13;
+  var zp6 = document.getElementById('customRecZP6').value.trim() || "4.2";
+  var stagesRaw = document.getElementById('customRecStages').value.trim();
+  var notes = document.getElementById('customRecNotes').value.trim();
+
+  if (!title) return alert("Please enter a recipe title");
+
+  var stages = [];
+  if (stagesRaw) {
+    var lines = stagesRaw.split('\n');
+    var lastSec = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var parts = lines[i].split('|');
+      if (parts.length >= 3) {
+        var timePart = parts[0].trim();
+        var weightPart = parseInt(parts[1].replace(/[^0-9]/g, '')) || 0;
+        var instrPart = parts[2].trim();
+
+        var timeRange = timePart.split('-');
+        var startSec = 0; var endSec = 40;
+        if (timeRange.length === 2) {
+          var s1 = timeRange[0].trim().split(':');
+          var s2 = timeRange[1].trim().split(':');
+          startSec = (parseInt(s1[0]) || 0) * 60 + (parseInt(s1[1]) || 0);
+          endSec = (parseInt(s2[0]) || 0) * 60 + (parseInt(s2[1]) || 0);
+        }
+
+        stages.push({
+          startSec: startSec,
+          endSec: endSec,
+          targetWeight: weightPart,
+          label: "Stage " + (i + 1),
+          instruction: instrPart
+        });
+      }
+    }
+  }
+
+  var brewerObj = storedDrippers[brewerKey] || defaultDrippers.origami;
+
+  var customRecipe = {
+    id: "rec_" + Date.now(),
+    title: title,
+    coffeeName: "Custom Lot",
+    coffeeId: storedCoffees[0].id,
+    method: "hot",
+    brewerKey: brewerKey,
+    brewerName: brewerObj.name,
+    dose: dose,
+    totalWater: water,
+    ratio: (water / dose).toFixed(1),
+    temp: temp,
+    c3s: c3s,
+    zp6: zp6,
+    stages: stages,
+    notes: notes || "Hand-crafted custom extraction profile."
+  };
+
+  savedCustomRecipes.unshift(customRecipe);
+  saveState();
+  closeNewRecipeModal();
+  renderSavedRecipes();
+  alert("Recipe '" + title + "' saved to your Library!");
+}
+
+function deleteSavedRecipe(id) {
+  if (confirm("Delete this recipe from your library?")) {
+    savedCustomRecipes = savedCustomRecipes.filter(function(r) { return r.id !== id; });
+    saveState();
+    renderSavedRecipes();
+  }
+}
+
+function loadSavedRecipeIntoEngine(id) {
+  var rec = savedCustomRecipes.find(function(r) { return r.id === id; });
+  if (!rec) return;
+
+  var coffeeSelect = document.getElementById('calcCoffeeSelect');
+  var methodSelect = document.getElementById('calcMethodSelect');
+  var brewerSelect = document.getElementById('calcBrewerSelect');
+  var doseInput = document.getElementById('calcDoseInput');
+
+  if (rec.coffeeId) coffeeSelect.value = rec.coffeeId;
+  methodSelect.value = rec.method || "hot";
+  brewerSelect.value = rec.brewerKey || "auto";
+  doseInput.value = rec.dose || 15.0;
+
+  switchTab('recipeEngine');
+
+  if (rec.stages && rec.stages.length > 0) {
+    currentBrewStages = rec.stages.slice();
+    resetTimer();
+
+    var specBanner = document.getElementById('specBanner');
+    var totalW = rec.totalWater || Math.round(rec.dose * (rec.ratio || 16));
+    specBanner.innerHTML = '<div class="item">Active Brewer<b>' + rec.brewerName + '</b></div>' +
+      '<div class="item">Coffee Dose<b>' + rec.dose + 'g</b></div>' +
+      '<div class="item">Total Liquid<b>' + totalW + 'g</b></div>' +
+      '<div class="item">Water Temp<b>' + rec.temp + '°C</b></div>' +
+      '<div class="item">Timemore C3S<b>' + rec.c3s + ' clicks</b></div>' +
+      '<div class="item">1Zpresso ZP6<b>Dial ' + rec.zp6 + '</b></div>';
+
+    var stepContainer = document.getElementById('stepListContainer');
+    var html = '';
+    for (var i = 0; i < rec.stages.length; i++) {
+      var st = rec.stages[i];
+      var m1 = Math.floor(st.startSec / 60); var s1 = st.startSec % 60;
+      var m2 = Math.floor(st.endSec / 60); var s2 = st.endSec % 60;
+      var tStr = m1 + ":" + (s1 < 10 ? "0" : "") + s1 + " – " + m2 + ":" + (s2 < 10 ? "0" : "") + s2;
+
+      html += '<div class="step-row' + (i === 0 ? ' active-step' : '') + '">' +
+        '<div class="step-time">' + tStr + '</div>' +
+        '<div class="step-desc"><b>' + st.label + ':</b> ' + st.instruction + '</div>' +
+        '<div class="step-weight">' + st.targetWeight + 'g</div>' +
+        '</div>';
+    }
+    stepContainer.innerHTML = html;
+
+    document.getElementById('currentStageLabel').textContent = rec.stages[0].label;
+    document.getElementById('currentTargetWeight').textContent = rec.stages[0].targetWeight + "g";
+    document.getElementById('currentInstruction').textContent = rec.stages[0].instruction;
+
+    var rationale = document.getElementById('calloutRationale');
+    rationale.innerHTML = '<b>Custom Loaded Recipe (' + rec.title + '):</b> ' + rec.notes;
+  } else {
+    calculateRecipe();
+  }
+}
+
+function renderSavedRecipes() {
+  var container = document.getElementById('savedRecipesContainer');
+  if (!container) return;
+
+  if (savedCustomRecipes.length === 0) {
+    container.innerHTML = '<div style="background:#141624; border:1px solid #26293d; padding:24px; border-radius:12px; text-align:center; color:#94a3b8;">' +
+      '<div style="font-size:32px; margin-bottom:8px;">📖</div>' +
+      '<h3 style="color:#fff; font-size:15px; margin-bottom:4px;">No Saved Custom Recipes Yet</h3>' +
+      '<p style="font-size:12px; margin-bottom:14px;">Tune a recipe in the Brew Assistant and click "Save Recipe to Library", or create one from scratch.</p>' +
+      '<button class="btn" onclick="openNewRecipeModal()">+ Create Detailed Recipe</button>' +
+      '</div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < savedCustomRecipes.length; i++) {
+    var r = savedCustomRecipes[i];
+    html += '<div class="saved-recipe-card">' +
+      '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">' +
+      '<div>' +
+      '<h3 style="font-size:16px; font-weight:800; color:#fff;">' + r.title + '</h3>' +
+      '<p style="font-size:12px; color:var(--blue);">' + (r.brewerName || 'Dripper') + ' • ' + (r.dose || 15) + 'g dose • ' + (r.temp || 92) + '°C</p>' +
+      '</div>' +
+      '<div style="display:flex; gap:6px;">' +
+      '<button class="btn" style="padding:6px 12px; font-size:11px;" onclick="loadSavedRecipeIntoEngine(\'' + r.id + '\')">🚀 Load & Brew</button>' +
+      '<button class="btn-danger" onclick="deleteSavedRecipe(\'' + r.id + '\')">Delete</button>' +
+      '</div>' +
+      '</div>' +
+      '<div style="background:#10111a; padding:8px 10px; border-radius:6px; font-size:12px; color:var(--text-sub); margin-bottom:8px;">' +
+      '<b>Grind:</b> C3S: ' + r.c3s + ' clk | ZP6: ' + r.zp6 + ' • <b>Notes:</b> ' + (r.notes || 'None') +
+      '</div>' +
+      '<div style="font-size:11.5px; color:var(--text-sub);">' +
+      '<b>Stages:</b> ' + (r.stages ? r.stages.length : 0) + ' pour steps calibrated' +
+      '</div>' +
+      '</div>';
+  }
+  container.innerHTML = html;
+}
+
+// ARAMSE-INSPIRED INTERACTIVE TIMER & LIVE BREW STATE
+var timerInterval = null;
+var timerSeconds = 0;
+var isTimerRunning = false;
+var currentBrewStages = [];
+
+function toggleTimer() {
+  var btn = document.getElementById('startBtn');
+  if (!isTimerRunning) {
+    isTimerRunning = true;
+    btn.textContent = "Pause Timer";
+    btn.className = "timer-btn btn-pause";
+    timerInterval = setInterval(onTimerTick, 1000);
+  } else {
+    isTimerRunning = false;
+    btn.textContent = "Resume Timer";
+    btn.className = "timer-btn btn-start";
+    clearInterval(timerInterval);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  isTimerRunning = false;
+  timerSeconds = 0;
+  document.getElementById('timerDisplay').textContent = "00:00";
+  var btn = document.getElementById('startBtn');
+  btn.textContent = "Start Bloom";
+  btn.className = "timer-btn btn-start";
+  document.getElementById('progressFill').style.width = "0%";
+  updateActiveStepHighlight(0);
+}
+
+function onTimerTick() {
+  timerSeconds++;
+  var mins = Math.floor(timerSeconds / 60);
+  var secs = timerSeconds % 60;
+  var displayStr = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
+  document.getElementById('timerDisplay').textContent = displayStr;
+
+  var totalExpectedSecs = currentBrewStages.length > 0 ? currentBrewStages[currentBrewStages.length - 1].endSec : 160;
+  var progressPct = Math.min(100, (timerSeconds / totalExpectedSecs) * 100);
+  document.getElementById('progressFill').style.width = progressPct + "%";
+
+  var activeStage = null;
+  var activeIndex = -1;
+  for (var i = 0; i < currentBrewStages.length; i++) {
+    if (timerSeconds >= currentBrewStages[i].startSec && timerSeconds < currentBrewStages[i].endSec) {
+      activeStage = currentBrewStages[i];
+      activeIndex = i;
+      break;
+    }
+  }
+
+  if (!activeStage && timerSeconds >= totalExpectedSecs) {
+    document.getElementById('currentStageLabel').textContent = "Drawdown Complete! ✨";
+    document.getElementById('currentTargetWeight').textContent = currentBrewStages[currentBrewStages.length - 1].targetWeight + "g";
+    document.getElementById('currentInstruction').textContent = "Lift dripper, swirl server, and enjoy!";
+    document.getElementById('progressFill').style.width = "100%";
+    clearInterval(timerInterval);
+    isTimerRunning = false;
+    document.getElementById('startBtn').textContent = "Brew Finished";
+  } else if (activeStage) {
+    document.getElementById('currentStageLabel').textContent = activeStage.label;
+    document.getElementById('currentTargetWeight').textContent = activeStage.targetWeight + "g";
+    document.getElementById('currentInstruction').textContent = activeStage.instruction;
+    updateActiveStepHighlight(activeIndex);
+  }
+}
+
+function updateActiveStepHighlight(stepIdx) {
+  var rows = document.querySelectorAll('.step-row');
+  for (var i = 0; i < rows.length; i++) {
+    if (i === stepIdx) rows[i].classList.add('active-step');
+    else rows[i].classList.remove('active-step');
+  }
+}
+
+// REAL-TIME DYNAMIC EXTRACTION ENGINE
 function calculateRecipe() {
+  resetTimer();
+
   var coffeeSelect = document.getElementById('calcCoffeeSelect');
   var methodSelect = document.getElementById('calcMethodSelect');
   var brewerSelect = document.getElementById('calcBrewerSelect');
@@ -584,14 +1096,14 @@ function calculateRecipe() {
     c3s += 2;
     zp6 = (zp6 + 0.8).toFixed(1);
     temp = Math.max(86, temp - 2);
-    dripperAdjustmentNote = "Restricted-flow wedge dripper detected: Grind loosened +2 clicks (ZP6 +0.8) and temperature lowered by 2°C to prevent bed stalling and astringent bitterness.";
+    dripperAdjustmentNote = "Restricted wedge dripper: Grind loosened +2 clicks (ZP6 +0.8) and temperature lowered 2°C to prevent stall.";
   } else if (brewerObj.flow === 'medium') {
     c3s += 1;
     zp6 = (zp6 + 0.3).toFixed(1);
-    dripperAdjustmentNote = "Medium-flow brewer detected: Grind loosened +1 click (ZP6 +0.3) for optimum thermal extraction and balanced sweetness.";
+    dripperAdjustmentNote = "Medium flow dripper: Grind loosened +1 click (ZP6 +0.3) for smooth heat distribution.";
   } else {
     zp6 = zp6.toFixed(1);
-    dripperAdjustmentNote = "High-velocity bypass dripper detected: Baseline tight grind utilized to maximize kinetic clarity.";
+    dripperAdjustmentNote = "High flow bypass dripper: Tight grind leveraged for maximum clarity.";
   }
 
   if (method === 'iced') {
@@ -620,57 +1132,114 @@ function calculateRecipe() {
       '<div class="item">1Zpresso ZP6<b>Dial ' + zp6 + '</b></div>';
   }
 
-  var timeline = document.getElementById('timelineContainer');
+  var stepContainer = document.getElementById('stepListContainer');
   var rationale = document.getElementById('calloutRationale');
+  currentBrewStages = [];
 
   if (method === 'hot') {
     var bloom = Math.round(dose * 3.0);
     var p1 = Math.round((hotWaterGrams - bloom) * 0.48);
     var p2 = hotWaterGrams - bloom - p1;
 
-    var action1 = brewerObj.flow === 'restricted' ? "Oval racetrack line back and forth along long wedge seam" : "Concentric circular spirals from center outward";
-    var action2 = brewerObj.flow === 'restricted' ? "Gentle center pulse stream. Lift kettle before draw stalls" : "Gentle laminar center pour (low spout height, minimal turbulence)";
+    var action1 = brewerObj.flow === 'restricted' ? "Oval racetrack along wedge line" : "Concentric outward circles";
+    var action2 = brewerObj.flow === 'restricted' ? "Gentle center pulse stream" : "Low laminar center pour";
 
-    if (timeline) {
-      timeline.innerHTML = '<table class="pour-table">' +
-        '<tr><th>Stage & Time</th><th>Water Dose</th><th>Total Water</th><th>Pour Dynamics (' + brewerObj.name + ')</th></tr>' +
-        '<tr><td><b>Stage 1 (Bloom):</b> 0:00 – 0:40</td><td>' + bloom + 'g</td><td>' + bloom + 'g</td><td>Rapid wetting. ' + (brewerObj.flow === 'restricted' ? 'No swirl (avoids choking bottom holes).' : '1-2 gentle swirls to exhaust CO2.') + '</td></tr>' +
-        '<tr><td><b>Stage 2 (Acidity):</b> 0:40 – 1:15</td><td>+' + p1 + 'g</td><td>' + (bloom + p1) + 'g</td><td>' + action1 + '.</td></tr>' +
-        '<tr><td><b>Stage 3 (Sweetness):</b> 1:20 – 1:55</td><td>+' + p2 + 'g</td><td>' + hotWaterGrams + 'g</td><td>' + action2 + '. Target Drawdown: 2:20–2:45.</td></tr>' +
-        '</table>';
+    currentBrewStages = [
+      { startSec: 0, endSec: 40, targetWeight: bloom, label: "Bloom Stage", instruction: "Pour " + bloom + "g quickly. " + (brewerObj.flow === 'restricted' ? "No swirl." : "1 gentle swirl.") },
+      { startSec: 40, endSec: 75, targetWeight: (bloom + p1), label: "First Pour (Acidity)", instruction: action1 + " up to " + (bloom + p1) + "g." },
+      { startSec: 75, endSec: 160, targetWeight: hotWaterGrams, label: "Final Pour (Sweetness)", instruction: action2 + " up to " + hotWaterGrams + "g. Allow drawdown." }
+    ];
+
+    if (stepContainer) {
+      stepContainer.innerHTML = '<div class="step-row active-step">' +
+        '<div class="step-time">0:00 – 0:40</div>' +
+        '<div class="step-desc"><b>Stage 1: Bloom</b> — Rapid saturation with ' + bloom + 'g water. ' + (brewerObj.flow === 'restricted' ? 'No swirl.' : 'Gentle swirl to release CO2.') + '</div>' +
+        '<div class="step-weight">' + bloom + 'g</div>' +
+        '</div>' +
+        '<div class="step-row">' +
+        '<div class="step-time">0:40 – 1:15</div>' +
+        '<div class="step-desc"><b>Stage 2: Main Body</b> — ' + action1 + ' (add ' + p1 + 'g).</div>' +
+        '<div class="step-weight">' + (bloom + p1) + 'g</div>' +
+        '</div>' +
+        '<div class="step-row">' +
+        '<div class="step-time">1:15 – 2:40</div>' +
+        '<div class="step-desc"><b>Stage 3: Sweetness Pulse</b> — ' + action2 + ' (add ' + p2 + 'g). Let drain completely.</div>' +
+        '<div class="step-weight">' + hotWaterGrams + 'g</div>' +
+        '</div>';
     }
+
+    document.getElementById('currentStageLabel').textContent = "Stage 1: Bloom";
+    document.getElementById('currentTargetWeight').textContent = bloom + "g";
+    document.getElementById('currentInstruction').textContent = "Hit Start Bloom and saturate with " + bloom + "g";
+
     if (rationale) {
-      rationale.innerHTML = '<b>Extraction Strategy:</b> ' + (coffee.flowNote || '') + '<br/><span style="color:var(--blue); font-size:11.5px; margin-top:4px; display:block;">⚙️ ' + dripperAdjustmentNote + '</span>';
+      rationale.innerHTML = '<b>Aramse-Calibrated Strategy:</b> ' + (coffee.flowNote || '') + '<br/><span style="color:var(--blue); font-size:11.5px; margin-top:4px; display:block;">⚙️ ' + dripperAdjustmentNote + '</span>';
     }
   } else if (method === 'iced') {
     var bloom = Math.round(dose * 2.5);
     var p1 = Math.round((hotWaterGrams - bloom) * 0.55);
     var p2 = hotWaterGrams - bloom - p1;
 
-    if (timeline) {
-      timeline.innerHTML = '<table class="pour-table">' +
-        '<tr><th>Stage & Time</th><th>Water Dose</th><th>Total Liquid</th><th>Japanese Flash Mechanics</th></tr>' +
-        '<tr><td><b>Prep</b></td><td>' + iceGrams + 'g Ice</td><td>' + iceGrams + 'g</td><td>Place ' + iceGrams + 'g hard ice cubes directly inside carafe.</td></tr>' +
-        '<tr><td><b>Stage 1:</b> 0:00 – 0:40</td><td>' + bloom + 'g Hot</td><td>' + (iceGrams + bloom) + 'g</td><td>Saturate bed. Fast single swirl to start extraction over ice.</td></tr>' +
-        '<tr><td><b>Stage 2:</b> 0:40 – 1:10</td><td>+' + p1 + 'g Hot</td><td>' + (iceGrams + bloom + p1) + 'g</td><td>Slow tight concentric pulses to elevate dissolved solids.</td></tr>' +
-        '<tr><td><b>Stage 3:</b> 1:15 – 1:45</td><td>+' + p2 + 'g Hot</td><td>' + totalWater + 'g Total</td><td>Laminar center stream. Swirl carafe 15s to shock-cool aromatics.</td></tr>' +
-        '</table>';
+    currentBrewStages = [
+      { startSec: 0, endSec: 40, targetWeight: (iceGrams + bloom), label: "Hot Bloom Over Ice", instruction: "Pour " + bloom + "g hot water directly over coffee bed." },
+      { startSec: 40, endSec: 70, targetWeight: (iceGrams + bloom + p1), label: "Concentration Pour", instruction: "Slow tight concentric pulses up to " + (iceGrams + bloom + p1) + "g." },
+      { startSec: 70, endSec: 130, targetWeight: totalWater, label: "Final Chill Pulse", instruction: "Laminar center pour to " + totalWater + "g total. Swirl carafe 15s to shock-cool." }
+    ];
+
+    if (stepContainer) {
+      stepContainer.innerHTML = '<div class="step-row">' +
+        '<div class="step-time">Pre-Brew</div>' +
+        '<div class="step-desc"><b>Setup:</b> Place ' + iceGrams + 'g hard ice cubes directly inside carafe under dripper.</div>' +
+        '<div class="step-weight">' + iceGrams + 'g Ice</div>' +
+        '</div>' +
+        '<div class="step-row active-step">' +
+        '<div class="step-time">0:00 – 0:40</div>' +
+        '<div class="step-desc"><b>Stage 1: Flash Bloom</b> — ' + bloom + 'g hot water. Quick swirl.</div>' +
+        '<div class="step-weight">' + (iceGrams + bloom) + 'g</div>' +
+        '</div>' +
+        '<div class="step-row">' +
+        '<div class="step-time">0:40 – 1:10</div>' +
+        '<div class="step-desc"><b>Stage 2: Dense Extraction</b> — Tight circles with ' + p1 + 'g water.</div>' +
+        '<div class="step-weight">' + (iceGrams + bloom + p1) + 'g</div>' +
+        '</div>' +
+        '<div class="step-row">' +
+        '<div class="step-time">1:10 – 2:10</div>' +
+        '<div class="step-desc"><b>Stage 3: Finish & Shock Chill</b> — Add ' + p2 + 'g. Swirl carafe until cold.</div>' +
+        '<div class="step-weight">' + totalWater + 'g</div>' +
+        '</div>';
     }
+
+    document.getElementById('currentStageLabel').textContent = "Flash Stage 1: Bloom";
+    document.getElementById('currentTargetWeight').textContent = (iceGrams + bloom) + "g";
+    document.getElementById('currentInstruction').textContent = "Ice in carafe: " + iceGrams + "g. Bloom with " + bloom + "g hot water.";
+
     if (rationale) {
-      rationale.innerHTML = '<b>Japanese Flash Rationale:</b> Grinding 2 clicks finer (C3S: ' + c3s + ' / ZP6: ' + zp6 + ') and brewing hot onto ' + iceGrams + 'g ice locks volatile fruit aromatics without dilution bitterness.<br/><span style="color:var(--blue); font-size:11.5px; margin-top:4px; display:block;">⚙️ ' + dripperAdjustmentNote + '</span>';
+      rationale.innerHTML = '<b>Japanese Flash Rationale:</b> Grinding 2 clicks finer (C3S: ' + c3s + ' / ZP6: ' + zp6 + ') and brewing hot onto ' + iceGrams + 'g ice locks volatile fruit aromatics.<br/><span style="color:var(--blue); font-size:11.5px; margin-top:4px; display:block;">⚙️ ' + dripperAdjustmentNote + '</span>';
     }
   } else {
-    if (timeline) {
-      timeline.innerHTML = '<table class="pour-table">' +
-        '<tr><th>Step</th><th>Ratio / Specs</th><th>Protocol</th></tr>' +
-        '<tr><td><b>1. Grind & Load</b></td><td>' + dose + 'g @ ' + c3s + ' clicks (ZP6: ' + zp6 + ')</td><td>Coarse grind prevents astringency and silt.</td></tr>' +
-        '<tr><td><b>2. Saturate</b></td><td>' + totalWater + 'g Water</td><td>Pour room temp filtered water, stir 3 times.</td></tr>' +
-        '<tr><td><b>3. Cold Steep</b></td><td>14 – 16 Hours in Fridge</td><td>Cap tightly in refrigerator.</td></tr>' +
-        '<tr><td><b>4. Filtration</b></td><td>Paper V60 Filter</td><td>Strain through paper cone for tea-like clarity.</td></tr>' +
-        '</table>';
+    currentBrewStages = [];
+    if (stepContainer) {
+      stepContainer.innerHTML = '<div class="step-row active-step">' +
+        '<div class="step-time">Step 1</div>' +
+        '<div class="step-desc"><b>Grind & Load:</b> Dose ' + dose + 'g at coarse grind (' + c3s + ' clk / ZP6 ' + zp6 + ').</div>' +
+        '<div class="step-weight">' + dose + 'g</div>' +
+        '</div>' +
+        '<div class="step-row">' +
+        '<div class="step-time">Step 2</div>' +
+        '<div class="step-desc"><b>Saturate:</b> Add ' + totalWater + 'g room temp water; stir gently 3 times.</div>' +
+        '<div class="step-weight">' + totalWater + 'g</div>' +
+        '</div>' +
+        '<div class="step-row">' +
+        '<div class="step-time">Step 3</div>' +
+        '<div class="step-desc"><b>Fridge Steep:</b> 14–16 hours. Filter through paper V60 for tea-like clarity.</div>' +
+        '<div class="step-weight">14–16h</div>' +
+        '</div>';
     }
+    document.getElementById('currentStageLabel').textContent = "Cold Immersion / Toddy";
+    document.getElementById('currentTargetWeight').textContent = totalWater + "g";
+    document.getElementById('currentInstruction').textContent = "Add " + totalWater + "g water, stir, and steep 14h in fridge.";
     if (rationale) {
-      rationale.innerHTML = '<b>Cold Immersion Rationale:</b> 14 hours of cold steeping extracts rich sucrose without extracting harsh chlorogenic acid compounds.';
+      rationale.innerHTML = '<b>Cold Immersion Rationale:</b> 14 hours of cold steeping extracts rich sweetness without extracting harsh chlorogenic acid compounds.';
     }
   }
 }
