@@ -16,7 +16,6 @@
     --green: #10b981;
     --purple: #a78bfa;
     --pink: #f43f5e;
-    --yellow: #facc15;
     --text-main: #f8fafc;
     --text-sub: #94a3b8;
   }
@@ -60,7 +59,6 @@
   .app-section { display: none; }
   .app-section.active { display: block; }
 
-  /* Hero Timer */
   .brew-hero {
     background: linear-gradient(180deg, #161826 0%, #10111a 100%);
     border: 1px solid #2e334d;
@@ -262,7 +260,7 @@
 
 <div class="container">
 
-  <!-- TAB 1: BREW ASSISTANT & RECIPE BUILDER -->
+  <!-- TAB 1: BREW ASSISTANT -->
   <div id="recipeEngine" class="app-section active">
     <div class="brew-hero">
       <div class="timer-display-box">
@@ -357,7 +355,7 @@
     <div class="grid-3" id="pantryGrid"></div>
   </div>
 
-  <!-- TAB 3: CAFÉ & TRIED LOG (NEW TASTING PASSPORT) -->
+  <!-- TAB 3: CAFÉ & TRIED LOG -->
   <div id="cafeLogTab" class="app-section">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
       <div>
@@ -435,7 +433,7 @@
     </div>
   </div>
 
-  <!-- TAB 7: ADD BEAN (PANTRY OR VAULT) -->
+  <!-- TAB 7: ADD BEAN -->
   <div id="addCoffeeTab" class="app-section">
     <div class="calc-box" style="max-width:600px; margin:0 auto;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -486,7 +484,7 @@
 
 </div>
 
-<!-- QUICK CAFÉ / TRIED LOG MODAL (NO ROAST DATE REQUIRED) -->
+<!-- QUICK CAFÉ / TRIED LOG MODAL -->
 <div id="quickCafeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; padding:20px; overflow-y:auto;">
   <div class="calc-box" style="max-width:600px; margin:30px auto; background:#141624; border:1px solid #4338ca;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -662,7 +660,7 @@ var defaultCoffees = [
   { id: "broot-sur-lie", name: "Broot - SUR LIE (Melkodige)", roaster: "Broot Coffee", roast: "Medium-Light", process: "Wine Yeast Anoxic Natural", varietal: "Obata", roastDate: "2026-09-03", defaultBrewer: "origami", notes: "Red Grape, Dried Fig, Jasmine Lift, Wine Finish", hotTemp: 92, hotRatio: 16.3, c3sHot: 13, zp6Hot: 4.3, inPantry: true, source: "lab", flowNote: "Origami fast drain lets delicate wine yeast jasmine & grape volatiles lift cleanly." },
   { id: "moss-theory", name: "Broot - Moss Theory (Kerehaklu)", roaster: "Broot Coffee", roast: "Medium-Light", process: "Extended Aerobic SLN9 Peaberry", varietal: "SLN9 Peaberry", roastDate: "2026-08-26", defaultBrewer: "neo", notes: "Golden Mango, Pink Guava Nectar, Syrupy Body", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.5, inPantry: true, source: "lab", flowNote: "Neo V60 rapid spiral channels accelerate tropical mango extraction on peaberries." },
   { id: "salawara-estate", name: "Blue Tokai - Salawara Estate", roaster: "Blue Tokai", roast: "Light", process: "Anaerobic Natural", varietal: "SLN 795", roastDate: "2026-08-20", defaultBrewer: "ceramic", notes: "Crisp Red Apple, Stewed Pear, Toasted Almond", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.4, inPantry: true, source: "lab", flowNote: "Ceramic V60 converts malic apple acidity into baked, sweet caramel warmth." },
-  { id: "raxidi-lobo", name: "Roastery - Raxidi Lobo Estate", roaster: "Roastery Coffee", roast: "Medium", process: "5B Block Anaerobic Natural", varietal: "SLN 5B", roastDate: "2026-08-18", defaultBrewer: "origami", notes: "Dark Cherry Jam, Boozy Plum, Cocoa, Grapefruit", hotTemp: 90, hotRatio: 16, c3sHot: 14, zp6Hot: 4.8, flowNote: "Origami prevents stalling; center laminar stream skips bitter tannins." },
+  { id: "raxidi-lobo", name: "Roastery - Raxidi Lobo Estate", roaster: "Roastery Coffee", roast: "Medium", process: "5B Block Anaerobic Natural", varietal: "SLN 5B", roastDate: "2026-08-18", defaultBrewer: "origami", notes: "Dark Cherry Jam, Boozy Plum, Cocoa, Grapefruit", hotTemp: 90, hotRatio: 16, c3sHot: 14, zp6Hot: 4.8, inPantry: true, source: "lab", flowNote: "Origami prevents stalling; center laminar stream skips bitter tannins." },
   { id: "mizoram-reserve", name: "Grey Soul - Mizoram Reserve (#4)", roaster: "Grey Soul", roast: "Medium-Dark", process: "Sun-Dried Natural", varietal: "Regional Natural Lot", roastDate: "2026-08-15", defaultBrewer: "balloon", notes: "Watermelon Candy, Ripe Plum, Hazelnut Cocoa", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.2, inPantry: true, source: "lab", flowNote: "Balloon glass bulb enhances body, pulling out juicy watermelon candy sweetness." },
   { id: "sholiga", name: "Veer Attikan - Sholiga", roaster: "Veer Attikan", roast: "Light-Medium", process: "Washed Arabica", varietal: "Single Origin BR Hills", roastDate: "2026-08-10", defaultBrewer: "ceramic", notes: "Honeyed Jackfruit, Dried Dates, Brown Sugar", hotTemp: 91, hotRatio: 16, c3sHot: 15, zp6Hot: 4.8, flowNote: "Uniform concentric spirals in ceramic cone give comforting dates and brown sugar." },
   { id: "bold-edition", name: "Bold Edition #2", roaster: "Specialty Roasters", roast: "Dark", process: "Salawara Honey / Washed", varietal: "Specialty Dark Blend", roastDate: "2026-08-12", defaultBrewer: "kalita", notes: "Dark Fudge, Molasses, Stewed Plum, Zero Ash", hotTemp: 88, hotRatio: 15, c3sHot: 17, zp6Hot: 5.8, inPantry: true, source: "lab", flowNote: "Kalita 102 wedge with oval racetrack pour and 88°C water pulls dense fudge." },
@@ -811,7 +809,7 @@ function renderEquipmentList() {
       item.className = 'arsenal-item';
       var isDefault = defaultDrippers.hasOwnProperty(k);
       item.innerHTML = '<div><b>' + storedDrippers[k].name + '</b> <span style="font-size:11px; color:var(--text-sub); margin-left:8px;">[' + storedDrippers[k].flow + ' flow]</span></div>' +
-        (!isDefault ? '<button class="btn-danger" onclick="deleteDripper(\\'' + k + '\\')">Remove</button>' : '');
+        (!isDefault ? '<button class="btn-danger" onclick="deleteDripper(\'' + k + '\')">Remove</button>' : '');
       container.appendChild(item);
     }
   }
@@ -890,9 +888,9 @@ function renderPantry() {
       '<div><b>Hot Dial:</b> C3S: ' + c.c3sHot + ' clk | ZP6: ' + c.zp6Hot + ' @ ' + c.hotTemp + '°C</div>' +
       '</div>' +
       '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
-      '<button class="btn" style="flex:2;" onclick="brewSpecificCoffee(\\'' + c.id + '\\')">⚡ Dial-In</button>' +
-      '<button class="btn-archive" title="Move out of Pantry into Master Vault history" onclick="archiveBag(\\'' + c.id + '\\')">Finish Bag</button>' +
-      '<button class="btn-danger" title="Delete completely" onclick="deleteCoffeePermanently(\\'' + c.id + '\\')">Delete</button>' +
+      '<button class="btn" style="flex:2;" onclick="brewSpecificCoffee(\'' + c.id + '\')">⚡ Dial-In</button>' +
+      '<button class="btn-archive" title="Move out of Pantry into Master Vault history" onclick="archiveBag(\'' + c.id + '\')">Finish Bag</button>' +
+      '<button class="btn-danger" title="Delete completely" onclick="deleteCoffeePermanently(\'' + c.id + '\')">Delete</button>' +
       '</div>';
     grid.appendChild(card);
   }
@@ -1033,9 +1031,9 @@ function renderTriedCafes() {
       '<div>' + storedDrippers[t.defaultBrewer].name + ' | ' + t.c3sHot + ' C3S / ' + t.zp6Hot + ' ZP6 @ ' + t.hotTemp + '°C</div>' +
       '</div>' +
       '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
-      '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\\'' + t.id + '\\')">⚡ Get Recipe</button>' +
-      '<button class="btn" style="background:var(--green); flex:1.2;" onclick="graduateTriedToPantry(\\'' + t.id + '\\')">🛍️ Bought Bag (Add to Pantry)</button>' +
-      '<button class="btn-danger" onclick="deleteTriedCoffee(\\'' + t.id + '\\')">✕</button>' +
+      '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\'' + t.id + '\')">⚡ Get Recipe</button>' +
+      '<button class="btn" style="background:var(--green); flex:1.2;" onclick="graduateTriedToPantry(\'' + t.id + '\')">🛍️ Bought Bag (Add to Pantry)</button>' +
+      '<button class="btn-danger" onclick="deleteTriedCoffee(\'' + t.id + '\')">✕</button>' +
       '</div>';
     grid.appendChild(card);
   }
@@ -1129,8 +1127,8 @@ function renderMasterVault() {
       '<p style="font-size:12px; color:var(--blue); margin-bottom:8px;">Varietal: ' + (c.varietal || 'Specialty Arabica') + '</p>' +
       '<p style="font-size:12px; color:var(--purple); font-style:italic; margin-bottom:12px;">Notes: ' + c.notes + '</p>' +
       '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
-      '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\\'' + c.id + '\\')">⚡ Get Recipe</button>' +
-      (!c.inPantry ? '<button class="btn" style="background:var(--green); flex:1;" onclick="restockToPantry(\\'' + c.id + '\\')">➕ Restock to Pantry</button>' : '') +
+      '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\'' + c.id + '\')">⚡ Get Recipe</button>' +
+      (!c.inPantry ? '<button class="btn" style="background:var(--green); flex:1;" onclick="restockToPantry(\'' + c.id + '\')">➕ Restock to Pantry</button>' : '') +
       '</div>';
     grid.appendChild(card);
   }
@@ -1536,8 +1534,8 @@ function renderSavedRecipes() {
       '<p style="font-size:12px; color:var(--blue);">' + (r.brewerName || 'Dripper') + ' • ' + (r.dose || 15) + 'g dose • ' + (r.temp || 92) + '°C</p>' +
       '</div>' +
       '<div style="display:flex; gap:6px;">' +
-      '<button class="btn" style="padding:6px 12px; font-size:11px;" onclick="loadSavedRecipeIntoEngine(\\'' + r.id + '\\')">🚀 Load & Brew</button>' +
-      '<button class="btn-danger" onclick="deleteSavedRecipe(\\'' + r.id + '\\')">Delete</button>' +
+      '<button class="btn" style="padding:6px 12px; font-size:11px;" onclick="loadSavedRecipeIntoEngine(\'' + r.id + '\')">🚀 Load & Brew</button>' +
+      '<button class="btn-danger" onclick="deleteSavedRecipe(\'' + r.id + '\')">Delete</button>' +
       '</div>' +
       '</div>' +
       '<div style="background:#10111a; padding:8px 10px; border-radius:6px; font-size:12px; color:var(--text-sub); margin-bottom:8px;">' +
@@ -1551,9 +1549,6 @@ function renderSavedRecipes() {
   container.innerHTML = html;
 }
 
-// ==========================================
-// TIMER & REAL-TIME BREW SCHEDULE
-// ==========================================
 var timerInterval = null;
 var timerSeconds = 0;
 var isTimerRunning = false;
