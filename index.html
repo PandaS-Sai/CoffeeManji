@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coffee Lab OS - Daily Brewing & Live Pantry Protocol</title>
+<title>Coffee Lab OS - Daily Brewing, Master Vault & Pantry Protocol</title>
 <style>
   :root {
     --bg: #090a0f;
@@ -15,6 +15,8 @@
     --blue: #38bdf8;
     --green: #10b981;
     --purple: #a78bfa;
+    --pink: #f43f5e;
+    --yellow: #facc15;
     --text-main: #f8fafc;
     --text-sub: #94a3b8;
   }
@@ -38,19 +40,19 @@
   .brand h1 { font-size: 15px; font-weight: 800; letter-spacing: -0.5px; }
   .brand span { font-size: 10px; background: rgba(217, 119, 6, 0.2); color: var(--accent-light); padding: 2px 6px; border-radius: 4px; font-weight: 600; }
   
-  .nav-tabs { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; margin-top: 6px; }
+  .nav-tabs { display: flex; gap: 5px; flex-wrap: wrap; width: 100%; margin-top: 6px; }
   .tab-btn {
     background: #191a27;
     border: 1px solid var(--border);
     color: var(--text-sub);
-    padding: 8px 12px;
+    padding: 8px 10px;
     border-radius: 8px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     flex: 1;
     text-align: center;
-    min-width: 75px;
+    min-width: 65px;
   }
   .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
@@ -58,7 +60,7 @@
   .app-section { display: none; }
   .app-section.active { display: block; }
 
-  /* Precision Flow Brew Assistant / Timer Hero */
+  /* Hero Timer */
   .brew-hero {
     background: linear-gradient(180deg, #161826 0%, #10111a 100%);
     border: 1px solid #2e334d;
@@ -185,7 +187,10 @@
   .badge-light { background: #78350f; color: #fde68a; }
   .badge-med { background: #065f46; color: #a7f3d0; }
   .badge-dark { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
-  
+  .badge-interloper { background: #831843; color: #fbcfe8; border: 1px solid #be185d; }
+  .badge-archive { background: #334155; color: #94a3b8; }
+  .badge-cafe { background: #1e1b4b; color: #c7d2fe; border: 1px solid #4338ca; }
+
   .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 14px; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
 
@@ -209,7 +214,9 @@
     cursor: pointer;
   }
   .btn-sec { background: #26293d; color: var(--text-main); }
+  .btn-archive { background: #475569; color: white; padding: 4px 8px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; }
   .btn-danger { background: #991b1b; color: white; padding: 4px 8px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; }
+  .btn-interloper { background: #be185d; color: white; padding: 6px 12px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; }
   .arsenal-item { background: #191b28; border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 
   .saved-recipe-card {
@@ -219,6 +226,20 @@
     padding: 14px;
     margin-bottom: 12px;
   }
+
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #1a1d2e;
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+  }
+  .chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .chip-interloper.active { background: #be185d; color: white; border-color: #be185d; }
 </style>
 </head>
 <body>
@@ -226,12 +247,14 @@
 <div class="navbar">
   <div class="brand">
     <h1>☕ COFFEE LAB OS</h1>
-    <span>Sai' Competition Lab</span>
+    <span id="userModeBadge">Sai' Competition Lab</span>
   </div>
   <div class="nav-tabs">
-    <button class="tab-btn active" id="btn-recipeEngine" onclick="switchTab('recipeEngine')">⏱️ Brew Assistant</button>
-    <button class="tab-btn" id="btn-savedRecipesTab" onclick="switchTab('savedRecipesTab')">⭐ Saved Recipes</button>
+    <button class="tab-btn active" id="btn-recipeEngine" onclick="switchTab('recipeEngine')">⏱️ Brew</button>
     <button class="tab-btn" id="btn-livePantry" onclick="switchTab('livePantry')">📋 Pantry</button>
+    <button class="tab-btn" id="btn-cafeLogTab" onclick="switchTab('cafeLogTab')">☕ Tried / Cafés</button>
+    <button class="tab-btn" id="btn-masterVaultTab" onclick="switchTab('masterVaultTab')">📦 Master Vault</button>
+    <button class="tab-btn" id="btn-savedRecipesTab" onclick="switchTab('savedRecipesTab')">⭐ Recipes</button>
     <button class="tab-btn" id="btn-equipmentTab" onclick="switchTab('equipmentTab')">⚙️ Arsenal</button>
     <button class="tab-btn" id="btn-addCoffeeTab" onclick="switchTab('addCoffeeTab')">➕ Add Bean</button>
   </div>
@@ -241,7 +264,6 @@
 
   <!-- TAB 1: BREW ASSISTANT & RECIPE BUILDER -->
   <div id="recipeEngine" class="app-section active">
-    
     <div class="brew-hero">
       <div class="timer-display-box">
         <div>
@@ -265,7 +287,6 @@
       </div>
     </div>
 
-    <!-- Parameter Config & Real-Time Scale Ticker -->
     <div class="calc-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
         <div>
@@ -277,7 +298,7 @@
 
       <div class="control-grid">
         <div class="control-group">
-          <label>Select Coffee</label>
+          <label>Select Coffee (Pantry, Tried, or Vault)</label>
           <select id="calcCoffeeSelect" onchange="calculateRecipe()"></select>
         </div>
 
@@ -314,12 +335,73 @@
     </div>
   </div>
 
-  <!-- TAB 2: SAVED RECIPES LIBRARY -->
+  <!-- TAB 2: LIVE PANTRY -->
+  <div id="livePantry" class="app-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+      <div>
+        <h2 style="font-size:18px; font-weight:800;">📋 Active Live Bean Pantry</h2>
+        <p style="font-size:12px; color:var(--text-sub);">Bags currently open on your coffee bar with rest timers</p>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn" style="background:#0284c7;" onclick="openSyncModal()">🔄 Sync & Share</button>
+        <button class="btn" onclick="switchTab('addCoffeeTab')">+ Add Bean</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="chip active" id="pantryFilter-all" onclick="filterPantry('all')">All Active</div>
+      <div class="chip" id="pantryFilter-lab" onclick="filterPantry('lab')">Sai' Lab Reserve</div>
+      <div class="chip chip-interloper" id="pantryFilter-interloper" onclick="filterPantry('interloper')">Interloper Only</div>
+    </div>
+
+    <div class="grid-3" id="pantryGrid"></div>
+  </div>
+
+  <!-- TAB 3: CAFÉ & TRIED LOG (NEW TASTING PASSPORT) -->
+  <div id="cafeLogTab" class="app-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+      <div>
+        <h2 style="font-size:18px; font-weight:800;">☕ Café Tastings & Tried Log</h2>
+        <p style="font-size:12px; color:var(--text-sub);">Log specials drank at cafés or international roasters (No roast dates needed!)</p>
+      </div>
+      <button class="btn" style="background:#4338ca;" onclick="openQuickCafeModal()">➕ Log a Café / Tried Coffee</button>
+    </div>
+
+    <div class="filter-bar">
+      <div class="chip active" id="triedFilter-all" onclick="filterTried('all')">All Tried</div>
+      <div class="chip" id="triedFilter-high" onclick="filterTried('5star')">5-Star Favorites</div>
+      <div class="chip chip-interloper" id="triedFilter-interloper" onclick="filterTried('interloper')">Interloper Recommendations</div>
+    </div>
+
+    <div class="grid-3" id="triedGrid"></div>
+  </div>
+
+  <!-- TAB 4: MASTER INVENTORY VAULT -->
+  <div id="masterVaultTab" class="app-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+      <div>
+        <h2 style="font-size:18px; font-weight:800;">📦 Master Inventory Vault</h2>
+        <p style="font-size:12px; color:var(--text-sub);">Full historical record of every bean logged, drank, or shared</p>
+      </div>
+      <button class="btn" style="background:#0284c7;" onclick="openSyncModal()">🔄 Sync & Share Data</button>
+    </div>
+
+    <div class="filter-bar">
+      <div class="chip active" id="vaultFilter-all" onclick="filterVault('all')">All Records</div>
+      <div class="chip" id="vaultFilter-active" onclick="filterVault('active')">Currently In Pantry</div>
+      <div class="chip" id="vaultFilter-finished" onclick="filterVault('finished')">Archived / Finished</div>
+      <div class="chip chip-interloper" id="vaultFilter-interloper" onclick="filterVault('interloper')">Interloper Records</div>
+    </div>
+
+    <div class="grid-3" id="vaultGrid"></div>
+  </div>
+
+  <!-- TAB 5: SAVED RECIPES LIBRARY -->
   <div id="savedRecipesTab" class="app-section">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
       <div>
-        <h2 style="font-size:18px; font-weight:800;">⭐ My Saved Recipes Library</h2>
-        <p style="font-size:12px; color:var(--text-sub);">Custom dial-in profiles with saved pour schedule, grind, and temperature</p>
+        <h2 style="font-size:18px; font-weight:800;">⭐ Saved Recipes Library</h2>
+        <p style="font-size:12px; color:var(--text-sub);">Custom dial-in profiles with saved pour schedules, clicks, and temperatures</p>
       </div>
       <button class="btn" onclick="openNewRecipeModal()">➕ Create Detailed Recipe</button>
     </div>
@@ -327,16 +409,7 @@
     <div id="savedRecipesContainer"></div>
   </div>
 
-  <!-- TAB 3: LIVE PANTRY -->
-  <div id="livePantry" class="app-section">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-      <h2 style="font-size:18px; font-weight:800;">📋 Live Bean Pantry</h2>
-      <button class="btn" onclick="switchTab('addCoffeeTab')">+ Add Bean</button>
-    </div>
-    <div class="grid-3" id="pantryGrid"></div>
-  </div>
-
-  <!-- TAB 4: ARSENAL -->
+  <!-- TAB 6: ARSENAL -->
   <div id="equipmentTab" class="app-section">
     <h2 style="font-size:18px; font-weight:800; margin-bottom:12px;">⚙️ Equipment Arsenal</h2>
     <div class="calc-box">
@@ -362,10 +435,15 @@
     </div>
   </div>
 
-  <!-- TAB 5: ADD BEAN -->
+  <!-- TAB 7: ADD BEAN (PANTRY OR VAULT) -->
   <div id="addCoffeeTab" class="app-section">
     <div class="calc-box" style="max-width:600px; margin:0 auto;">
-      <h2 style="font-size:16px; font-weight:800; margin-bottom:8px;">➕ Add Coffee Lot</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 style="font-size:16px; font-weight:800;">➕ Add Coffee Lot to Pantry</h2>
+        <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--pink);">
+          <input type="checkbox" id="addAsInterloper" style="width:auto;"> Tag as <b>Interloper</b>
+        </label>
+      </div>
       <p style="font-size:12px; color:var(--text-sub); margin-bottom:14px;">Enter basic bag specs. The engine automatically computes optimal dripper, grind sizes, and temperatures.</p>
       
       <div class="control-group" style="margin-bottom:10px;">
@@ -373,8 +451,8 @@
         <input type="text" id="addName" placeholder="e.g. Melkodige Obata or Ratnagiri Lot 12">
       </div>
       <div class="control-group" style="margin-bottom:10px;">
-        <label>Roaster</label>
-        <input type="text" id="addRoaster" placeholder="e.g. Subko, Grey Soul, Broot, Blue Tokai">
+        <label>Roaster / Origin</label>
+        <input type="text" id="addRoaster" placeholder="e.g. Subko, Grey Soul, Sey, April, Tim Wendelboe">
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Roast Level</label>
@@ -392,7 +470,7 @@
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Varietal</label>
-        <input type="text" id="addVarietal" placeholder="e.g. Obata, SLN 795, Peaberry, Robusta">
+        <input type="text" id="addVarietal" placeholder="e.g. Obata, SLN 795, Geisha, Bourbon">
       </div>
       <div class="control-group" style="margin-bottom:10px;">
         <label>Roast Date</label>
@@ -402,10 +480,86 @@
         <label>Tasting Notes</label>
         <input type="text" id="addNotes" placeholder="e.g. Mango, Jasmine, Plum, Fudge">
       </div>
-      <button class="btn" style="width:100%; padding:12px;" onclick="saveNewCoffee()">Save to Live Pantry</button>
+      <button class="btn" style="width:100%; padding:12px;" onclick="saveNewCoffee()">Save to Live Pantry & Master Vault</button>
     </div>
   </div>
 
+</div>
+
+<!-- QUICK CAFÉ / TRIED LOG MODAL (NO ROAST DATE REQUIRED) -->
+<div id="quickCafeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; padding:20px; overflow-y:auto;">
+  <div class="calc-box" style="max-width:600px; margin:30px auto; background:#141624; border:1px solid #4338ca;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div>
+        <h3 style="font-size:16px; font-weight:800; color:#c7d2fe;">☕ Log Café Tasting or Brand Special</h3>
+        <p style="font-size:11.5px; color:var(--text-sub);">Drank a cup at a coffee shop or cupping? Log it even with partial info.</p>
+      </div>
+      <button onclick="closeQuickCafeModal()" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
+    </div>
+
+    <div class="control-group" style="margin-bottom:10px;">
+      <label>Coffee Name / Lot</label>
+      <input type="text" id="cafeCoffeeName" placeholder="e.g. Sey Colombia Pink Bourbon or Subko Project Pearl">
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+      <div class="control-group">
+        <label>Café / Roaster Brand</label>
+        <input type="text" id="cafeRoaster" placeholder="e.g. Roastery Coffee House, Sey, Tim Wendelboe">
+      </div>
+      <div class="control-group">
+        <label>Origin / Region</label>
+        <input type="text" id="cafeOrigin" placeholder="e.g. Huila Colombia, Yirgacheffe, Chikmagalur">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+      <div class="control-group">
+        <label>Roast Level (Best Guess)</label>
+        <select id="cafeRoast">
+          <option value="Light (Specialty Nordic/Ultra)">Light / Nordic Ultra-Light</option>
+          <option value="Medium-Light" selected>Medium-Light (Standard Specialty)</option>
+          <option value="Medium">Medium (Balanced)</option>
+          <option value="Medium-Dark / Dark">Medium-Dark / Dark</option>
+          <option value="Unknown">Unknown (Auto-tune to 93°C)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Processing (If Known)</label>
+        <input type="text" id="cafeProcess" placeholder="e.g. Washed, Anaerobic, Natural (or leave blank)">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+      <div class="control-group">
+        <label>My Rating</label>
+        <select id="cafeRating">
+          <option value="5">⭐⭐⭐⭐⭐ Outstanding (Must buy bag!)</option>
+          <option value="4" selected>⭐⭐⭐⭐ Very Good</option>
+          <option value="3">⭐⭐⭐ Decent / Standard</option>
+          <option value="2">⭐⭐ Not for me</option>
+          <option value="1">⭐ Flawed</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Tag as Interloper Recommendation?</label>
+        <select id="cafeSource">
+          <option value="lab">My Tasting (Sai' Lab)</option>
+          <option value="interloper">Friend / Interloper Shared</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group" style="margin-bottom:16px;">
+      <label>Flavor Notes / Cup Impressions</label>
+      <input type="text" id="cafeNotes" placeholder="e.g. Bergamot, high tea clarity, peach candy finish">
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn" style="flex:1; background:#4338ca;" onclick="saveCafeTastingLog()">Save to Tried Passport</button>
+      <button class="btn btn-sec" onclick="closeQuickCafeModal()">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <!-- DETAILED RECIPE CREATOR MODAL -->
@@ -473,19 +627,47 @@
   </div>
 </div>
 
+<!-- SYNC & SHARE MODAL -->
+<div id="syncModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; padding:20px; overflow-y:auto;">
+  <div class="calc-box" style="max-width:650px; margin:30px auto; background:#141624; border:1px solid #333852;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="font-size:16px; font-weight:800;">🔄 Multi-Device Sync & Interloper Bridge</h3>
+      <button onclick="closeSyncModal()" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
+    </div>
+
+    <p style="font-size:12px; color:var(--text-sub); margin-bottom:14px;">
+      Because GitHub Pages runs directly on each person's phone, use this bridge to share your Master Vault or import beans and recipes created by other people (Interlopers).
+    </p>
+
+    <div style="margin-bottom:16px;">
+      <button class="btn" style="width:100%; background:#0284c7; padding:11px;" onclick="generateExportBundle()">📤 Generate My Share / Export Code</button>
+      <textarea id="syncExportText" rows="3" readonly style="margin-top:8px; font-size:11px; font-family:monospace; display:none;" placeholder="Your bundle code will appear here..."></textarea>
+    </div>
+
+    <div style="border-top:1px solid var(--border); padding-top:14px; margin-bottom:16px;">
+      <h4 style="font-size:13px; font-weight:700; margin-bottom:6px; color:var(--pink);">📥 Import Interloper / External Beans & Recipes</h4>
+      <p style="font-size:11.5px; color:var(--text-sub); margin-bottom:8px;">Paste sync code from another person. All imported beans will be tagged with <b>[Interloper]</b> automatically!</p>
+      <textarea id="syncImportText" rows="3" style="font-size:11px; font-family:monospace;" placeholder="Paste sync code here..."></textarea>
+      <button class="btn btn-interloper" style="width:100%; margin-top:8px; padding:11px;" onclick="importSyncBundle()">Merge as [Interloper] Data</button>
+    </div>
+
+    <button class="btn btn-sec" style="width:100%;" onclick="closeSyncModal()">Close</button>
+  </div>
+</div>
+
 <script>
 var defaultCoffees = [
-  { id: "subko-ratnagiri", name: "Subko - Ratnagiri Estate (Pearl)", roaster: "Subko", roast: "Ultra-Light", process: "Culture Naturals + Anaerobic", varietal: "Catuai & Hemavathi", roastDate: "2026-08-28", defaultBrewer: "origami", notes: "Marigold, Dragon Fruit, Peach Iced-Tea", hotTemp: 92, hotRatio: 17, c3sHot: 13, zp6Hot: 4.2, flowNote: "Origami flutes maximize peach florals while bypassing heavy ferment funk." },
-  { id: "pink-lemonade", name: "Grey Soul - Pink Lemonade (#5)", roaster: "Grey Soul", roast: "Ultra-Light", process: "Sun-Dried Anaerobic Natural", varietal: "Specialty Arabica Lot #5", roastDate: "2026-08-25", defaultBrewer: "origami", notes: "Candied Strawberry, Citrus Malic, Fig Base", hotTemp: 96, hotRatio: 15, c3sHot: 11, zp6Hot: 3.9, flowNote: "Dense cells require near-boiling water (96-97°C) & 5 pulses to dissolve berry sugars." },
-  { id: "broot-sur-lie", name: "Broot - SUR LIE (Melkodige)", roaster: "Broot Coffee", roast: "Medium-Light", process: "Wine Yeast Anoxic Natural", varietal: "Obata", roastDate: "2026-09-03", defaultBrewer: "origami", notes: "Red Grape, Dried Fig, Jasmine Lift, Wine Finish", hotTemp: 92, hotRatio: 16.3, c3sHot: 13, zp6Hot: 4.3, flowNote: "Origami fast drain lets delicate wine yeast jasmine & grape volatiles lift cleanly." },
-  { id: "moss-theory", name: "Broot - Moss Theory (Kerehaklu)", roaster: "Broot Coffee", roast: "Medium-Light", process: "Extended Aerobic SLN9 Peaberry", varietal: "SLN9 Peaberry", roastDate: "2026-08-26", defaultBrewer: "neo", notes: "Golden Mango, Pink Guava Nectar, Syrupy Body", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.5, flowNote: "Neo V60 rapid spiral channels accelerate tropical mango extraction on peaberries." },
-  { id: "salawara-estate", name: "Blue Tokai - Salawara Estate", roaster: "Blue Tokai", roast: "Light", process: "Anaerobic Natural", varietal: "SLN 795", roastDate: "2026-08-20", defaultBrewer: "ceramic", notes: "Crisp Red Apple, Stewed Pear, Toasted Almond", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.4, flowNote: "Ceramic V60 converts malic apple acidity into baked, sweet caramel warmth." },
+  { id: "subko-ratnagiri", name: "Subko - Ratnagiri Estate (Pearl)", roaster: "Subko", roast: "Ultra-Light", process: "Culture Naturals + Anaerobic", varietal: "Catuai & Hemavathi", roastDate: "2026-08-28", defaultBrewer: "origami", notes: "Marigold, Dragon Fruit, Peach Iced-Tea", hotTemp: 92, hotRatio: 17, c3sHot: 13, zp6Hot: 4.2, inPantry: true, source: "lab", flowNote: "Origami flutes maximize peach florals while bypassing heavy ferment funk." },
+  { id: "pink-lemonade", name: "Grey Soul - Pink Lemonade (#5)", roaster: "Grey Soul", roast: "Ultra-Light", process: "Sun-Dried Anaerobic Natural", varietal: "Specialty Arabica Lot #5", roastDate: "2026-08-25", defaultBrewer: "origami", notes: "Candied Strawberry, Citrus Malic, Fig Base", hotTemp: 96, hotRatio: 15, c3sHot: 11, zp6Hot: 3.9, inPantry: true, source: "lab", flowNote: "Dense cells require near-boiling water (96-97°C) & 5 pulses to dissolve berry sugars." },
+  { id: "broot-sur-lie", name: "Broot - SUR LIE (Melkodige)", roaster: "Broot Coffee", roast: "Medium-Light", process: "Wine Yeast Anoxic Natural", varietal: "Obata", roastDate: "2026-09-03", defaultBrewer: "origami", notes: "Red Grape, Dried Fig, Jasmine Lift, Wine Finish", hotTemp: 92, hotRatio: 16.3, c3sHot: 13, zp6Hot: 4.3, inPantry: true, source: "lab", flowNote: "Origami fast drain lets delicate wine yeast jasmine & grape volatiles lift cleanly." },
+  { id: "moss-theory", name: "Broot - Moss Theory (Kerehaklu)", roaster: "Broot Coffee", roast: "Medium-Light", process: "Extended Aerobic SLN9 Peaberry", varietal: "SLN9 Peaberry", roastDate: "2026-08-26", defaultBrewer: "neo", notes: "Golden Mango, Pink Guava Nectar, Syrupy Body", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.5, inPantry: true, source: "lab", flowNote: "Neo V60 rapid spiral channels accelerate tropical mango extraction on peaberries." },
+  { id: "salawara-estate", name: "Blue Tokai - Salawara Estate", roaster: "Blue Tokai", roast: "Light", process: "Anaerobic Natural", varietal: "SLN 795", roastDate: "2026-08-20", defaultBrewer: "ceramic", notes: "Crisp Red Apple, Stewed Pear, Toasted Almond", hotTemp: 92, hotRatio: 16, c3sHot: 14, zp6Hot: 4.4, inPantry: true, source: "lab", flowNote: "Ceramic V60 converts malic apple acidity into baked, sweet caramel warmth." },
   { id: "raxidi-lobo", name: "Roastery - Raxidi Lobo Estate", roaster: "Roastery Coffee", roast: "Medium", process: "5B Block Anaerobic Natural", varietal: "SLN 5B", roastDate: "2026-08-18", defaultBrewer: "origami", notes: "Dark Cherry Jam, Boozy Plum, Cocoa, Grapefruit", hotTemp: 90, hotRatio: 16, c3sHot: 14, zp6Hot: 4.8, flowNote: "Origami prevents stalling; center laminar stream skips bitter tannins." },
-  { id: "mizoram-reserve", name: "Grey Soul - Mizoram Reserve (#4)", roaster: "Grey Soul", roast: "Medium-Dark", process: "Sun-Dried Natural", varietal: "Regional Natural Lot", roastDate: "2026-08-15", defaultBrewer: "balloon", notes: "Watermelon Candy, Ripe Plum, Hazelnut Cocoa", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.2, flowNote: "Balloon glass bulb enhances body, pulling out juicy watermelon candy sweetness." },
+  { id: "mizoram-reserve", name: "Grey Soul - Mizoram Reserve (#4)", roaster: "Grey Soul", roast: "Medium-Dark", process: "Sun-Dried Natural", varietal: "Regional Natural Lot", roastDate: "2026-08-15", defaultBrewer: "balloon", notes: "Watermelon Candy, Ripe Plum, Hazelnut Cocoa", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.2, inPantry: true, source: "lab", flowNote: "Balloon glass bulb enhances body, pulling out juicy watermelon candy sweetness." },
   { id: "sholiga", name: "Veer Attikan - Sholiga", roaster: "Veer Attikan", roast: "Light-Medium", process: "Washed Arabica", varietal: "Single Origin BR Hills", roastDate: "2026-08-10", defaultBrewer: "ceramic", notes: "Honeyed Jackfruit, Dried Dates, Brown Sugar", hotTemp: 91, hotRatio: 16, c3sHot: 15, zp6Hot: 4.8, flowNote: "Uniform concentric spirals in ceramic cone give comforting dates and brown sugar." },
-  { id: "bold-edition", name: "Bold Edition #2", roaster: "Specialty Roasters", roast: "Dark", process: "Salawara Honey / Washed", varietal: "Specialty Dark Blend", roastDate: "2026-08-12", defaultBrewer: "kalita", notes: "Dark Fudge, Molasses, Stewed Plum, Zero Ash", hotTemp: 88, hotRatio: 15, c3sHot: 17, zp6Hot: 5.8, flowNote: "Kalita 102 wedge with oval racetrack pour and 88°C water pulls dense fudge." },
-  { id: "ph-seven-robusta", name: "PH-Seven - 100% Robusta-AA", roaster: "PH-Seven", roast: "Medium-Dark", process: "High-Grown Washed Robusta", varietal: "Robusta-AA", roastDate: "2026-08-05", defaultBrewer: "kalita", notes: "Dark Cacao, Clove, Nutmeg, Velvety Crema", hotTemp: 87, hotRatio: 14, c3sHot: 17, zp6Hot: 6.0, flowNote: "Low temp (87°C) & short ratio (1:14) extract warm baking spices without ash." },
-  { id: "tim-hortons-signature", name: "Tim Hortons - Signature India", roaster: "Tim Hortons", roast: "Medium", process: "Commercial Washed Blend", varietal: "Whole Bean Blend", roastDate: "2026-08-01", defaultBrewer: "neo", notes: "Milk Chocolate, Toasted Cereal, Mellow Acidity", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.0, flowNote: "Amber Neo V60 flutes flush out clean morning chocolate without bitter over-steep." }
+  { id: "bold-edition", name: "Bold Edition #2", roaster: "Specialty Roasters", roast: "Dark", process: "Salawara Honey / Washed", varietal: "Specialty Dark Blend", roastDate: "2026-08-12", defaultBrewer: "kalita", notes: "Dark Fudge, Molasses, Stewed Plum, Zero Ash", hotTemp: 88, hotRatio: 15, c3sHot: 17, zp6Hot: 5.8, inPantry: true, source: "lab", flowNote: "Kalita 102 wedge with oval racetrack pour and 88°C water pulls dense fudge." },
+  { id: "ph-seven-robusta", name: "PH-Seven - 100% Robusta-AA", roaster: "PH-Seven", roast: "Medium-Dark", process: "High-Grown Washed Robusta", varietal: "Robusta-AA", roastDate: "2026-08-05", defaultBrewer: "kalita", notes: "Dark Cacao, Clove, Nutmeg, Velvety Crema", hotTemp: 87, hotRatio: 14, c3sHot: 17, zp6Hot: 6.0, inPantry: true, source: "lab", flowNote: "Low temp (87°C) & short ratio (1:14) extract warm baking spices without ash." },
+  { id: "tim-hortons-signature", name: "Tim Hortons - Signature India", roaster: "Tim Hortons", roast: "Medium", process: "Commercial Washed Blend", varietal: "Whole Bean Blend", roastDate: "2026-08-01", defaultBrewer: "neo", notes: "Milk Chocolate, Toasted Cereal, Mellow Acidity", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.0, inPantry: true, source: "lab", flowNote: "Amber Neo V60 flutes flush out clean morning chocolate without bitter over-steep." }
 ];
 
 var defaultDrippers = {
@@ -499,21 +681,46 @@ var defaultDrippers = {
 var storedCoffees = defaultCoffees.slice();
 var storedDrippers = Object.assign({}, defaultDrippers);
 var savedCustomRecipes = [];
+var triedCafeCoffees = [];
 
 try {
-  var c = localStorage.getItem('sai_coffees_v5');
-  if (c) storedCoffees = JSON.parse(c);
-  var d = localStorage.getItem('sai_drippers_v5');
+  var c = localStorage.getItem('sai_master_coffees_v7');
+  if (c) {
+    storedCoffees = JSON.parse(c);
+  } else {
+    var oldC = localStorage.getItem('sai_master_coffees_v6') || localStorage.getItem('sai_coffees_v5');
+    if (oldC) {
+      storedCoffees = JSON.parse(oldC);
+      for (var i = 0; i < storedCoffees.length; i++) {
+        if (storedCoffees[i].inPantry === undefined) storedCoffees[i].inPantry = true;
+        if (!storedCoffees[i].source) storedCoffees[i].source = "lab";
+      }
+    }
+  }
+  var d = localStorage.getItem('sai_drippers_v7');
   if (d) storedDrippers = JSON.parse(d);
-  var r = localStorage.getItem('sai_saved_recipes_v1');
+  var r = localStorage.getItem('sai_saved_recipes_v7');
   if (r) savedCustomRecipes = JSON.parse(r);
+  var t = localStorage.getItem('sai_tried_cafes_v7');
+  if (t) triedCafeCoffees = JSON.parse(t);
 } catch(err) {}
+
+var isInterloperDevice = window.location.search.indexOf('mode=interloper') !== -1;
+if (isInterloperDevice) {
+  setTimeout(function() {
+    var b = document.getElementById('userModeBadge');
+    if (b) { b.textContent = "Interloper Station"; b.style.background = "rgba(190, 24, 93, 0.3)"; b.style.color = "#fbcfe8"; }
+    var chk = document.getElementById('addAsInterloper');
+    if (chk) chk.checked = true;
+  }, 100);
+}
 
 function saveState() {
   try {
-    localStorage.setItem('sai_coffees_v5', JSON.stringify(storedCoffees));
-    localStorage.setItem('sai_drippers_v5', JSON.stringify(storedDrippers));
-    localStorage.setItem('sai_saved_recipes_v1', JSON.stringify(savedCustomRecipes));
+    localStorage.setItem('sai_master_coffees_v7', JSON.stringify(storedCoffees));
+    localStorage.setItem('sai_drippers_v7', JSON.stringify(storedDrippers));
+    localStorage.setItem('sai_saved_recipes_v7', JSON.stringify(savedCustomRecipes));
+    localStorage.setItem('sai_tried_cafes_v7', JSON.stringify(triedCafeCoffees));
   } catch(err) {}
 }
 
@@ -528,6 +735,9 @@ function switchTab(tabId) {
   var targetBtn = document.getElementById('btn-' + tabId);
   if (targetBtn) targetBtn.classList.add('active');
 
+  if (tabId === 'livePantry') renderPantry();
+  if (tabId === 'cafeLogTab') renderTriedCafes();
+  if (tabId === 'masterVaultTab') renderMasterVault();
   if (tabId === 'savedRecipesTab') renderSavedRecipes();
 }
 
@@ -559,13 +769,36 @@ function renderCoffeeDropdown() {
   var select = document.getElementById('calcCoffeeSelect');
   if (!select) return;
   select.innerHTML = '';
+
+  var optGroupPantry = document.createElement('optgroup');
+  optGroupPantry.label = "── In Live Pantry ──";
+  var optGroupTried = document.createElement('optgroup');
+  optGroupTried.label = "── Tried / Café Passport ──";
+  var optGroupVault = document.createElement('optgroup');
+  optGroupVault.label = "── Master Vault (Past / Archive) ──";
+
   for (var i = 0; i < storedCoffees.length; i++) {
     var c = storedCoffees[i];
     var opt = document.createElement('option');
     opt.value = c.id;
-    opt.textContent = c.name + " (" + c.roast + ")";
-    select.appendChild(opt);
+    var prefix = c.source === 'interloper' ? "[Interloper] " : "";
+    opt.textContent = prefix + c.name + " (" + c.roast + ")";
+    if (c.inPantry) optGroupPantry.appendChild(opt);
+    else optGroupVault.appendChild(opt);
   }
+
+  for (var j = 0; j < triedCafeCoffees.length; j++) {
+    var t = triedCafeCoffees[j];
+    var tOpt = document.createElement('option');
+    tOpt.value = t.id;
+    var tPrefix = t.source === 'interloper' ? "[Interloper] " : "";
+    tOpt.textContent = "☕ " + tPrefix + t.name + " (" + t.roaster + ")";
+    optGroupTried.appendChild(tOpt);
+  }
+
+  select.appendChild(optGroupPantry);
+  if (optGroupTried.children.length > 0) select.appendChild(optGroupTried);
+  if (optGroupVault.children.length > 0) select.appendChild(optGroupVault);
 }
 
 function renderEquipmentList() {
@@ -578,7 +811,7 @@ function renderEquipmentList() {
       item.className = 'arsenal-item';
       var isDefault = defaultDrippers.hasOwnProperty(k);
       item.innerHTML = '<div><b>' + storedDrippers[k].name + '</b> <span style="font-size:11px; color:var(--text-sub); margin-left:8px;">[' + storedDrippers[k].flow + ' flow]</span></div>' +
-        (!isDefault ? '<button class="btn-danger" onclick="deleteDripper(\'' + k + '\')">Remove</button>' : '');
+        (!isDefault ? '<button class="btn-danger" onclick="deleteDripper(\\'' + k + '\\')">Remove</button>' : '');
       container.appendChild(item);
     }
   }
@@ -607,14 +840,31 @@ function deleteDripper(k) {
   }
 }
 
+var activePantryFilter = 'all';
+
+function filterPantry(type) {
+  activePantryFilter = type;
+  document.querySelectorAll('#livePantry .chip').forEach(function(c) { c.classList.remove('active'); });
+  var activeChip = document.getElementById('pantryFilter-' + type);
+  if (activeChip) activeChip.classList.add('active');
+  renderPantry();
+}
+
 function renderPantry() {
   var grid = document.getElementById('pantryGrid');
   if (!grid) return;
   grid.innerHTML = '';
   var now = new Date();
 
+  var count = 0;
   for (var i = 0; i < storedCoffees.length; i++) {
     var c = storedCoffees[i];
+    if (!c.inPantry) continue;
+
+    if (activePantryFilter === 'lab' && c.source === 'interloper') continue;
+    if (activePantryFilter === 'interloper' && c.source !== 'interloper') continue;
+
+    count++;
     var rDate = new Date(c.roastDate);
     var diff = Math.floor((now - rDate) / (1000 * 60 * 60 * 24));
     var badgeClass = 'badge-med';
@@ -624,25 +874,285 @@ function renderPantry() {
     var card = document.createElement('div');
     card.className = 'card';
     var dripperName = storedDrippers[c.defaultBrewer] ? storedDrippers[c.defaultBrewer].name : "Origami / V60";
-    var isCustom = !defaultCoffees.some(function(dc) { return dc.id === c.id; });
+    var isInterloper = (c.source === 'interloper');
 
     card.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">' +
-      '<span class="badge ' + badgeClass + '">' + c.roast + '</span>' +
+      '<div><span class="badge ' + badgeClass + '">' + c.roast + '</span> ' +
+      (isInterloper ? '<span class="badge badge-interloper">Interloper</span>' : '') +
+      '</div>' +
       '<span style="font-size:11px; color:var(--accent-light); font-weight:700;">Day ' + (diff >= 0 ? diff : 0) + ' rested</span>' +
       '</div>' +
-      '<h3 style="font-size:14px; font-weight:700; margin-bottom:4px;">' + c.name + '</h3>' +
+      '<h3 style="font-size:14px; font-weight:700; margin-bottom:4px;">' + (isInterloper ? '[Interloper] ' : '') + c.name + '</h3>' +
       '<p style="font-size:12px; color:var(--text-sub); margin-bottom:6px;">' + c.roaster + ' • ' + c.process + '</p>' +
       '<p style="font-size:12px; color:var(--purple); font-style:italic; margin-bottom:10px;">Notes: ' + c.notes + '</p>' +
       '<div style="background:var(--card-inner); padding:8px 10px; border-radius:6px; font-size:11.5px; border:1px solid var(--border); margin-bottom:10px;">' +
       '<div><b>Best Paired Dripper:</b> <span style="color:var(--blue);">' + dripperName + '</span></div>' +
       '<div><b>Hot Dial:</b> C3S: ' + c.c3sHot + ' clk | ZP6: ' + c.zp6Hot + ' @ ' + c.hotTemp + '°C</div>' +
       '</div>' +
-      '<div style="display:flex; gap:8px;">' +
-      '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\'' + c.id + '\')">⚡ Dial-In</button>' +
-      (isCustom ? '<button class="btn-danger" onclick="deleteCoffee(\'' + c.id + '\')">Delete</button>' : '') +
+      '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
+      '<button class="btn" style="flex:2;" onclick="brewSpecificCoffee(\\'' + c.id + '\\')">⚡ Dial-In</button>' +
+      '<button class="btn-archive" title="Move out of Pantry into Master Vault history" onclick="archiveBag(\\'' + c.id + '\\')">Finish Bag</button>' +
+      '<button class="btn-danger" title="Delete completely" onclick="deleteCoffeePermanently(\\'' + c.id + '\\')">Delete</button>' +
       '</div>';
     grid.appendChild(card);
   }
+
+  if (count === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1; background:#141624; border:1px solid #26293d; padding:24px; border-radius:12px; text-align:center; color:#94a3b8;">' +
+      '<h3>No Coffees in Live Pantry</h3><p style="font-size:12px; margin-top:6px;">Add a new bag or restock from your Master Inventory Vault!</p>' +
+      '</div>';
+  }
+}
+
+function archiveBag(id) {
+  for (var i = 0; i < storedCoffees.length; i++) {
+    if (storedCoffees[i].id === id) {
+      storedCoffees[i].inPantry = false;
+      break;
+    }
+  }
+  saveState();
+  renderCoffeeDropdown();
+  renderPantry();
+  alert("Bag finished! Moved to Master Vault history. You can restock it anytime.");
+}
+
+function deleteCoffeePermanently(id) {
+  if (confirm("Delete this coffee permanently from both Live Pantry and Master Vault?")) {
+    storedCoffees = storedCoffees.filter(function(c) { return c.id !== id; });
+    saveState();
+    renderCoffeeDropdown();
+    renderPantry();
+    renderMasterVault();
+    calculateRecipe();
+  }
+}
+
+var activeTriedFilter = 'all';
+
+function filterTried(type) {
+  activeTriedFilter = type;
+  document.querySelectorAll('#cafeLogTab .chip').forEach(function(c) { c.classList.remove('active'); });
+  var activeChip = document.getElementById('triedFilter-' + type);
+  if (activeChip) activeChip.classList.add('active');
+  renderTriedCafes();
+}
+
+function openQuickCafeModal() {
+  document.getElementById('quickCafeModal').style.display = 'block';
+}
+
+function closeQuickCafeModal() {
+  document.getElementById('quickCafeModal').style.display = 'none';
+}
+
+function saveCafeTastingLog() {
+  var name = document.getElementById('cafeCoffeeName').value.trim();
+  var roaster = document.getElementById('cafeRoaster').value.trim();
+  var origin = document.getElementById('cafeOrigin').value.trim();
+  var roast = document.getElementById('cafeRoast').value;
+  var process = document.getElementById('cafeProcess').value.trim();
+  var rating = document.getElementById('cafeRating').value;
+  var source = document.getElementById('cafeSource').value;
+  var notes = document.getElementById('cafeNotes').value.trim();
+
+  if (!name || !roaster) return alert("Please enter Coffee Name and Roaster/Café");
+
+  var brewer = "origami";
+  var temp = 93; var ratio = 16; var c3s = 13; var zp6 = 4.3;
+  var rationale = "Derived for specialty café profile: high kinetic extraction on conical dripper.";
+
+  if (roast.indexOf('Ultra') !== -1 || roast.indexOf('Nordic') !== -1) {
+    brewer = "origami"; temp = 96; ratio = 15; c3s = 11; zp6 = 3.9;
+    rationale = "Ultra-light density requires near-boiling water (96°C) to dissolve sweet sucrose.";
+  } else if (roast.indexOf('Dark') !== -1) {
+    brewer = "kalita"; temp = 88; ratio = 15; c3s = 17; zp6 = 5.8;
+    rationale = "Kalita wedge + 88°C water prevents dark roast bitterness and extracts deep cocoa.";
+  } else if (roast.indexOf('Medium') !== -1 && process.toLowerCase().indexOf('natural') !== -1) {
+    brewer = "balloon"; temp = 90; ratio = 16; c3s = 15; zp6 = 5.0;
+    rationale = "Balloon glass bulb accents jammy stone fruit and sweetness.";
+  }
+
+  var item = {
+    id: "tried_" + Date.now(),
+    name: name,
+    roaster: roaster,
+    origin: origin || "Specialty Single Origin",
+    roast: roast,
+    process: process || "Washed / Clean Process",
+    rating: rating,
+    source: source,
+    notes: notes || "Tried at café / event tasting",
+    loggedDate: new Date().toISOString().split('T')[0],
+    defaultBrewer: brewer,
+    hotTemp: temp,
+    hotRatio: ratio,
+    c3sHot: c3s,
+    zp6Hot: zp6,
+    flowNote: rationale
+  };
+
+  triedCafeCoffees.unshift(item);
+  saveState();
+  closeQuickCafeModal();
+  renderCoffeeDropdown();
+  renderTriedCafes();
+  alert("Coffee logged in your Tried Passport! Ideal home recipe calculated automatically.");
+}
+
+function renderTriedCafes() {
+  var grid = document.getElementById('triedGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  var count = 0;
+  for (var i = 0; i < triedCafeCoffees.length; i++) {
+    var t = triedCafeCoffees[i];
+
+    if (activeTriedFilter === '5star' && t.rating !== '5') continue;
+    if (activeTriedFilter === 'interloper' && t.source !== 'interloper') continue;
+
+    count++;
+    var stars = "⭐".repeat(parseInt(t.rating) || 4);
+    var isInterloper = (t.source === 'interloper');
+
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">' +
+      '<div><span class="badge badge-cafe">Tasted: ' + (t.loggedDate || 'Recent') + '</span> ' +
+      (isInterloper ? '<span class="badge badge-interloper">Interloper</span>' : '') +
+      '</div>' +
+      '<span style="font-size:12px;">' + stars + '</span>' +
+      '</div>' +
+      '<h3 style="font-size:15px; font-weight:700; margin-bottom:3px;">' + (isInterloper ? '[Interloper] ' : '') + t.name + '</h3>' +
+      '<p style="font-size:12px; color:var(--blue); margin-bottom:4px;">' + t.roaster + ' • ' + t.origin + '</p>' +
+      '<p style="font-size:11.5px; color:var(--text-sub); margin-bottom:6px;"><b>Roast/Process:</b> ' + t.roast + ' | ' + t.process + '</p>' +
+      '<p style="font-size:12px; color:var(--purple); font-style:italic; margin-bottom:12px;">Impressions: ' + t.notes + '</p>' +
+      '<div style="background:var(--card-inner); padding:8px 10px; border-radius:6px; font-size:11.5px; border:1px solid var(--border); margin-bottom:12px;">' +
+      '<div style="color:var(--accent-light); font-weight:700; margin-bottom:2px;">Target Home Recipe if Bought:</div>' +
+      '<div>' + storedDrippers[t.defaultBrewer].name + ' | ' + t.c3sHot + ' C3S / ' + t.zp6Hot + ' ZP6 @ ' + t.hotTemp + '°C</div>' +
+      '</div>' +
+      '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
+      '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\\'' + t.id + '\\')">⚡ Get Recipe</button>' +
+      '<button class="btn" style="background:var(--green); flex:1.2;" onclick="graduateTriedToPantry(\\'' + t.id + '\\')">🛍️ Bought Bag (Add to Pantry)</button>' +
+      '<button class="btn-danger" onclick="deleteTriedCoffee(\\'' + t.id + '\\')">✕</button>' +
+      '</div>';
+    grid.appendChild(card);
+  }
+
+  if (count === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1; background:#141624; border:1px solid #26293d; padding:24px; border-radius:12px; text-align:center; color:#94a3b8;">' +
+      '<h3>No Coffees in Tried Passport</h3><p style="font-size:12px; margin-top:6px;">Tap "Log a Café / Tried Coffee" above to save memorable drinks from cafes or friends.</p>' +
+      '</div>';
+  }
+}
+
+function graduateTriedToPantry(id) {
+  var t = triedCafeCoffees.find(function(item) { return item.id === id; });
+  if (!t) return;
+
+  var rDate = prompt("You bought this bag! What is the Roast Date? (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+  if (!rDate) return;
+
+  var newPantryBean = {
+    id: "bean_" + Date.now(),
+    name: t.roaster + " - " + t.name,
+    roaster: t.roaster,
+    roast: t.roast.indexOf('Light') !== -1 ? "Light" : (t.roast.indexOf('Dark') !== -1 ? "Dark" : "Medium"),
+    process: t.process,
+    varietal: t.origin,
+    roastDate: rDate,
+    defaultBrewer: t.defaultBrewer,
+    notes: t.notes,
+    hotTemp: t.hotTemp,
+    hotRatio: t.hotRatio,
+    c3sHot: t.c3sHot,
+    zp6Hot: t.zp6Hot,
+    inPantry: true,
+    source: t.source,
+    flowNote: t.flowNote
+  };
+
+  storedCoffees.unshift(newPantryBean);
+  saveState();
+  renderCoffeeDropdown();
+  renderPantry();
+  renderMasterVault();
+  switchTab('livePantry');
+  alert("'" + t.name + "' has been added as a live bag in your Live Pantry with fresh rest-day tracking!");
+}
+
+function deleteTriedCoffee(id) {
+  if (confirm("Remove this coffee from your Tried Passport?")) {
+    triedCafeCoffees = triedCafeCoffees.filter(function(item) { return item.id !== id; });
+    saveState();
+    renderCoffeeDropdown();
+    renderTriedCafes();
+  }
+}
+
+var activeVaultFilter = 'all';
+
+function filterVault(type) {
+  activeVaultFilter = type;
+  document.querySelectorAll('#masterVaultTab .chip').forEach(function(c) { c.classList.remove('active'); });
+  var activeChip = document.getElementById('vaultFilter-' + type);
+  if (activeChip) activeChip.classList.add('active');
+  renderMasterVault();
+}
+
+function renderMasterVault() {
+  var grid = document.getElementById('vaultGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  for (var i = 0; i < storedCoffees.length; i++) {
+    var c = storedCoffees[i];
+
+    if (activeVaultFilter === 'active' && !c.inPantry) continue;
+    if (activeVaultFilter === 'finished' && c.inPantry) continue;
+    if (activeVaultFilter === 'interloper' && c.source !== 'interloper') continue;
+
+    var card = document.createElement('div');
+    card.className = 'card';
+    var isInterloper = (c.source === 'interloper');
+
+    card.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">' +
+      '<div>' +
+      '<span class="badge ' + (c.inPantry ? 'badge-med' : 'badge-archive') + '">' + (c.inPantry ? 'In Live Pantry' : 'Archived Bag') + '</span> ' +
+      (isInterloper ? '<span class="badge badge-interloper">Interloper</span>' : '') +
+      '</div>' +
+      '<span style="font-size:11px; color:var(--text-sub);">' + c.roast + '</span>' +
+      '</div>' +
+      '<h3 style="font-size:15px; font-weight:700; margin-bottom:4px;">' + (isInterloper ? '[Interloper] ' : '') + c.name + '</h3>' +
+      '<p style="font-size:12px; color:var(--text-sub); margin-bottom:4px;"><b>Roaster:</b> ' + c.roaster + ' • <b>Process:</b> ' + c.process + '</p>' +
+      '<p style="font-size:12px; color:var(--blue); margin-bottom:8px;">Varietal: ' + (c.varietal || 'Specialty Arabica') + '</p>' +
+      '<p style="font-size:12px; color:var(--purple); font-style:italic; margin-bottom:12px;">Notes: ' + c.notes + '</p>' +
+      '<div style="display:flex; gap:6px; flex-wrap:wrap;">' +
+      '<button class="btn" style="flex:1;" onclick="brewSpecificCoffee(\\'' + c.id + '\\')">⚡ Get Recipe</button>' +
+      (!c.inPantry ? '<button class="btn" style="background:var(--green); flex:1;" onclick="restockToPantry(\\'' + c.id + '\\')">➕ Restock to Pantry</button>' : '') +
+      '</div>';
+    grid.appendChild(card);
+  }
+}
+
+function restockToPantry(id) {
+  var newDate = prompt("Enter new roast date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+  if (!newDate) return;
+
+  for (var i = 0; i < storedCoffees.length; i++) {
+    if (storedCoffees[i].id === id) {
+      storedCoffees[i].inPantry = true;
+      storedCoffees[i].roastDate = newDate;
+      break;
+    }
+  }
+  saveState();
+  renderCoffeeDropdown();
+  renderPantry();
+  renderMasterVault();
+  switchTab('livePantry');
+  alert("Bean successfully restocked back into your Live Pantry!");
 }
 
 function brewSpecificCoffee(id) {
@@ -662,6 +1172,7 @@ function saveNewCoffee() {
   var varietal = document.getElementById('addVarietal').value.trim();
   var rDate = document.getElementById('addRoastDate').value || new Date().toISOString().split('T')[0];
   var notes = document.getElementById('addNotes').value.trim();
+  var isInterloper = document.getElementById('addAsInterloper').checked;
 
   if (!name || !roaster) return alert("Enter Coffee Name & Roaster");
 
@@ -673,43 +1184,35 @@ function saveNewCoffee() {
   var lowerVar = varietal.toLowerCase();
 
   if (roast === 'Ultra-Light') {
-    chosenBrewer = "origami";
-    temp = 96; ratio = 15; c3s = 11; zp6 = 3.9;
-    rationale = "Ultra-light density requires near-boiling water (96°C) and fast vertical Origami drainage to prevent under-extraction and savory lentil defect.";
+    chosenBrewer = "origami"; temp = 96; ratio = 15; c3s = 11; zp6 = 3.9;
+    rationale = "Ultra-light density requires near-boiling water (96°C) and fast vertical Origami drainage to prevent under-extraction.";
   } else if (roast === 'Medium-Light') {
     if (lowerVar.indexOf('peaberry') !== -1 || lowerProc.indexOf('aerobic') !== -1) {
-      chosenBrewer = "neo";
-      temp = 92; ratio = 16; c3s = 14; zp6 = 4.5;
-      rationale = "Spherical peaberry / aerobic processing thrives with Amber Neo V60's rapid spiral ribs for maximum sweetness.";
+      chosenBrewer = "neo"; temp = 92; ratio = 16; c3s = 14; zp6 = 4.5;
+      rationale = "Spherical peaberry / aerobic processing thrives with Amber Neo V60's rapid spiral ribs.";
     } else {
-      chosenBrewer = "origami";
-      temp = 92; ratio = 16.3; c3s = 13; zp6 = 4.3;
-      rationale = "Origami fast drain lets delicate fruit esters and floral aromatics lift cleanly without boozy astringency.";
+      chosenBrewer = "origami"; temp = 92; ratio = 16.3; c3s = 13; zp6 = 4.3;
+      rationale = "Origami fast drain lets delicate fruit esters and floral aromatics lift cleanly.";
     }
   } else if (roast === 'Medium') {
     if (lowerProc.indexOf('natural') !== -1 || lowerProc.indexOf('honey') !== -1) {
-      chosenBrewer = "balloon";
-      temp = 90; ratio = 16; c3s = 15; zp6 = 5.0;
+      chosenBrewer = "balloon"; temp = 90; ratio = 16; c3s = 15; zp6 = 5.0;
       rationale = "Balloon-Glass V60 bulbous reservoir accentuates syrupy mouthfeel and candied sugars.";
     } else {
-      chosenBrewer = "ceramic";
-      temp = 91; ratio = 16; c3s = 14; zp6 = 4.8;
+      chosenBrewer = "ceramic"; temp = 91; ratio = 16; c3s = 14; zp6 = 4.8;
       rationale = "Ceramic thermal stability balances citric/malic acidity with caramelized sweetness.";
     }
   } else if (roast === 'Medium-Dark') {
     if (lowerVar.indexOf('robusta') !== -1) {
-      chosenBrewer = "kalita";
-      temp = 87; ratio = 14; c3s = 17; zp6 = 6.0;
-      rationale = "Robusta thrives at 87°C on Kalita 102 with short ratio to draw dark cacao and warm spices without ash.";
+      chosenBrewer = "kalita"; temp = 87; ratio = 14; c3s = 17; zp6 = 6.0;
+      rationale = "Robusta thrives at 87°C on Kalita 102 with short ratio to draw dark cacao and warm spices.";
     } else {
-      chosenBrewer = "balloon";
-      temp = 89; ratio = 15.5; c3s = 15; zp6 = 5.2;
-      rationale = "Balloon-glass rounds body and pulls deep plum and chocolate while suppressing bitterness.";
+      chosenBrewer = "balloon"; temp = 89; ratio = 15.5; c3s = 15; zp6 = 5.2;
+      rationale = "Balloon-glass rounds body and pulls deep plum and chocolate.";
     }
   } else if (roast === 'Dark') {
-    chosenBrewer = "kalita";
-    temp = 88; ratio = 15; c3s = 17; zp6 = 5.8;
-    rationale = "Brittle dark roast needs coarse grind, 88°C water, and Kalita wedge oval pour to prevent astringency.";
+    chosenBrewer = "kalita"; temp = 88; ratio = 15; c3s = 17; zp6 = 5.8;
+    rationale = "Brittle dark roast needs coarse grind, 88°C water, and Kalita wedge oval pour.";
   }
 
   var newBean = {
@@ -726,6 +1229,8 @@ function saveNewCoffee() {
     hotRatio: ratio,
     c3sHot: c3s,
     zp6Hot: zp6,
+    inPantry: true,
+    source: isInterloper ? "interloper" : "lab",
     flowNote: rationale
   };
 
@@ -733,23 +1238,93 @@ function saveNewCoffee() {
   saveState();
   renderCoffeeDropdown();
   renderPantry();
+  renderMasterVault();
   brewSpecificCoffee(newBean.id);
-  alert("Coffee analyzed! Best dripper & recipes calculated and loaded into the Recipe Engine.");
+  alert("Coffee added to Live Pantry and Master Vault!");
 }
 
-function deleteCoffee(id) {
-  if (confirm("Delete this coffee?")) {
-    storedCoffees = storedCoffees.filter(function(c) { return c.id !== id; });
+function openSyncModal() {
+  document.getElementById('syncModal').style.display = 'block';
+}
+
+function closeSyncModal() {
+  document.getElementById('syncModal').style.display = 'none';
+}
+
+function generateExportBundle() {
+  var bundle = {
+    coffees: storedCoffees,
+    tried: triedCafeCoffees,
+    recipes: savedCustomRecipes,
+    timestamp: Date.now()
+  };
+  var str = btoa(unescape(encodeURIComponent(JSON.stringify(bundle))));
+  var txt = document.getElementById('syncExportText');
+  txt.value = str;
+  txt.style.display = 'block';
+  txt.select();
+  alert("Sync Bundle generated! Copy and send this code to any friend or device.");
+}
+
+function importSyncBundle() {
+  var raw = document.getElementById('syncImportText').value.trim();
+  if (!raw) return alert("Please paste a sync bundle code");
+
+  try {
+    var decoded = decodeURIComponent(escape(atob(raw)));
+    var data = JSON.parse(decoded);
+
+    var importCount = 0;
+    if (data.coffees && data.coffees.length > 0) {
+      for (var i = 0; i < data.coffees.length; i++) {
+        var c = data.coffees[i];
+        var exists = storedCoffees.some(function(item) { return item.name === c.name; });
+        if (!exists) {
+          c.id = "interloper_" + Date.now() + "_" + i;
+          c.source = "interloper";
+          storedCoffees.push(c);
+          importCount++;
+        }
+      }
+    }
+
+    if (data.tried && data.tried.length > 0) {
+      for (var k = 0; k < data.tried.length; k++) {
+        var t = data.tried[k];
+        var tExists = triedCafeCoffees.some(function(item) { return item.name === t.name && item.roaster === t.roaster; });
+        if (!tExists) {
+          t.id = "interloper_tried_" + Date.now() + "_" + k;
+          t.source = "interloper";
+          triedCafeCoffees.push(t);
+        }
+      }
+    }
+
+    if (data.recipes && data.recipes.length > 0) {
+      for (var j = 0; j < data.recipes.length; j++) {
+        var r = data.recipes[j];
+        var rExists = savedCustomRecipes.some(function(item) { return item.title === r.title; });
+        if (!rExists) {
+          r.id = "interloper_rec_" + Date.now() + "_" + j;
+          r.title = "[Interloper] " + r.title;
+          savedCustomRecipes.push(r);
+        }
+      }
+    }
+
     saveState();
     renderCoffeeDropdown();
     renderPantry();
-    calculateRecipe();
+    renderTriedCafes();
+    renderMasterVault();
+    renderSavedRecipes();
+    closeSyncModal();
+    alert("Successfully imported " + importCount + " beans, café logs, and recipes under the [Interloper] tag!");
+  } catch(e) {
+    alert("Invalid bundle code. Please ensure the full string was copied.");
   }
 }
 
-// ==========================================
-// SAVED RECIPES SYSTEM
-// ==========================================
 function promptSaveCurrentRecipe() {
   var title = prompt("Enter a title for this recipe:", "Competition Dial-In");
   if (!title) return;
@@ -764,10 +1339,9 @@ function promptSaveCurrentRecipe() {
   var brewerChoice = brewerSelect.value;
   var dose = parseFloat(doseInput.value) || 15.0;
 
-  var coffee = storedCoffees[0];
-  for (var i = 0; i < storedCoffees.length; i++) {
-    if (storedCoffees[i].id === coffeeId) { coffee = storedCoffees[i]; break; }
-  }
+  var coffee = storedCoffees.find(function(c) { return c.id === coffeeId; }) ||
+               triedCafeCoffees.find(function(t) { return t.id === coffeeId; }) ||
+               storedCoffees[0];
 
   var isAuto = (brewerChoice === "auto");
   var activeBrewerKey = isAuto ? coffee.defaultBrewer : brewerChoice;
@@ -775,7 +1349,7 @@ function promptSaveCurrentRecipe() {
 
   var currentSpec = {
     id: "rec_" + Date.now(),
-    title: title,
+    title: (coffee.source === 'interloper' ? "[Interloper] " : "") + title,
     coffeeName: coffee.name,
     coffeeId: coffee.id,
     method: method,
@@ -792,7 +1366,7 @@ function promptSaveCurrentRecipe() {
 
   savedCustomRecipes.unshift(currentSpec);
   saveState();
-  alert("Recipe '" + title + "' saved to your Library! View it under the '⭐ Saved Recipes' tab.");
+  alert("Recipe '" + title + "' saved to your Library!");
 }
 
 function openNewRecipeModal() {
@@ -851,7 +1425,7 @@ function saveCustomDetailedRecipe() {
 
   var customRecipe = {
     id: "rec_" + Date.now(),
-    title: title,
+    title: (isInterloperDevice ? "[Interloper] " : "") + title,
     coffeeName: "Custom Lot",
     coffeeId: storedCoffees[0].id,
     method: "hot",
@@ -871,11 +1445,11 @@ function saveCustomDetailedRecipe() {
   saveState();
   closeNewRecipeModal();
   renderSavedRecipes();
-  alert("Recipe '" + title + "' saved to your Library!");
+  alert("Recipe saved to Library!");
 }
 
 function deleteSavedRecipe(id) {
-  if (confirm("Delete this recipe from your library?")) {
+  if (confirm("Delete this recipe?")) {
     savedCustomRecipes = savedCustomRecipes.filter(function(r) { return r.id !== id; });
     saveState();
     renderSavedRecipes();
@@ -962,8 +1536,8 @@ function renderSavedRecipes() {
       '<p style="font-size:12px; color:var(--blue);">' + (r.brewerName || 'Dripper') + ' • ' + (r.dose || 15) + 'g dose • ' + (r.temp || 92) + '°C</p>' +
       '</div>' +
       '<div style="display:flex; gap:6px;">' +
-      '<button class="btn" style="padding:6px 12px; font-size:11px;" onclick="loadSavedRecipeIntoEngine(\'' + r.id + '\')">🚀 Load & Brew</button>' +
-      '<button class="btn-danger" onclick="deleteSavedRecipe(\'' + r.id + '\')">Delete</button>' +
+      '<button class="btn" style="padding:6px 12px; font-size:11px;" onclick="loadSavedRecipeIntoEngine(\\'' + r.id + '\\')">🚀 Load & Brew</button>' +
+      '<button class="btn-danger" onclick="deleteSavedRecipe(\\'' + r.id + '\\')">Delete</button>' +
       '</div>' +
       '</div>' +
       '<div style="background:#10111a; padding:8px 10px; border-radius:6px; font-size:12px; color:var(--text-sub); margin-bottom:8px;">' +
@@ -977,7 +1551,9 @@ function renderSavedRecipes() {
   container.innerHTML = html;
 }
 
-// INTERACTIVE TIMER & LIVE BREW STATE
+// ==========================================
+// TIMER & REAL-TIME BREW SCHEDULE
+// ==========================================
 var timerInterval = null;
 var timerSeconds = 0;
 var isTimerRunning = false;
@@ -1055,7 +1631,6 @@ function updateActiveStepHighlight(stepIdx) {
   }
 }
 
-// REAL-TIME DYNAMIC EXTRACTION ENGINE
 function calculateRecipe() {
   resetTimer();
 
@@ -1070,23 +1645,19 @@ function calculateRecipe() {
   var brewerChoice = brewerSelect.value;
   var dose = parseFloat(doseInput.value) || 15.0;
 
-  var coffee = storedCoffees[0];
-  for (var i = 0; i < storedCoffees.length; i++) {
-    if (storedCoffees[i].id === coffeeId) {
-      coffee = storedCoffees[i];
-      break;
-    }
-  }
+  var coffee = storedCoffees.find(function(c) { return c.id === coffeeId; }) ||
+               triedCafeCoffees.find(function(t) { return t.id === coffeeId; }) ||
+               storedCoffees[0];
 
   var isAuto = (brewerChoice === "auto");
   var activeBrewerKey = isAuto ? coffee.defaultBrewer : brewerChoice;
   var brewerObj = storedDrippers[activeBrewerKey] || defaultDrippers.origami;
 
-  var c3s = coffee.c3sHot;
-  var zp6 = parseFloat(coffee.zp6Hot);
-  var temp = coffee.hotTemp;
-  var totalWater = Math.round(dose * coffee.hotRatio);
-  var ratioDisplay = "1 : " + coffee.hotRatio;
+  var c3s = coffee.c3sHot || 14;
+  var zp6 = parseFloat(coffee.zp6Hot || 4.5);
+  var temp = coffee.hotTemp || 92;
+  var totalWater = Math.round(dose * (coffee.hotRatio || 16));
+  var ratioDisplay = "1 : " + (coffee.hotRatio || 16);
   var iceGrams = 0;
   var hotWaterGrams = totalWater;
 
@@ -1247,6 +1818,8 @@ function start() {
   renderBrewerDropdowns();
   renderCoffeeDropdown();
   renderPantry();
+  renderTriedCafes();
+  renderMasterVault();
   renderEquipmentList();
   calculateRecipe();
 }
