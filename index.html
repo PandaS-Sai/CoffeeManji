@@ -58,7 +58,7 @@
   .app-section { display: none; }
   .app-section.active { display: block; }
 
-  /* Aramse-Style Brew Assistant / Timer Hero */
+  /* Precision Flow Brew Assistant / Timer Hero */
   .brew-hero {
     background: linear-gradient(180deg, #161826 0%, #10111a 100%);
     border: 1px solid #2e334d;
@@ -418,7 +418,7 @@
 
     <div class="control-group" style="margin-bottom:10px;">
       <label>Recipe Title</label>
-      <input type="text" id="customRecTitle" placeholder="e.g. Aramse 5-Pulse Clarity / Kasuya 4:6">
+      <input type="text" id="customRecTitle" placeholder="e.g. Competition 5-Pulse Clarity / Kasuya 4:6">
     </div>
 
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
@@ -483,7 +483,7 @@ var defaultCoffees = [
   { id: "raxidi-lobo", name: "Roastery - Raxidi Lobo Estate", roaster: "Roastery Coffee", roast: "Medium", process: "5B Block Anaerobic Natural", varietal: "SLN 5B", roastDate: "2026-08-18", defaultBrewer: "origami", notes: "Dark Cherry Jam, Boozy Plum, Cocoa, Grapefruit", hotTemp: 90, hotRatio: 16, c3sHot: 14, zp6Hot: 4.8, flowNote: "Origami prevents stalling; center laminar stream skips bitter tannins." },
   { id: "mizoram-reserve", name: "Grey Soul - Mizoram Reserve (#4)", roaster: "Grey Soul", roast: "Medium-Dark", process: "Sun-Dried Natural", varietal: "Regional Natural Lot", roastDate: "2026-08-15", defaultBrewer: "balloon", notes: "Watermelon Candy, Ripe Plum, Hazelnut Cocoa", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.2, flowNote: "Balloon glass bulb enhances body, pulling out juicy watermelon candy sweetness." },
   { id: "sholiga", name: "Veer Attikan - Sholiga", roaster: "Veer Attikan", roast: "Light-Medium", process: "Washed Arabica", varietal: "Single Origin BR Hills", roastDate: "2026-08-10", defaultBrewer: "ceramic", notes: "Honeyed Jackfruit, Dried Dates, Brown Sugar", hotTemp: 91, hotRatio: 16, c3sHot: 15, zp6Hot: 4.8, flowNote: "Uniform concentric spirals in ceramic cone give comforting dates and brown sugar." },
-  { id: "aramse-bold", name: "Aramse - Bold Edition #2", roaster: "Aramse", roast: "Dark", process: "Salawara Honey / Washed", varietal: "Specialty Dark Blend", roastDate: "2026-08-12", defaultBrewer: "kalita", notes: "Dark Fudge, Molasses, Stewed Plum, Zero Ash", hotTemp: 88, hotRatio: 15, c3sHot: 17, zp6Hot: 5.8, flowNote: "Kalita 102 wedge with oval racetrack pour and 88°C water pulls dense fudge." },
+  { id: "bold-edition", name: "Bold Edition #2", roaster: "Specialty Roasters", roast: "Dark", process: "Salawara Honey / Washed", varietal: "Specialty Dark Blend", roastDate: "2026-08-12", defaultBrewer: "kalita", notes: "Dark Fudge, Molasses, Stewed Plum, Zero Ash", hotTemp: 88, hotRatio: 15, c3sHot: 17, zp6Hot: 5.8, flowNote: "Kalita 102 wedge with oval racetrack pour and 88°C water pulls dense fudge." },
   { id: "ph-seven-robusta", name: "PH-Seven - 100% Robusta-AA", roaster: "PH-Seven", roast: "Medium-Dark", process: "High-Grown Washed Robusta", varietal: "Robusta-AA", roastDate: "2026-08-05", defaultBrewer: "kalita", notes: "Dark Cacao, Clove, Nutmeg, Velvety Crema", hotTemp: 87, hotRatio: 14, c3sHot: 17, zp6Hot: 6.0, flowNote: "Low temp (87°C) & short ratio (1:14) extract warm baking spices without ash." },
   { id: "tim-hortons-signature", name: "Tim Hortons - Signature India", roaster: "Tim Hortons", roast: "Medium", process: "Commercial Washed Blend", varietal: "Whole Bean Blend", roastDate: "2026-08-01", defaultBrewer: "neo", notes: "Milk Chocolate, Toasted Cereal, Mellow Acidity", hotTemp: 90, hotRatio: 16, c3sHot: 15, zp6Hot: 5.0, flowNote: "Amber Neo V60 flutes flush out clean morning chocolate without bitter over-steep." }
 ];
@@ -820,7 +820,6 @@ function saveCustomDetailedRecipe() {
   var stages = [];
   if (stagesRaw) {
     var lines = stagesRaw.split('\n');
-    var lastSec = 0;
     for (var i = 0; i < lines.length; i++) {
       var parts = lines[i].split('|');
       if (parts.length >= 3) {
@@ -978,7 +977,7 @@ function renderSavedRecipes() {
   container.innerHTML = html;
 }
 
-// ARAMSE-INSPIRED INTERACTIVE TIMER & LIVE BREW STATE
+// INTERACTIVE TIMER & LIVE BREW STATE
 var timerInterval = null;
 var timerSeconds = 0;
 var isTimerRunning = false;
@@ -1173,7 +1172,7 @@ function calculateRecipe() {
     document.getElementById('currentInstruction').textContent = "Hit Start Bloom and saturate with " + bloom + "g";
 
     if (rationale) {
-      rationale.innerHTML = '<b>Aramse-Calibrated Strategy:</b> ' + (coffee.flowNote || '') + '<br/><span style="color:var(--blue); font-size:11.5px; margin-top:4px; display:block;">⚙️ ' + dripperAdjustmentNote + '</span>';
+      rationale.innerHTML = '<b>Precision-Calibrated Strategy:</b> ' + (coffee.flowNote || '') + '<br/><span style="color:var(--blue); font-size:11.5px; margin-top:4px; display:block;">⚙️ ' + dripperAdjustmentNote + '</span>';
     }
   } else if (method === 'iced') {
     var bloom = Math.round(dose * 2.5);
