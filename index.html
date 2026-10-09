@@ -316,4 +316,409 @@ var COFFEES=[
   {id:'elbueno',name:'El Bueno Golden Glow (Ratnagiri)',roaster:'El Bueno',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
   {id:'sbux',name:'Starbucks Benchmark',roaster:'Starbucks',proc:'',cat:'md',status:'archived',roastDate:'',dose:15,zp:6.6,est:1,note:'Used as a benchmark.'},
   {id:'bt-sal',name:'Blue Tokai Salawara',roaster:'Blue Tokai',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,zp:5.6,note:'Bag finished.'},
-  {id:'grey-miz',name:'
+  {id:'grey-miz',name:'Grey Soul Mizoram #4',roaster:'Grey Soul',proc:'',cat:'md',status:'archived',roastDate:'',dose:15,zp:6.4,note:'Bag finished.'},
+  {id:'veer-sh',name:'Veer Attikan Sholiga',roaster:'Veer Attikan',proc:'',cat:'med',status:'archived',roastDate:'',dose:15,zp:5.8,note:'Bag finished.'}
+];
+
+/* ---------- state & storage ---------- */
+var KEY='coffeelabos.v2';
+var S={coffees:JSON.parse(JSON.stringify(COFFEES)),log:[]};
+function load(){try{var j=JSON.parse(localStorage.getItem(KEY)||'null');if(j&&j.coffees&&j.coffees.length){S=j;if(!S.log)S.log=[]}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+load();
+function getCoffee(id){for(var i=0;i<S.coffees.length;i++)if(S.coffees[i].id===id)return S.coffees[i];return null}
+function active(){return S.coffees.filter(function(c){return c.status==='active'})}
+
+/* ---------- navigation ---------- */
+function go(v){
+  $$('.view').forEach(function(e){e.classList.toggle('on',e.id==='v-'+v)});
+  $$('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)});
+  if(v==='pantry')renderPantry();
+  if(v==='vault')renderVault();
+  if(v==='lab')renderLab();
+  window.scrollTo(0,0);
+}
+$('#nav').addEventListener('click',function(e){var b=e.target.closest('button');if(b)go(b.dataset.v)});
+
+/* ---------- brew state ---------- */
+var B={coffeeId:'',method:'hot',dripper:'orea',dose:15,temp:88,grinder:'zp6',zp:5.6,rating:0};
+
+function baseOf(c){return c.base!=null?c.base:CAT[c.cat].base}
+function recZpOf(c,dripKey){return r1((c.zp!=null?c.zp:CAT[c.cat].zp)+DRIP[dripKey].gOff)}
+
+function resetToCoffee(){
+  var c=getCoffee(B.coffeeId);if(!c)return;
+  B.dose=c.dose||15;
+  B.temp=baseOf(c);
+  B.zp=recZpOf(c,B.dripper);
+}
+
+function compute(){
+  var c=getCoffee(B.coffeeId);if(!c)return null;
+  var cat=CAT[c.cat],d=DRIP[B.dripper];
+  var base=baseOf(c),rec=recZpOf(c,B.dripper);
+  var e=clamp(0.6*(B.temp-base)-1.5*(B.zp-rec),-4,4);
+  var ratio=r2(cat.ratio+clamp(e*0.15,-0.7,0.7));
+  var total=Math.round(B.dose*ratio);
+  var hot=total,ice=0;
+  if(B.method==='iced'){hot=Math.round(total*0.627);ice=total-hot}
+  var bloomW=Math.round(B.dose*3);
+  var bloomT=Math.round(clamp(45-e*4,30,60));
+  var n=e<-1.5?5:4;
+  var step=e>1?40:32;
+  var steps=[{label:'Bloom',t:0,cum:bloomW,add:bloomW}];
+  var prev=bloomW;
+  for(var i=1;i<=n;i++){
+    var cum=Math.round(bloomW+(hot-bloomW)*i/n);
+    steps.push({label:'Pour '+i,t:bloomT+(i-1)*step,cum:cum,add:cum-prev});
+    prev=cum;
+  }
+  var end=steps[steps.length-1].t+55;
+  var notes=[];
+  if(e<-1.2)notes.push('Under-extraction risk (sour, hollow). Compensated: tighter ratio, longer bloom'+(n===5?', one extra pulse':'')+'. Add a gentle swirl after the bloom and pour a little higher (5-6 cm).');
+  else if(e>1.2)notes.push('Over-extraction risk (bitter, dry). Compensated: wider ratio, shorter bloom, slower pulses. Keep pours low and centre-only, no swirl.');
+  else notes.push('Balanced. Low kettle height (under 4 cm), gentle centre-dominant stream, no swirl during main pours.');
+  notes.push(d.note);
+  if(c.note)notes.push(c.note);
+  if(B.method==='iced')notes.push('Japanese iced: put '+ice+' g of ice in the server and pour '+hot+' g hot water over the coffee.');
+  return {c:c,cat:cat,d:d,e:e,ratio:ratio,total:total,hot:hot,ice:ice,steps:steps,bloomT:bloomT,end:end,notes:notes,base:base,rec:rec,kettle:r1(B.temp+d.tOff)};
+}
+
+var R=null;
+
+function update(){
+  R=compute();if(!R)return;
+  var c=R.c;
+  var okT=B.temp>=85&&B.temp<=90,okG=B.zp>=5.4&&B.zp<=7.4;
+  $('#tempVal').textContent=B.temp.toFixed(1)+'\u00B0C';
+  $('#bTempR').value=B.temp;
+  $('#lawT').innerHTML=okT?'<span style="color:var(--good)">Inside Law 1 (85-90\u00B0C)</span>':'<span style="color:var(--warn)">Outside Law 1. This is an off-protocol brew.</span>';
+  $('#lawG').innerHTML=okG?'<span style="color:var(--good)">Inside Law 2 (coarse range)</span>':'<span style="color:var(--warn)">Outside Law 2 (ZP6 5.4-7.4).</span>';
+  $('#bDose').value=B.dose;
+  $('#dialLbl').textContent=B.grinder==='zp6'?'ZP6 dial':'C3S clicks';
+  var dial=$('#bDial');
+  if(B.grinder==='zp6'){dial.step='0.1';dial.value=B.zp.toFixed(1)}else{dial.step='1';dial.value=zpToC3(B.zp)}
+  $('#dialHint').textContent='Recommended: ZP6 '+R.rec.toFixed(1)+' / C3S '+zpToC3(R.rec)+' clicks';
+  $$('#bGrinder button').forEach(function(b){b.classList.toggle('on',b.dataset.v===B.grinder)});
+  $$('#bMethod button').forEach(function(b){b.classList.toggle('on',b.dataset.v===B.method)});
+
+  var d=daysOff(c.roastDate);
+  var info=['<span class="chip">'+esc(R.cat.label)+'</span>'];
+  if(c.roastDate)info.push('<span class="chip '+(d!=null&&d<5?'warn':'good')+'">Roasted '+esc(c.roastDate)+(d!=null?' ('+d+' d off roast)':'')+'</span>');
+  if(c.proc)info.push('<span class="chip">'+esc(c.proc)+'</span>');
+  $('#bCoffeeInfo').innerHTML=info.join('');
+
+  $('#bBig').innerHTML=
+    '<div><b>'+(B.method==='iced'?R.hot:R.total)+'</b><small>'+(B.method==='iced'?'Hot water g':'Water g')+'</small></div>'+
+    '<div><b>1:'+R.ratio.toFixed(2).replace(/0$/,'')+'</b><small>Ratio</small></div>'+
+    '<div><b>'+R.kettle.toFixed(1)+'\u00B0</b><small>Kettle</small></div>'+
+    '<div><b>'+(B.grinder==='zp6'?B.zp.toFixed(1):zpToC3(B.zp))+'</b><small>'+(B.grinder==='zp6'?'ZP6':'C3S')+'</small></div>';
+
+  var chips=[];
+  chips.push(R.e<-1.2?'<span class="chip bad">Leaning sour</span>':R.e>1.2?'<span class="chip bad">Leaning bitter</span>':'<span class="chip good">Balanced</span>');
+  chips.push('<span class="chip blue">Dose '+B.dose+' g</span>');
+  if(B.method==='iced')chips.push('<span class="chip blue">+ '+R.ice+' g ice</span>');
+  chips.push('<span class="chip">Finish ~'+fmt(R.end)+'</span>');
+  chips.push('<span class="chip">Bloom '+R.bloomT+'s</span>');
+  $('#bChips').innerHTML=chips.join('');
+
+  renderSteps();
+  $('#bNotes').innerHTML=R.notes.map(function(n){return '<p style="margin:6px 0">'+esc(n)+'</p>'}).join('');
+  $('#lvT').textContent=currentTarget()||'\u2013';
+}
+
+function curStepIndex(t){
+  if(!R)return -1;
+  var idx=-1;
+  for(var i=0;i<R.steps.length;i++){if(t>=R.steps[i].t)idx=i}
+  return idx;
+}
+function currentTarget(){
+  if(!R)return 0;
+  var i=curStepIndex(TM.elapsed());
+  if(i<0)i=0;
+  return R.steps[i].cum;
+}
+function renderSteps(){
+  if(!R)return;
+  var t=TM.elapsed(),idx=TM.running||t>0?curStepIndex(t):-1;
+  $('#bSteps').innerHTML=R.steps.map(function(s,i){
+    var cls=i===idx?'cur':(i<idx?'done':'');
+    return '<tr class="'+cls+'"><td>'+s.label+'</td><td>'+fmt(s.t)+'</td><td>+'+s.add+' g</td><td><b>'+s.cum+' g</b></td></tr>';
+  }).join('')+'<tr><td>Drawdown</td><td>~'+fmt(R.end)+'</td><td colspan="2">Finish</td></tr>';
+}
+
+/* ---------- timer ---------- */
+var TM={running:false,t0:0,acc:0,
+  elapsed:function(){return (this.acc+(this.running?(performance.now()-this.t0):0))/1000},
+  start:function(){if(!this.running){this.running=true;this.t0=performance.now();$('#tmrGo').textContent='Pause'}},
+  pause:function(){if(this.running){this.acc+=performance.now()-this.t0;this.running=false;$('#tmrGo').textContent='Resume'}},
+  reset:function(){this.running=false;this.acc=0;$('#tmrGo').textContent='Start';draw()}
+};
+function draw(){
+  $('#tmr').textContent=fmt(TM.elapsed());
+  renderSteps();
+  $('#lvT').textContent=currentTarget()||'\u2013';
+}
+setInterval(function(){if(TM.running)draw()},200);
+$('#tmrGo').onclick=function(){TM.running?TM.pause():TM.start();draw()};
+$('#tmrReset').onclick=function(){TM.reset()};
+$('#tmrTare').onclick=function(){SC.tare()};
+
+/* ---------- brew controls ---------- */
+function fillSelects(){
+  var cs=active();
+  $('#bCoffee').innerHTML=cs.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>'}).join('');
+  if(!getCoffee(B.coffeeId)||getCoffee(B.coffeeId).status!=='active'){B.coffeeId=cs.length?cs[0].id:'';resetToCoffee()}
+  $('#bCoffee').value=B.coffeeId;
+  $('#bDrip').innerHTML=Object.keys(DRIP).map(function(k){return '<option value="'+k+'">'+DRIP[k].name+'</option>'}).join('');
+  $('#bDrip').value=B.dripper;
+  $('#nCat').innerHTML=Object.keys(CAT).map(function(k){return '<option value="'+k+'">'+CAT[k].label+'</option>'}).join('');
+}
+$('#bCoffee').onchange=function(){B.coffeeId=this.value;resetToCoffee();update()};
+$('#bDrip').onchange=function(){B.dripper=this.value;var c=getCoffee(B.coffeeId);B.zp=recZpOf(c,B.dripper);update()};
+$('#bMethod').onclick=function(e){var b=e.target.closest('button');if(!b)return;B.method=b.dataset.v;update()};
+$('#bGrinder').onclick=function(e){var b=e.target.closest('button');if(!b)return;B.grinder=b.dataset.v;update()};
+$('#bDose').onchange=function(){B.dose=clamp(parseFloat(this.value)||15,5,60);update()};
+$('#doseM').onclick=function(){B.dose=clamp(r1(B.dose-0.5),5,60);update()};
+$('#doseP').onclick=function(){B.dose=clamp(r1(B.dose+0.5),5,60);update()};
+$('#bTempR').oninput=function(){B.temp=parseFloat(this.value);update()};
+$('#bDial').onchange=function(){
+  var v=parseFloat(this.value);if(isNaN(v))return;
+  B.zp=B.grinder==='zp6'?r1(clamp(v,2,10)):c3ToZp(clamp(v,5,30));update();
+};
+function nudgeDial(dir){
+  if(B.grinder==='zp6')B.zp=r1(clamp(B.zp+dir*0.1,2,10));
+  else B.zp=c3ToZp(clamp(zpToC3(B.zp)+dir,5,30));
+  update();
+}
+$('#dialM').onclick=function(){nudgeDial(-1)};
+$('#dialP').onclick=function(){nudgeDial(1)};
+$('#resetDial').onclick=function(){var c=getCoffee(B.coffeeId);B.zp=recZpOf(c,B.dripper);B.temp=baseOf(c);update()};
+
+/* stars + log */
+function drawStars(){
+  $('#stars').innerHTML=[1,2,3,4,5].map(function(i){return '<button data-v="'+i+'" class="'+(B.rating>=i?'on':'')+'">\u2605</button>'}).join(' ');
+}
+$('#stars').onclick=function(e){var b=e.target.closest('button');if(!b)return;B.rating=parseInt(b.dataset.v,10);drawStars()};
+$('#saveLog').onclick=function(){
+  if(!R)return;
+  S.log.unshift({ts:Date.now(),coffee:R.c.name,dripper:R.d.name,method:B.method,dose:B.dose,temp:B.temp,
+    grinder:B.grinder,dial:B.grinder==='zp6'?B.zp:zpToC3(B.zp),water:R.hot,ratio:R.ratio,time:Math.round(TM.elapsed()),rating:B.rating,note:$('#bNote').value.trim()});
+  save();$('#bNote').value='';B.rating=0;drawStars();toast('Brew saved to log');
+};
+
+/* ---------- pantry ---------- */
+function coffeeItem(c,mode){
+  var d=daysOff(c.roastDate);
+  var rz=recZpOf(c,'neo');
+  var meta=[CAT[c.cat].label];
+  if(c.roaster)meta.push(esc(c.roaster));
+  if(c.proc)meta.push(esc(c.proc));
+  var line='ZP6 '+rz.toFixed(1)+' / C3S '+zpToC3(rz)+' &middot; '+baseOf(c)+'\u00B0C &middot; 1:'+CAT[c.cat].ratio+(c.dose?' &middot; '+c.dose+' g':'');
+  var rd=c.roastDate?'Roasted '+esc(c.roastDate)+(d!=null?' ('+d+' d)':''):'';
+  var acts=c.status==='active'
+    ?'<button class="sm pri" data-a="brew" data-id="'+esc(c.id)+'">Brew</button><button class="sm" data-a="finish" data-id="'+esc(c.id)+'">Finished</button>'
+    :'<button class="sm pri" data-a="restock" data-id="'+esc(c.id)+'">Restock</button>';
+  return '<div class="item"><div><h3>'+esc(c.name)+'</h3><div class="meta">'+meta.join(' &middot; ')+'</div><div class="meta">'+line+'</div>'+(rd?'<div class="meta">'+rd+'</div>':'')+(c.est?'<div class="meta">Category estimated, edit by restocking</div>':'')+'</div><div class="acts">'+acts+'</div></div>';
+}
+function renderPantry(){
+  var cs=active();
+  $('#pCount').textContent='('+cs.length+')';
+  $('#pList').innerHTML=cs.length?cs.map(function(c){return coffeeItem(c)}).join(''):'<div class="note">Pantry is empty. Restock a coffee from the Vault.</div>';
+}
+function renderVault(){
+  var q=$('#vSearch').value.trim().toLowerCase();
+  var f=($('#vFilter button.on')||{dataset:{v:'all'}}).dataset.v;
+  var list=S.coffees.filter(function(c){
+    if(f==='active'&&c.status!=='active')return false;
+    if(f==='archived'&&c.status!=='archived')return false;
+    return !q||(c.name+' '+c.roaster).toLowerCase().indexOf(q)>=0;
+  });
+  $('#vCount').textContent='('+list.length+' of '+S.coffees.length+')';
+  $('#vList').innerHTML=list.map(function(c){return coffeeItem(c)}).join('')||'<div class="note">No matches.</div>';
+}
+function listClick(e){
+  var b=e.target.closest('button[data-a]');if(!b)return;
+  var c=getCoffee(b.dataset.id),a=b.dataset.a;if(!c)return;
+  if(a==='brew'){B.coffeeId=c.id;resetToCoffee();fillSelects();update();go('brew')}
+  else if(a==='finish'){c.status='archived';save();renderPantry();renderVault();fillSelects();update();toast(c.name+' archived')}
+  else if(a==='restock'){
+    var d=prompt('Roast date for '+c.name+' (YYYY-MM-DD, blank if unknown):',today());
+    if(d===null)return;
+    c.status='active';c.roastDate=(d||'').trim();
+    save();renderPantry();renderVault();fillSelects();update();toast(c.name+' back in pantry');
+  }
+}
+$('#pList').onclick=listClick;
+$('#vList').onclick=listClick;
+$('#vSearch').oninput=renderVault;
+$('#vFilter').onclick=function(e){var b=e.target.closest('button');if(!b)return;$$('#vFilter button').forEach(function(x){x.classList.toggle('on',x===b)});renderVault()};
+$('#nAdd').onclick=function(){
+  var name=$('#nName').value.trim();if(!name){toast('Enter a name');return}
+  var id='c'+Date.now().toString(36);
+  S.coffees.unshift({id:id,name:name,roaster:$('#nRoaster').value.trim(),proc:$('#nProc').value.trim(),cat:$('#nCat').value,status:'active',roastDate:$('#nDate').value,dose:15,note:''});
+  save();['#nName','#nRoaster','#nProc','#nDate'].forEach(function(s){$(s).value=''});
+  renderPantry();fillSelects();update();toast('Added to pantry and vault');
+};
+
+/* ---------- lab ---------- */
+function renderLab(){
+  $('#catTable').innerHTML=Object.keys(CAT).map(function(k){var c=CAT[k];return '<tr><td>'+c.label+'</td><td>1:'+c.ratio+'</td><td>'+c.base+'\u00B0C</td><td>'+c.zp+'</td></tr>'}).join('');
+  $('#dripList').innerHTML=Object.keys(DRIP).map(function(k){var d=DRIP[k];return '<div class="item"><div><h3>'+d.name+'</h3><div class="meta">'+d.shape+'</div><div class="meta">'+esc(d.note)+'</div></div></div>'}).join('');
+  $('#lCount').textContent='('+S.log.length+')';
+  $('#logList').innerHTML=S.log.length?S.log.slice(0,40).map(function(l){
+    var dt=new Date(l.ts);
+    return '<div class="item"><div><h3>'+esc(l.coffee)+' '+(l.rating?'<span style="color:var(--accent)">'+'\u2605'.repeat(l.rating)+'</span>':'')+'</h3><div class="meta">'+dt.toLocaleDateString()+' &middot; '+esc(l.dripper)+' &middot; '+l.dose+' g / '+l.water+' g (1:'+l.ratio+') &middot; '+l.temp+'\u00B0C &middot; '+(l.grinder==='zp6'?'ZP6 '+Number(l.dial).toFixed(1):'C3S '+l.dial)+(l.time?' &middot; '+fmt(l.time):'')+'</div>'+(l.note?'<div class="meta">'+esc(l.note)+'</div>':'')+'</div></div>';
+  }).join(''):'<div class="note">No brews logged yet.</div>';
+}
+$('#exp').onclick=function(){
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='coffee-lab-os-backup.json';a.click();
+};
+$('#imp').onclick=function(){$('#impFile').click()};
+$('#impFile').onchange=function(){
+  var f=this.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){try{var j=JSON.parse(r.result);if(!j.coffees)throw 0;S=j;if(!S.log)S.log=[];save();fillSelects();resetToCoffee();update();renderLab();toast('Backup imported')}catch(e){toast('Not a valid backup file')}};
+  r.readAsText(f);
+};
+$('#reset').onclick=function(){
+  if(!confirm('Reset pantry, vault and log to factory data?'))return;
+  S={coffees:JSON.parse(JSON.stringify(COFFEES)),log:[]};save();B.coffeeId='';fillSelects();resetToCoffee();update();renderLab();toast('Reset done');
+};
+
+/* ---------- scale ---------- */
+var SC={
+  dev:null,nChar:null,wChar:null,hb:null,connected:false,demo:null,
+  raw:0,tareOff:0,w:0,prevW:0,samples:[],flow:0,buf:[],logs:[],
+  SVC:['49535343-fe7d-4ae5-8fa9-9fafd205e455','00001820-0000-1000-8000-00805f9b34fb'],
+  NEW_N:'49535343-1e4d-4bd9-ba61-23c647249616',NEW_W:'49535343-8841-43f4-a8d4-ecbe34729bb3',OLD_C:'00002a80-0000-1000-8000-00805f9b34fb',
+  say:function(m){$('#scaleState').textContent=m;$('#sS').textContent=m.length>14?m.slice(0,12)+'\u2026':m},
+  log:function(m){this.logs.unshift(m);if(this.logs.length>40)this.logs.pop();$('#scLog').textContent=this.logs.join('\n')},
+  tare:function(){this.tareOff=this.raw;this.samples=[];this.flow=0;this.push(this.raw)},
+  push:function(raw){
+    this.raw=raw;
+    var w=r1(raw-this.tareOff),now=performance.now();
+    this.prevW=this.w;this.w=w;
+    this.samples.push({t:now,w:w});
+    while(this.samples.length&&now-this.samples[0].t>2500)this.samples.shift();
+    var ref=null;
+    for(var i=0;i<this.samples.length;i++){if(now-this.samples[i].t<=1500){ref=this.samples[i];break}}
+    if(ref&&now-ref.t>400){
+      var f=(w-ref.w)/((now-ref.t)/1000);
+      this.flow=this.flow*0.5+clamp(f,-5,30)*0.5;
+    }
+    if($('#autoStart').checked&&!TM.running&&TM.acc===0&&w>=2&&this.prevW<1)TM.start();
+    this.show();
+  },
+  show:function(){
+    var w=this.w.toFixed(1),f=Math.abs(this.flow)<0.05?'0.0':this.flow.toFixed(1);
+    $('#lvW').textContent=w;$('#lvF').textContent=f;$('#sW').textContent=w;$('#sF').textContent=f;
+  },
+  parse:function(arr){
+    this.buf=this.buf.concat(arr);
+    while(this.buf.length>=5){
+      var i=-1;
+      for(var k=0;k<this.buf.length-1;k++){if(this.buf[k]===0xEF&&this.buf[k+1]===0xDD){i=k;break}}
+      if(i<0){this.buf=[];return}
+      if(i>0)this.buf=this.buf.slice(i);
+      var L=this.buf[3],total=3+L+2;
+      if(this.buf.length<total)return;
+      var p=this.buf.slice(0,total);this.buf=this.buf.slice(total);
+      if(p[2]===0x0C&&(p[4]===5||p[4]===8)){
+        var val=p[5]|(p[6]<<8)|(p[7]<<16);
+        var unit=p[9]||1;
+        val=val/Math.pow(10,unit);
+        if(p[10]&0x02)val=-val;
+        this.push(val);
+      }
+    }
+  },
+  write:async function(bytes){
+    if(!this.wChar)return;
+    var d=new Uint8Array(bytes);
+    try{if(this.wChar.writeValueWithoutResponse)await this.wChar.writeValueWithoutResponse(d);else await this.wChar.writeValue(d)}catch(e){this.log('write error: '+e.message)}
+  },
+  connect:async function(){
+    if(!navigator.bluetooth){this.say('Web Bluetooth not supported');toast('Use Chrome or Edge, not iPhone Safari');return}
+    try{
+      this.say('Choose scale\u2026');
+      this.dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:this.SVC});
+      var self=this;
+      this.dev.addEventListener('gattserverdisconnected',function(){self.onDrop()});
+      this.say('Connecting\u2026');
+      var srv=await this.dev.gatt.connect();
+      var svc=null;
+      for(var i=0;i<this.SVC.length&&!svc;i++){try{svc=await srv.getPrimaryService(this.SVC[i])}catch(e){}}
+      if(!svc)throw new Error('No Acaia-style service found');
+      var chars=await svc.getCharacteristics();
+      this.nChar=null;this.wChar=null;
+      chars.forEach(function(c){
+        self.log('char '+c.uuid+' '+Object.keys(c.properties).filter(function(k){return c.properties[k]}).join(','));
+        if(c.uuid===self.NEW_N)self.nChar=c;
+        if(c.uuid===self.NEW_W)self.wChar=c;
+        if(c.uuid===self.OLD_C){self.nChar=c;self.wChar=c}
+      });
+      if(!this.nChar){chars.forEach(function(c){if(!self.nChar&&c.properties.notify)self.nChar=c;if(!self.wChar&&(c.properties.write||c.properties.writeWithoutResponse))self.wChar=c})}
+      if(!this.nChar)throw new Error('No notify characteristic');
+      await this.nChar.startNotifications();
+      this.nChar.addEventListener('characteristicvaluechanged',function(ev){
+        var a=Array.prototype.slice.call(new Uint8Array(ev.target.value.buffer));
+        self.log(a.map(function(x){return ('0'+x.toString(16)).slice(-2)}).join(' '));
+        self.parse(a);
+      });
+      this.connected=true;
+      await this.write([0xEF,0xDD,0x0B,0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x30,0x31,0x32,0x33,0x34,0x9A,0x6D]);
+      await new Promise(function(r){setTimeout(r,300)});
+      await this.write([0xEF,0xDD,0x0C,0x09,0x00,0x01,0x01,0x02,0x02,0x05,0x03,0x04,0x15,0x06]);
+      this.hb=setInterval(function(){self.write([0xEF,0xDD,0x00,0x02,0x00,0x02,0x00])},3000);
+      this.say('Connected: '+(this.dev.name||'scale'));
+      toast('Scale connected');
+    }catch(e){
+      this.say('Failed: '+e.message);this.log('connect error: '+e.message);this.connected=false;
+    }
+  },
+  onDrop:function(){clearInterval(this.hb);this.connected=false;this.say('Scale disconnected')},
+  disconnect:function(){
+    if(this.demo){clearInterval(this.demo);this.demo=null}
+    if(this.dev&&this.dev.gatt.connected)this.dev.gatt.disconnect();
+    clearInterval(this.hb);this.connected=false;this.say('Disconnected');
+  },
+  runDemo:function(){
+    var self=this;
+    if(this.demo){clearInterval(this.demo);this.demo=null;this.say('Demo stopped');return}
+    if(!R)return;
+    this.tareOff=0;this.raw=0;this.w=0;this.prevW=0;this.samples=[];
+    TM.reset();
+    var t0=performance.now(),w=0;
+    this.say('Demo running');
+    this.demo=setInterval(function(){
+      var t=(performance.now()-t0)/1000;
+      var target=0;
+      for(var i=0;i<R.steps.length;i++){if(t>=R.steps[i].t)target=R.steps[i].cum}
+      var rate=target>w?7:0;
+      w=Math.min(target,w+rate*0.1);
+      if(t>R.end){clearInterval(self.demo);self.demo=null;self.say('Demo finished');return}
+      self.push(w+(Math.random()-0.5)*0.1);
+    },100);
+  }
+};
+$('#scConnect').onclick=function(){SC.connect()};
+$('#scDisc').onclick=function(){SC.disconnect()};
+$('#scTare').onclick=function(){SC.tare()};
+$('#scDemo').onclick=function(){SC.runDemo();go('brew')};
+
+/* ---------- boot ---------- */
+fillSelects();
+if(B.coffeeId)resetToCoffee();
+drawStars();
+update();
+draw();
+renderPantry();
+
+if('serviceWorker' in navigator){/* no service worker: keep the app a single file */}
+})();
+</script>
+</body>
+</html>
