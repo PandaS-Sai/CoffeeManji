@@ -36,159 +36,284 @@ button.sm{padding:7px 10px;font-size:12px;border-radius:10px}
 .row>*{flex:1}
 .row.n>*{flex:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  var end=steps[steps.length-1].t+55;
-  var notes=[];
-  if(e<-1.2)notes.push('Under-extraction risk (sour, hollow). Compensated: tighter ratio, longer bloom'+(n===5?', one extra pulse':'')+'. Add a gentle swirl after the bloom and pour a little higher (5-6 cm).');
-  else if(e>1.2)notes.push('Over-extraction risk (bitter, dry). Compensated: wider ratio, shorter bloom, slower pulses. Keep pours low and centre-only, no swirl.');
-  else notes.push('Balanced. Low kettle height (under 4 cm), gentle centre-dominant stream, no swirl during main pours.');
-  notes.push(d.note);
-  if(c.note)notes.push(c.note);
-  if(B.method==='iced')notes.push('Japanese iced: put '+ice+' g of ice in the server and pour '+hot+' g hot water over the coffee.');
-  return {c:c,cat:cat,d:d,e:e,ratio:ratio,total:total,hot:hot,ice:ice,steps:steps,bloomT:bloomT,end:end,notes:notes,base:base,rec:rec,kettle:r1(B.temp+d.tOff)};
-}
+.seg{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;background:transparent;border:0;padding:8px 6px;border-radius:9px;color:var(--mute)}
+.seg button.on{background:var(--accent);color:#1a1209;font-weight:700}
+.stepper{display:flex;gap:6px;align-items:center}
+.stepper button{width:44px;padding:10px 0;font-size:18px}
+.stepper input{text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:11px;padding:4px 9px;border-radius:99px;background:var(--bg2);border:1px solid var(--line);color:var(--mute)}
+.chip.good{color:var(--good);border-color:#355a38}
+.chip.warn{color:var(--warn);border-color:#6a5223}
+.chip.bad{color:var(--bad);border-color:#6a2c22}
+.chip.blue{color:var(--blue);border-color:#2a4a5c}
+.big{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 10px}
+.big div{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center}
+.big b{display:block;font-size:20px;color:var(--text)}
+.big small{color:var(--mute);font-size:10px;text-transform:uppercase;letter-spacing:.8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mute);text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
+td{padding:9px 4px;border-bottom:1px solid var(--line)}
+tr.cur td{background:#3b2a1a;color:#fff}
+tr.done td{opacity:.45}
+.timer{font-size:54px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:1px;margin:2px 0}
+.live{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
+.live div{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.live b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.live small{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.8px}
+.note{font-size:13px;color:var(--mute);margin:6px 0}
+.note b{color:var(--text)}
+.item{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item h3{margin:0 0 2px;font-size:15px}
+.item .meta{color:var(--mute);font-size:12px}
+.item .acts{display:flex;flex-direction:column;gap:6px;min-width:84px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,16,13,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:10}
+nav button{flex:1;background:transparent;border:0;color:var(--mute);padding:8px 2px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button i{font-style:normal;font-size:19px}
+nav button.on{color:var(--accent)}
+details{margin-bottom:12px}
+summary{cursor:pointer;color:var(--accent);font-size:13px;padding:6px 0}
+pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:11px;max-height:160px;overflow:auto;white-space:pre-wrap;word-break:break-all;color:var(--mute)}
+.stars button{padding:6px 10px}
+.stars button.on{background:var(--accent);color:#1a1209}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:10px 16px;border-radius:99px;font-size:13px;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1>Coffee <span>Lab OS</span></h1>
+  <p>Sai' Competition Lab &middot; Hyderabad &middot; Dual-Law: 85&ndash;90&deg;C + coarse grind</p>
+</header>
 
-var R=null;
+<main>
+<!-- ================= BREW ================= -->
+<section id="v-brew" class="view on">
+  <div class="card">
+    <h2>Setup</h2>
+    <label>Coffee (live pantry)</label>
+    <select id="bCoffee"></select>
+    <div class="grid2">
+      <div><label>Method</label>
+        <div class="seg" id="bMethod"><button data-v="hot" class="on">Hot</button><button data-v="iced">Iced</button></div></div>
+      <div><label>Dripper</label><select id="bDrip"></select></div>
+    </div>
+    <div id="bCoffeeInfo" class="chips"></div>
+  </div>
 
-function update(){
-  R=compute();if(!R)return;
-  var c=R.c;
-  var okT=B.temp>=85&&B.temp<=90,okG=B.zp>=5.4&&B.zp<=7.4;
-  $('#tempVal').textContent=B.temp.toFixed(1)+'\u00B0C';
-  $('#bTempR').value=B.temp;
-  $('#lawT').innerHTML=okT?'<span style="color:var(--good)">Inside Law 1 (85-90\u00B0C)</span>':'<span style="color:var(--warn)">Outside Law 1. This is an off-protocol brew.</span>';
-  $('#lawG').innerHTML=okG?'<span style="color:var(--good)">Inside Law 2 (coarse range)</span>':'<span style="color:var(--warn)">Outside Law 2 (ZP6 5.4-7.4).</span>';
-  $('#bDose').value=B.dose;
-  $('#dialLbl').textContent=B.grinder==='zp6'?'ZP6 dial':'C3S clicks';
-  var dial=$('#bDial');
-  if(B.grinder==='zp6'){dial.step='0.1';dial.value=B.zp.toFixed(1)}else{dial.step='1';dial.value=zpToC3(B.zp)}
-  $('#dialHint').textContent='Recommended: ZP6 '+R.rec.toFixed(1)+' / C3S '+zpToC3(R.rec)+' clicks';
-  $$('#bGrinder button').forEach(function(b){b.classList.toggle('on',b.dataset.v===B.grinder)});
-  $$('#bMethod button').forEach(function(b){b.classList.toggle('on',b.dataset.v===B.method)});
+  <div class="card">
+    <h2>Dial it in</h2>
+    <label>Dose (g)</label>
+    <div class="stepper">
+      <button id="doseM">&minus;</button>
+      <input type="number" id="bDose" step="0.5" min="5" max="60" inputmode="decimal">
+      <button id="doseP">+</button>
+    </div>
+    <label>Water temperature: <b id="tempVal"></b></label>
+    <input type="range" id="bTempR" min="80" max="96" step="0.5">
+    <div class="note" id="lawT"></div>
 
-  var d=daysOff(c.roastDate);
-  var info=['<span class="chip">'+esc(R.cat.label)+'</span>'];
-  if(c.roastDate)info.push('<span class="chip '+(d!=null&&d<5?'warn':'good')+'">Roasted '+esc(c.roastDate)+(d!=null?' ('+d+' d off roast)':'')+'</span>');
-  if(c.proc)info.push('<span class="chip">'+esc(c.proc)+'</span>');
-  $('#bCoffeeInfo').innerHTML=info.join('');
+    <label>Grinder</label>
+    <div class="seg" id="bGrinder"><button data-v="zp6" class="on">1Zpresso ZP6</button><button data-v="c3s">Timemore C3S</button></div>
+    <label id="dialLbl">ZP6 dial</label>
+    <div class="stepper">
+      <button id="dialM">&minus;</button>
+      <input type="number" id="bDial" step="0.1" inputmode="decimal">
+      <button id="dialP">+</button>
+    </div>
+    <div class="row n" style="margin-top:8px">
+      <button class="sm" id="resetDial">Reset to recommended</button>
+      <span class="note" id="dialHint" style="flex:1;margin:0 0 0 8px"></span>
+    </div>
+    <div class="note" id="lawG"></div>
+  </div>
 
-  $('#bBig').innerHTML=
-    '<div><b>'+(B.method==='iced'?R.hot:R.total)+'</b><small>'+(B.method==='iced'?'Hot water g':'Water g')+'</small></div>'+
-    '<div><b>1:'+R.ratio.toFixed(2).replace(/0$/,'')+'</b><small>Ratio</small></div>'+
-    '<div><b>'+R.kettle.toFixed(1)+'\u00B0</b><small>Kettle</small></div>'+
-    this.raw=raw;
-    var w=r1(raw-this.tareOff),now=performance.now();
-    this.prevW=this.w;this.w=w;
-    this.samples.push({t:now,w:w});
-    while(this.samples.length&&now-this.samples[0].t>2500)this.samples.shift();
-    var ref=null;
-    for(var i=0;i<this.samples.length;i++){if(now-this.samples[i].t<=1500){ref=this.samples[i];break}}
-    if(ref&&now-ref.t>400){
-      var f=(w-ref.w)/((now-ref.t)/1000);
-      this.flow=this.flow*0.5+clamp(f,-5,30)*0.5;
-    }
-    if($('#autoStart').checked&&!TM.running&&TM.acc===0&&w>=2&&this.prevW<1)TM.start();
-    this.show();
-  },
-  show:function(){
-    var w=this.w.toFixed(1),f=Math.abs(this.flow)<0.05?'0.0':this.flow.toFixed(1);
-    $('#lvW').textContent=w;$('#lvF').textContent=f;$('#sW').textContent=w;$('#sF').textContent=f;
-  },
-  parse:function(arr){
-    this.buf=this.buf.concat(arr);
-    while(this.buf.length>=5){
-      var i=-1;
-      for(var k=0;k<this.buf.length-1;k++){if(this.buf[k]===0xEF&&this.buf[k+1]===0xDD){i=k;break}}
-      if(i<0){this.buf=[];return}
-      if(i>0)this.buf=this.buf.slice(i);
-      var L=this.buf[3],total=3+L+2;
-      if(this.buf.length<total)return;
-      var p=this.buf.slice(0,total);this.buf=this.buf.slice(total);
-      if(p[2]===0x0C&&(p[4]===5||p[4]===8)){
-        var val=p[5]|(p[6]<<8)|(p[7]<<16);
-        var unit=p[9]||1;
-        val=val/Math.pow(10,unit);
-        if(p[10]&0x02)val=-val;
-        this.push(val);
-      }
-    }
-  },
-  write:async function(bytes){
-    if(!this.wChar)return;
-    var d=new Uint8Array(bytes);
-      this.say('Choose scale\u2026');
-      this.dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:this.SVC});
-      var self=this;
-      this.dev.addEventListener('gattserverdisconnected',function(){self.onDrop()});
-      this.say('Connecting\u2026');
-      var srv=await this.dev.gatt.connect();
-      var svc=null;
-      for(var i=0;i<this.SVC.length&&!svc;i++){try{svc=await srv.getPrimaryService(this.SVC[i])}catch(e){}}
-      if(!svc)throw new Error('No Acaia-style service found');
-      var chars=await svc.getCharacteristics();
-      this.nChar=null;this.wChar=null;
-      chars.forEach(function(c){
-        self.log('char '+c.uuid+' '+Object.keys(c.properties).filter(function(k){return c.properties[k]}).join(','));
-        if(c.uuid===self.NEW_N)self.nChar=c;
-        if(c.uuid===self.NEW_W)self.wChar=c;
-        if(c.uuid===self.OLD_C){self.nChar=c;self.wChar=c}
-      });
-      if(!this.nChar){chars.forEach(function(c){if(!self.nChar&&c.properties.notify)self.nChar=c;if(!self.wChar&&(c.properties.write||c.properties.writeWithoutResponse))self.wChar=c})}
-      if(!this.nChar)throw new Error('No notify characteristic');
-      await this.nChar.startNotifications();
-      this.nChar.addEventListener('characteristicvaluechanged',function(ev){
-        var a=Array.prototype.slice.call(new Uint8Array(ev.target.value.buffer));
-        self.log(a.map(function(x){return ('0'+x.toString(16)).slice(-2)}).join(' '));
-        self.parse(a);
-      });
-      this.connected=true;
-      await this.write([0xEF,0xDD,0x0B,0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x30,0x31,0x32,0x33,0x34,0x9A,0x6D]);
-      await new Promise(function(r){setTimeout(r,300)});
-      await this.write([0xEF,0xDD,0x0C,0x09,0x00,0x01,0x01,0x02,0x02,0x05,0x03,0x04,0x15,0x06]);
-      this.hb=setInterval(function(){self.write([0xEF,0xDD,0x00,0x02,0x00,0x02,0x00])},3000);
-      this.say('Connected: '+(this.dev.name||'scale'));
-      toast('Scale connected');
-    }catch(e){
-      this.say('Failed: '+e.message);this.log('connect error: '+e.message);this.connected=false;
-    }
-  },
-  onDrop:function(){clearInterval(this.hb);this.connected=false;this.say('Scale disconnected')},
-  disconnect:function(){
-    if(this.demo){clearInterval(this.demo);this.demo=null}
-    if(this.dev&&this.dev.gatt.connected)this.dev.gatt.disconnect();
-  runDemo:function(){
-    var self=this;
-    if(this.demo){clearInterval(this.demo);this.demo=null;this.say('Demo stopped');return}
-    if(!R)return;
-    this.tareOff=0;this.raw=0;this.w=0;this.prevW=0;this.samples=[];
-    TM.reset();
-    var t0=performance.now(),w=0;
-    this.say('Demo running');
-    this.demo=setInterval(function(){
-      var t=(performance.now()-t0)/1000;
-      var target=0;
-      for(var i=0;i<R.steps.length;i++){if(t>=R.steps[i].t)target=R.steps[i].cum}
-      var rate=target>w?7:0;
-      w=Math.min(target,w+rate*0.1);
-      if(t>R.end){clearInterval(self.demo);self.demo=null;self.say('Demo finished');return}
-      self.push(w+(Math.random()-0.5)*0.1);
-    },100);
-  }
+  <div class="card">
+    <h2>Recipe</h2>
+    <div class="big" id="bBig"></div>
+    <div class="chips" id="bChips"></div>
+    <table><thead><tr><th>Step</th><th>At</th><th>Pour</th><th>Scale to</th></tr></thead><tbody id="bSteps"></tbody></table>
+    <div class="note" id="bNotes"></div>
+  </div>
+
+  <div class="card">
+    <h2>Timer &amp; scale</h2>
+    <div class="timer" id="tmr">0:00</div>
+    <div class="live">
+      <div><b id="lvW">&ndash;</b><small>Weight g</small></div>
+      <div><b id="lvF">&ndash;</b><small>Flow g/s</small></div>
+      <div><b id="lvT">&ndash;</b><small>Target g</small></div>
+    </div>
+    <div class="row">
+      <button class="pri" id="tmrGo">Start</button>
+      <button id="tmrReset">Reset</button>
+      <button id="tmrTare">Tare</button>
+    </div>
+    <div class="note" id="scaleState">Scale not connected &mdash; open the Scale tab to connect, or run the demo.</div>
+  </div>
+
+  <div class="card">
+    <h2>Log this brew</h2>
+    <div class="stars" id="stars"></div>
+    <label>Tasting notes</label>
+    <textarea id="bNote" placeholder="Sweetness, acidity, finish, what to change next time"></textarea>
+    <div style="margin-top:10px"><button class="pri" id="saveLog">Save to log</button></div>
+  </div>
+</section>
+
+<!-- ================= PANTRY ================= -->
+<section id="v-pantry" class="view">
+  <div class="card">
+    <h2>Live pantry <span id="pCount" style="color:var(--mute)"></span></h2>
+    <div id="pList"></div>
+  </div>
+  <details class="card">
+    <summary>+ Add a new coffee</summary>
+    <label>Name</label><input type="text" id="nName" placeholder="e.g. Subko Pearl">
+    <label>Roaster</label><input type="text" id="nRoaster">
+    <label>Process / origin (optional)</label><input type="text" id="nProc">
+    <div class="grid2">
+      <div><label>Category</label><select id="nCat"></select></div>
+      <div><label>Roast date</label><input type="date" id="nDate"></div>
+    </div>
+    <div style="margin-top:12px"><button class="pri" id="nAdd">Add to pantry &amp; vault</button></div>
+  </details>
+</section>
+
+<!-- ================= VAULT ================= -->
+<section id="v-vault" class="view">
+  <div class="card">
+    <h2>Master vault <span id="vCount" style="color:var(--mute)"></span></h2>
+    <input type="text" id="vSearch" placeholder="Search coffee or roaster">
+    <div class="seg" id="vFilter" style="margin-top:10px"><button data-v="all" class="on">All</button><button data-v="active">Active</button><button data-v="archived">Archive</button></div>
+    <div id="vList" style="margin-top:6px"></div>
+  </div>
+</section>
+
+<!-- ================= SCALE ================= -->
+<section id="v-scale" class="view">
+  <div class="card">
+    <h2>Bluetooth scale</h2>
+    <div class="note">Works in Chrome / Edge on Android and desktop over HTTPS (GitHub Pages is fine). iPhone Safari does not support Web Bluetooth. Built for Acaia-protocol scales such as the MisChief Lunar; other scales may need a different parser.</div>
+    <div class="row" style="margin:10px 0">
+      <button class="pri" id="scConnect">Connect scale</button>
+      <button id="scDisc">Disconnect</button>
+    </div>
+    <div class="row">
+      <button id="scDemo">Run demo</button>
+      <button id="scTare">Tare</button>
+    </div>
+    <label><input type="checkbox" id="autoStart" checked style="width:auto;margin-right:6px">Auto-start timer when water first lands</label>
+    <div class="live">
+      <div><b id="sW">&ndash;</b><small>Weight g</small></div>
+      <div><b id="sF">&ndash;</b><small>Flow g/s</small></div>
+      <div><b id="sS" style="font-size:14px;padding-top:6px">idle</b><small>Status</small></div>
+    </div>
+    <details><summary>Raw Bluetooth log (send me this if weight looks wrong)</summary><pre id="scLog">no data yet</pre></details>
+  </div>
+</section>
+
+<!-- ================= LAB ================= -->
+<section id="v-lab" class="view">
+  <div class="card">
+    <h2>The two laws</h2>
+    <div class="note"><b>Law 1 &mdash; Temperature:</b> slurry water strictly 85&ndash;90&deg;C.<br><b>Law 2 &mdash; Grind:</b> coarse range, ZP6 5.4&ndash;7.4 (C3S 13&ndash;18 clicks). Mechanical compensation: tighter ratios, longer bloom, staged pulses.</div>
+    <table><thead><tr><th>Category</th><th>Ratio</th><th>Base temp</th><th>ZP6</th></tr></thead><tbody id="catTable"></tbody></table>
+    <div class="note">The engine treats extraction as a balance: hotter or finer pushes extraction up, cooler or coarser pushes it down. Where you stray from a coffee's baseline it adjusts ratio, bloom time and number of pulses. It is a guide, taste is the judge.</div>
+  </div>
+  <div class="card">
+    <h2>Drippers</h2>
+    <div id="dripList"></div>
+  </div>
+  <div class="card">
+    <h2>Orea V1 rules</h2>
+    <div class="note">Remove the Switch converter until you own the Switch base. Run the Orea in its open flat-bed configuration, otherwise the plug restricts drainage and water puddles.</div>
+  </div>
+  <div class="card">
+    <h2>Brew log <span id="lCount" style="color:var(--mute)"></span></h2>
+    <div id="logList"></div>
+  </div>
+  <div class="card">
+    <h2>Data</h2>
+    <div class="note">Everything is saved in this browser only. Export a backup before clearing browser data.</div>
+    <div class="row" style="margin-top:8px"><button id="exp">Export JSON</button><button id="imp">Import JSON</button></div>
+    <input type="file" id="impFile" accept="application/json" style="display:none">
+    <div style="margin-top:10px"><button class="dng sm" id="reset">Reset to factory data</button></div>
+  </div>
+</section>
+</main>
+
+<nav id="nav">
+  <button data-v="brew" class="on"><i>&#9749;</i>Brew</button>
+  <button data-v="pantry"><i>&#127793;</i>Pantry</button>
+  <button data-v="vault"><i>&#128230;</i>Vault</button>
+  <button data-v="scale"><i>&#9878;</i>Scale</button>
+  <button data-v="lab"><i>&#129514;</i>Lab</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+var $=function(s){return document.querySelector(s)};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+var clamp=function(v,a,b){return Math.min(b,Math.max(a,v))};
+var r1=function(v){return Math.round(v*10)/10};
+var r2=function(v){return Math.round(v*100)/100};
+var fmt=function(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var zpToC3=function(z){return Math.round(13+(z-5.4)*2.5)};
+var c3ToZp=function(c){return r1(5.4+(c-13)/2.5)};
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('on')},2200)}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function daysOff(d){if(!d)return null;var n=Math.floor((Date.now()-new Date(d+'T00:00:00').getTime())/86400000);return n>=0?n:null}
+
+/* ---------- reference data ---------- */
+var CAT={
+  nordic:{label:'Nordic / Geisha',ratio:15.0,base:90,zp:5.4},
+  ml:{label:'Medium-light',ratio:15.5,base:89,zp:5.6},
+  med:{label:'Medium',ratio:15.0,base:88,zp:5.8},
+  md:{label:'Medium-dark / dark',ratio:14.5,base:86,zp:6.6},
+  rob:{label:'100% Robusta',ratio:14.0,base:85,zp:7.2}
 };
-$('#scConnect').onclick=function(){SC.connect()};
-$('#scDisc').onclick=function(){SC.disconnect()};
-$('#scTare').onclick=function(){SC.tare()};
-$('#scDemo').onclick=function(){SC.runDemo();go('brew')};
-
-/* ---------- boot ---------- */
-fillSelects();
-if(B.coffeeId)resetToCoffee();
-drawStars();
-update();
-draw();
-renderPantry();
-
-if('serviceWorker' in navigator){/* no service worker: keep the app a single file */}
-})();
-</script>
-</body>
-</html>
+var DRIP={
+  origami:{name:'Origami 02',shape:'Conical, fluted',gOff:0,tOff:0,note:'Fluted walls drain fast. Keep pours centre-dominant and low.'},
+  neo:{name:'Amber Neo V60',shape:'Conical, spiral ribs',gOff:0,tOff:0,note:'Open ribs keep flow brisk. Pairs well with a firm bloom swirl.'},
+  balloon:{name:'Balloon-Glass V60',shape:'Conical, glass',gOff:0,tOff:0.5,note:'Glass loses heat. Preheat well and set the kettle half a degree higher.'},
+  ceramic:{name:'Ceramic V60',shape:'Conical, ceramic',gOff:0,tOff:1,note:'Thermal mass steals heat. Preheat thoroughly; kettle +1\u00B0C keeps the slurry on target.'},
+  kalita:{name:'Kalita 102-D',shape:'Flat-bed wedge',gOff:-0.1,tOff:0,note:'Flat bed is forgiving. Pour in steady even circles, no swirl.'},
+  orea:{name:'Orea V1 Stainless',shape:'Flat-bed, open base',gOff:-0.2,tOff:0,note:'Fast vertical drainage and double-wall heat retention. Open configuration only, converter removed. Kalita Wave style paper.'}
+};
+var COFFEES=[
+  {id:'subko-rat',name:'Subko Ratnagiri (Pearl)',roaster:'Subko',proc:'',cat:'nordic',status:'active',roastDate:'',dose:15,note:''},
+  {id:'pink-lem',name:'Pink Lemonade',roaster:'',proc:'',cat:'nordic',status:'active',roastDate:'',dose:15,note:''},
+  {id:'broot-sl',name:'Broot Sur Lie',roaster:'Broot',proc:'Sur lie',cat:'ml',status:'active',roastDate:'',dose:15,note:''},
+  {id:'broot-mt',name:'Broot Moss Theory',roaster:'Broot',proc:'',cat:'ml',status:'active',roastDate:'',dose:25,note:'Works well as a Japanese iced brew: 25g dose.'},
+  {id:'raxidi',name:'Roastery Raxidi Lobo',roaster:'Roastery',proc:'',cat:'med',status:'active',roastDate:'',dose:15,zp:5.8,note:''},
+  {id:'bold2',name:'Bold Edition #2',roaster:'',proc:'',cat:'md',status:'active',roastDate:'',dose:15,zp:6.8,note:''},
+  {id:'ph7',name:'PH-Seven Robusta-AA',roaster:'PH-Seven',proc:'',cat:'rob',status:'active',roastDate:'',dose:15,zp:7.2,note:'100% Robusta.'},
+  {id:'tims',name:'Tim Hortons Signature',roaster:'Tim Hortons',proc:'',cat:'med',status:'active',roastDate:'',dose:15,zp:6.2,note:''},
+  {id:'unakki',name:'ROAST Coffee Unakki Washed Arabica',roaster:'ROAST Coffee',proc:'Washed, Chandragiri 1220m, Agtron 68',cat:'ml',status:'active',roastDate:'2026-10-03',dose:15,zp:5.6,note:'Medium roast.'},
+  {id:'geisha',name:'ROAST Coffee Golden Geisha (Easy Pour sachets)',roaster:'ROAST Coffee',proc:'Geisha, nitro-flushed, 5 sachets',cat:'nordic',status:'active',roastDate:'',dose:15,note:'Drip sachets: roughly 150-160 g water each.'},
+  {id:'rumba',name:'DAK Coffee Roasters Rumba',roaster:'DAK Coffee Roasters',proc:'',cat:'nordic',status:'active',roastDate:'',dose:10,note:'20 g total in two 10 g packets, kept frozen. Grind from frozen.'},
+  {id:'araku-sel',name:'Araku Selection',roaster:'Araku',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'araku-mon',name:'Araku Monsoon Edit',roaster:'Araku',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'araku-mic',name:'Araku Micro Climate',roaster:'Araku',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'c7-baar',name:'Corridor Seven Baarbara',roaster:'Corridor Seven',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'c7-div',name:'Corridor Seven Divenchi',roaster:'Corridor Seven',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'tul-swell',name:'Tulum Swell',roaster:'Tulum',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'tul-lumen',name:'Tulum Lumen',roaster:'Tulum',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'tul-baar',name:'Tulum Baarbara',roaster:'Tulum',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'bloom-vvg',name:'Bloom Vin Van Gogh',roaster:'Bloom',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'bili-agh',name:'Bili Hu Aghora',roaster:'Bili Hu',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'bili-ara',name:'Bili Hu Arabica Blend',roaster:'Bili Hu',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'hl-sal',name:'Half Light Salawara #02',roaster:'Half Light',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'toise',name:'Toise Brewstudio The Enchanter',roaster:'Toise Brewstudio',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'elbueno',name:'El Bueno Golden Glow (Ratnagiri)',roaster:'El Bueno',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
+  {id:'sbux',name:'Starbucks Benchmark',roaster:'Starbucks',proc:'',cat:'md',status:'archived',roastDate:'',dose:15,zp:6.6,est:1,note:'Used as a benchmark.'},
+  {id:'bt-sal',name:'Blue Tokai Salawara',roaster:'Blue Tokai',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,zp:5.6,note:'Bag finished.'},
+  {id:'grey-miz',name:'
