@@ -5,15 +5,28 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#14100d">
 <title>Coffee Lab OS</title>
+<script>
+/* Watchdog: if the app script is cut off or crashes, say so instead of failing silently. */
+window.__coloOK=false;
+window.addEventListener('error',function(e){window.__coloErr=(e&&e.message)||'error'});
+setTimeout(function(){
+  if(window.__coloOK)return;
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99;background:#a8382a;color:#fff;padding:12px 14px;font:14px/1.4 system-ui,sans-serif';
+  d.textContent='Coffee Lab OS did not start'+(window.__coloErr?' ('+window.__coloErr+')':'')+'. The file is probably cut off. Re-upload index.html using Add file > Upload files instead of pasting.';
+  (document.body||document.documentElement).appendChild(d);
+},2500);
+</script>
 <style>
 :root{
   --bg:#14100d; --bg2:#1c1612; --card:#241c16; --card2:#2d231b; --line:#3a2d23;
   --text:#f3e9dc; --mute:#a8957f; --accent:#e0a458; --accent2:#c9772f;
   --good:#7bc47f; --warn:#e8b04a; --bad:#e2674f; --blue:#6fb3d9;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
   --r:16px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.4}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.4}
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 header{padding:calc(14px + env(safe-area-inset-top)) 16px 10px;background:linear-gradient(180deg,#2a1e15,var(--bg));position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}
 header h1{margin:0;font-size:20px;letter-spacing:.3px}
@@ -23,8 +36,8 @@ main{max-width:760px;margin:0 auto;padding:12px 14px}
 .view{display:none}.view.on{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
 .card h2{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent)}
-label{display:block;font-size:12px;color:var(--mute);margin:10px 0 4px}
-select,input[type=text],input[type=number],input[type=date],textarea{width:100%;background:var(--bg2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:16px;font-family:inherit}
+label,.lbl{display:block;font-size:12px;color:var(--mute);margin:10px 0 4px}
+select,input[type=text],input[type=number],input[type=date],input[type=search],textarea{width:100%;background:var(--bg2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:16px;font-family:inherit}
 textarea{min-height:60px;resize:vertical}
 input[type=range]{width:100%;accent-color:var(--accent)}
 button{font-family:inherit;font-size:14px;border:0;border-radius:12px;padding:10px 14px;background:var(--card2);color:var(--text);border:1px solid var(--line);cursor:pointer}
@@ -32,6 +45,7 @@ button:active{transform:scale(.98)}
 button.pri{background:var(--accent);color:#1a1209;border-color:var(--accent);font-weight:700}
 button.dng{color:var(--bad)}
 button.sm{padding:7px 10px;font-size:12px;border-radius:10px}
+a{color:var(--blue)}
 .row{display:flex;gap:10px;align-items:center}
 .row>*{flex:1}
 .row.n>*{flex:none}
@@ -48,6 +62,9 @@ button.sm{padding:7px 10px;font-size:12px;border-radius:10px}
 .chip.warn{color:var(--warn);border-color:#6a5223}
 .chip.bad{color:var(--bad);border-color:#6a2c22}
 .chip.blue{color:var(--blue);border-color:#2a4a5c}
+.chip.tag{color:var(--text)}
+.chip.dim{opacity:.75;font-style:italic}
+.chip.hit{border-color:#355a38;color:var(--good)}
 .big{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 10px}
 .big div{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center}
 .big b{display:block;font-size:20px;color:var(--text)}
@@ -64,28 +81,83 @@ tr.done td{opacity:.45}
 .live small{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.8px}
 .note{font-size:13px;color:var(--mute);margin:6px 0}
 .note b{color:var(--text)}
-.item{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.item{padding:12px 0;border-bottom:1px solid var(--line)}
 .item:last-child{border-bottom:0}
+.item .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .item h3{margin:0 0 2px;font-size:15px}
 .item .meta{color:var(--mute);font-size:12px}
 .item .acts{display:flex;flex-direction:column;gap:6px;min-width:84px}
-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,16,13,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:10}
-nav button{flex:1;background:transparent;border:0;color:var(--mute);padding:8px 2px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,16,13,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:10}
+nav button{flex:1;background:transparent;border:0;color:var(--mute);padding:8px 0;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:8px}
 nav button i{font-style:normal;font-size:19px}
 nav button.on{color:var(--accent)}
 details{margin-bottom:12px}
+details.card{margin-bottom:12px}
 summary{cursor:pointer;color:var(--accent);font-size:13px;padding:6px 0}
 pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:11px;max-height:160px;overflow:auto;white-space:pre-wrap;word-break:break-all;color:var(--mute)}
-.stars button{padding:6px 10px}
-.stars button.on{background:var(--accent);color:#1a1209}
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:10px 16px;border-radius:99px;font-size:13px;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:10px 16px;border-radius:99px;font-size:13px;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
 .toast.on{opacity:1}
+
+/* ---------- notebook journal form ---------- */
+.journal{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg2)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+.fg .full{grid-column:1/-1}
+.fg .third{grid-column:span 1}
+.fld label{margin:8px 0 2px;font-size:11px;text-transform:uppercase;letter-spacing:.8px}
+.fld input,.fld select{border-radius:8px;border-color:var(--line);background:var(--card);padding:9px 10px;font-size:15px}
+.fg4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fg4 .fld input{padding:9px 6px;text-align:center}
+.ruled{width:100%;min-height:118px;line-height:23px;padding:2px 10px;border-radius:8px;background-color:var(--card);background-image:repeating-linear-gradient(transparent,transparent 22px,#4a3a2c 22px,#4a3a2c 23px);background-attachment:local}
+.boxlabel{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--mute);margin:10px 0 4px}
+.stars{display:flex;gap:4px}
+.stars button{background:transparent;border:0;font-size:28px;padding:2px 4px;color:#5a4838;line-height:1}
+.stars button.on{color:var(--accent)}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+.checks label{display:flex;align-items:center;gap:8px;margin:2px 0;font-size:14px;color:var(--text);text-transform:none;letter-spacing:0}
+.checks input{width:18px;height:18px;accent-color:var(--accent)}
+.wheelbox{display:flex;justify-content:center}
+.wheelbox svg{width:100%;max-width:360px;height:auto;touch-action:manipulation}
+.sl{display:grid;grid-template-columns:96px 1fr 18px;gap:8px;align-items:center;font-size:12px;color:var(--mute);margin:3px 0}
+.sl b{color:var(--text);text-align:right}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.two{grid-template-columns:1fr}.fg4{grid-template-columns:1fr 1fr}}
+
+/* ---------- logs ---------- */
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.filters .full{grid-column:1/-1}
+.filters select,.filters input{padding:9px 10px;font-size:14px;border-radius:10px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.tile b{display:block;font-size:20px}
+.tile small{display:block;color:var(--mute);font-size:10px;text-transform:uppercase;letter-spacing:.8px}
+.dayh{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:1px;margin:14px 2px 6px}
+.entry{display:flex;gap:10px;justify-content:space-between}
+.entry .l{flex:1;min-width:0}
+.entry h3{margin:0;font-size:15px}
+.entry .stars-s{color:var(--accent);letter-spacing:1px;font-size:13px}
+.entry p{margin:6px 0 0;font-size:13px;color:var(--text);white-space:pre-wrap;word-break:break-word}
+.entry svg.mini{width:92px;height:92px;flex:none}
+.attr{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);background:var(--bg2);color:var(--mute);font-size:12px;cursor:pointer}
+.attr.on{color:var(--text);border-color:var(--accent)}
+.attr .sw{width:14px;height:3px;border-radius:2px;background:var(--mute)}
+.chartwrap{position:relative}
+.chartwrap svg{width:100%;height:auto;display:block}
+.tip{position:absolute;pointer-events:none;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;min-width:120px;z-index:3;display:none}
+.tip b{display:block;margin-bottom:2px}
+.tip .k{display:flex;align-items:center;gap:6px}
+.tip .k i{width:10px;height:3px;border-radius:2px;display:inline-block}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:40;display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:18px 18px 0 0;width:100%;max-width:760px;max-height:92vh;overflow:auto;padding:14px}
+.empty{color:var(--mute);font-size:13px;padding:12px 0;text-align:center}
+.src{font-size:11px;color:var(--mute)}
+.secthead{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mute);margin:10px 0 2px}
 </style>
 </head>
 <body>
 <header>
   <h1>Coffee <span>Lab OS</span></h1>
-  <p>Sai' Competition Lab &middot; Hyderabad &middot; Dual-Law: 85&ndash;90&deg;C + coarse grind</p>
+  <p>Sai' Competition Lab &middot; Hyderabad &middot; Roast-Matched Protocol: coarse grind, temperature by roast</p>
 </header>
 
 <main>
@@ -151,15 +223,18 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
       <button id="tmrReset">Reset</button>
       <button id="tmrTare">Tare</button>
     </div>
-    <div class="note" id="scaleState">Scale not connected &mdash; open the Scale tab to connect, or run the demo.</div>
+    <div class="note" id="scaleState">Scale not connected. Open the Scale tab to connect, or run the demo.</div>
   </div>
 
   <div class="card">
-    <h2>Log this brew</h2>
-    <div class="stars" id="stars"></div>
-    <label>Tasting notes</label>
-    <textarea id="bNote" placeholder="Sweetness, acidity, finish, what to change next time"></textarea>
-    <div style="margin-top:10px"><button class="pri" id="saveLog">Save to log</button></div>
+    <h2>Brew journal</h2>
+    <div class="note" style="margin-top:0">Everything here is optional. It fills itself from the brew above; type over anything.</div>
+    <div class="row n" style="margin:6px 0 10px;gap:8px">
+      <button class="sm" id="jFill">Fill from this brew</button>
+      <button class="sm" id="jClear">Clear form</button>
+    </div>
+    <div id="bForm"></div>
+    <div style="margin-top:12px"><button class="pri" id="jSave" style="width:100%">Save to journal</button></div>
   </div>
 </section>
 
@@ -186,9 +261,50 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 <section id="v-vault" class="view">
   <div class="card">
     <h2>Master vault <span id="vCount" style="color:var(--mute)"></span></h2>
-    <input type="text" id="vSearch" placeholder="Search coffee or roaster">
+    <input type="search" id="vSearch" placeholder="Search coffee or roaster">
     <div class="seg" id="vFilter" style="margin-top:10px"><button data-v="all" class="on">All</button><button data-v="active">Active</button><button data-v="archived">Archive</button></div>
     <div id="vList" style="margin-top:6px"></div>
+  </div>
+</section>
+
+<!-- ================= LOGS ================= -->
+<section id="v-logs" class="view">
+  <div class="card">
+    <h2>Filters</h2>
+    <div class="filters">
+      <input class="full" type="search" id="fQ" placeholder="Search notes, coffee, flavours">
+      <select id="fCoffee"></select>
+      <select id="fDrip"></select>
+      <select id="fMethod"></select>
+      <select id="fRating"></select>
+      <select id="fRange"></select>
+      <select id="fSort"></select>
+      <input type="date" id="fFrom" style="display:none">
+      <input type="date" id="fTo" style="display:none">
+      <button class="sm full" id="fClear">Clear filters</button>
+    </div>
+  </div>
+
+  <div class="tiles" id="lTiles"></div>
+
+  <div class="card">
+    <h2>Taste trend</h2>
+    <div class="note" style="margin-top:0">Pick up to four. One point per brew, using the filters above.</div>
+    <div id="lAttrs" class="chips"></div>
+    <div id="lChart"></div>
+    <div class="row n" style="margin-top:6px"><button class="sm" id="lTableBtn">Show table</button></div>
+    <div id="lTable" style="display:none;margin-top:8px;overflow:auto"></div>
+  </div>
+
+  <div class="card">
+    <h2>Average taste wheel</h2>
+    <div class="note" style="margin-top:0" id="lAvgNote"></div>
+    <div class="wheelbox" id="lAvg"></div>
+  </div>
+
+  <div class="card">
+    <h2>Journal <span id="lCount" style="color:var(--mute)"></span></h2>
+    <div id="lList"></div>
   </div>
 </section>
 
@@ -196,7 +312,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 <section id="v-scale" class="view">
   <div class="card">
     <h2>Bluetooth scale</h2>
-    <div class="note">Works in Chrome / Edge on Android and desktop over HTTPS (GitHub Pages is fine). iPhone Safari does not support Web Bluetooth. Built for Acaia-protocol scales such as the MisChief Lunar; other scales may need a different parser.</div>
+    <div class="note">Works in Chrome or Edge on Android and desktop over HTTPS (GitHub Pages is fine). iPhone Safari does not support Web Bluetooth. Built for Acaia-protocol scales such as the MisChief Lunar; other scales may need a different parser.</div>
     <div class="row" style="margin:10px 0">
       <button class="pri" id="scConnect">Connect scale</button>
       <button id="scDisc">Disconnect</button>
@@ -205,23 +321,22 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
       <button id="scDemo">Run demo</button>
       <button id="scTare">Tare</button>
     </div>
-    <label><input type="checkbox" id="autoStart" checked style="width:auto;margin-right:6px">Auto-start timer when water first lands</label>
+    <label style="display:flex;align-items:center;gap:8px;color:var(--text)"><input type="checkbox" id="autoStart" checked style="width:auto;margin:0">Auto-start timer when water first lands</label>
     <div class="live">
       <div><b id="sW">&ndash;</b><small>Weight g</small></div>
       <div><b id="sF">&ndash;</b><small>Flow g/s</small></div>
       <div><b id="sS" style="font-size:14px;padding-top:6px">idle</b><small>Status</small></div>
     </div>
-    <details><summary>Raw Bluetooth log (send me this if weight looks wrong)</summary><pre id="scLog">no data yet</pre></details>
+    <details><summary>Raw Bluetooth log (send this if the weight looks wrong)</summary><pre id="scLog">no data yet</pre></details>
   </div>
 </section>
 
 <!-- ================= LAB ================= -->
 <section id="v-lab" class="view">
   <div class="card">
-    <h2>The two laws</h2>
-    <div class="note"><b>Law 1 &mdash; Temperature:</b> slurry water strictly 85&ndash;90&deg;C.<br><b>Law 2 &mdash; Grind:</b> coarse range, ZP6 5.4&ndash;7.4 (C3S 13&ndash;18 clicks). Mechanical compensation: tighter ratios, longer bloom, staged pulses.</div>
-    <table><thead><tr><th>Category</th><th>Ratio</th><th>Base temp</th><th>ZP6</th></tr></thead><tbody id="catTable"></tbody></table>
-    <div class="note">The engine treats extraction as a balance: hotter or finer pushes extraction up, cooler or coarser pushes it down. Where you stray from a coffee's baseline it adjusts ratio, bloom time and number of pulses. It is a guide, taste is the judge.</div>
+    <h2>The protocol</h2>
+    <div class="note"><b>Coarse grind stays:</b> ZP6 about 5.2-7.4 (C3S 12-18 clicks). <b>Temperature follows the roast</b> instead of one cap for everything. Hotter or finer pushes extraction up; cooler or coarser pushes it down, and the engine adjusts ratio, bloom and pulses when you stray from a coffee's baseline.</div>
+    <table><thead><tr><th>Category</th><th>Kettle</th><th>Ratio</th><th>ZP6</th></tr></thead><tbody id="catTable"></tbody></table>
   </div>
   <div class="card">
     <h2>Drippers</h2>
@@ -232,15 +347,13 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
     <div class="note">Remove the Switch converter until you own the Switch base. Run the Orea in its open flat-bed configuration, otherwise the plug restricts drainage and water puddles.</div>
   </div>
   <div class="card">
-    <h2>Brew log <span id="lCount" style="color:var(--mute)"></span></h2>
-    <div id="logList"></div>
-  </div>
-  <div class="card">
     <h2>Data</h2>
     <div class="note">Everything is saved in this browser only. Export a backup before clearing browser data.</div>
-    <div class="row" style="margin-top:8px"><button id="exp">Export JSON</button><button id="imp">Import JSON</button></div>
+    <div class="row" style="margin-top:8px"><button id="exp">Export JSON</button><button id="expCsv">Export logs CSV</button></div>
+    <div class="row" style="margin-top:8px"><button id="imp">Import JSON</button></div>
     <input type="file" id="impFile" accept="application/json" style="display:none">
     <div style="margin-top:10px"><button class="dng sm" id="reset">Reset to factory data</button></div>
+    <div class="note" style="margin-top:12px">Coffee Lab OS v3 &middot; if this line is visible, the full page loaded.</div>
   </div>
 </section>
 </main>
@@ -249,81 +362,133 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
   <button data-v="brew" class="on"><i>&#9749;</i>Brew</button>
   <button data-v="pantry"><i>&#127793;</i>Pantry</button>
   <button data-v="vault"><i>&#128230;</i>Vault</button>
+  <button data-v="logs"><i>&#128211;</i>Logs</button>
   <button data-v="scale"><i>&#9878;</i>Scale</button>
   <button data-v="lab"><i>&#129514;</i>Lab</button>
 </nav>
-<div class="toast" id="toast"></div>
 
+<div class="modal" id="modal"><div class="sheet">
+  <h2 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent)">Edit journal entry</h2>
+  <div id="eForm"></div>
+  <div class="row" style="margin-top:12px"><button id="eCancel">Cancel</button><button class="pri" id="eSave">Save changes</button></div>
+</div></div>
+<datalist id="coffeeNames"></datalist>
+<div class="toast" id="toast"></div>
 <script>
 (function(){
 'use strict';
 
 /* ---------- helpers ---------- */
-var $=function(s){return document.querySelector(s)};
-var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
 var clamp=function(v,a,b){return Math.min(b,Math.max(a,v))};
 var r1=function(v){return Math.round(v*10)/10};
 var r2=function(v){return Math.round(v*100)/100};
 var fmt=function(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var clone=function(o){return JSON.parse(JSON.stringify(o))};
 var zpToC3=function(z){return Math.round(13+(z-5.4)*2.5)};
 var c3ToZp=function(c){return r1(5.4+(c-13)/2.5)};
-function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('on')},2200)}
-function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('on')},2400)}
+function pad2(n){return String(n).padStart(2,'0')}
+function dstr(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())}
+function today(){return dstr(new Date())}
 function daysOff(d){if(!d)return null;var n=Math.floor((Date.now()-new Date(d+'T00:00:00').getTime())/86400000);return n>=0?n:null}
+function dayLabel(d){try{return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}catch(e){return d}}
+function shortDay(d){try{return new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'})}catch(e){return d}}
+function parseTime(s){s=String(s||'').trim();if(!s)return 0;if(s.indexOf(':')>=0){var p=s.split(':');return (parseInt(p[0],10)||0)*60+(parseInt(p[1],10)||0)}return parseFloat(s)||0}
+function num(v){var n=parseFloat(v);return isNaN(n)?'':n}
 
 /* ---------- reference data ---------- */
 var CAT={
-  nordic:{label:'Nordic / Geisha',ratio:15.0,base:90,zp:5.4},
-  ml:{label:'Medium-light',ratio:15.5,base:89,zp:5.6},
-  med:{label:'Medium',ratio:15.0,base:88,zp:5.8},
-  md:{label:'Medium-dark / dark',ratio:14.5,base:86,zp:6.6},
-  rob:{label:'100% Robusta',ratio:14.0,base:85,zp:7.2}
+  nordic:{label:'Nordic / Geisha',ratio:15.5,base:93,range:[92,94],zp:5.4},
+  ml:{label:'Medium-light',ratio:15.5,base:91,range:[90,92],zp:5.6},
+  med:{label:'Medium',ratio:15.0,base:89,range:[88,90],zp:5.8},
+  md:{label:'Medium-dark / dark',ratio:14.5,base:86,range:[85,87],zp:6.6},
+  rob:{label:'100% Robusta',ratio:14.0,base:85,range:[84,86],zp:7.2}
 };
 var DRIP={
   origami:{name:'Origami 02',shape:'Conical, fluted',gOff:0,tOff:0,note:'Fluted walls drain fast. Keep pours centre-dominant and low.'},
   neo:{name:'Amber Neo V60',shape:'Conical, spiral ribs',gOff:0,tOff:0,note:'Open ribs keep flow brisk. Pairs well with a firm bloom swirl.'},
   balloon:{name:'Balloon-Glass V60',shape:'Conical, glass',gOff:0,tOff:0.5,note:'Glass loses heat. Preheat well and set the kettle half a degree higher.'},
-  ceramic:{name:'Ceramic V60',shape:'Conical, ceramic',gOff:0,tOff:1,note:'Thermal mass steals heat. Preheat thoroughly; kettle +1\u00B0C keeps the slurry on target.'},
+  ceramic:{name:'Ceramic V60',shape:'Conical, ceramic',gOff:0,tOff:1,note:'Thermal mass steals heat. Preheat thoroughly; kettle +1°C keeps the slurry on target.'},
   kalita:{name:'Kalita 102-D',shape:'Flat-bed wedge',gOff:-0.1,tOff:0,note:'Flat bed is forgiving. Pour in steady even circles, no swirl.'},
   orea:{name:'Orea V1 Stainless',shape:'Flat-bed, open base',gOff:-0.2,tOff:0,note:'Fast vertical drainage and double-wall heat retention. Open configuration only, converter removed. Kalita Wave style paper.'}
 };
+var WHEEL=[
+  {k:'sweet',n:'Sweet'},{k:'acid',n:'Acidic'},{k:'floral',n:'Floral'},{k:'spicy',n:'Spicy'},
+  {k:'salty',n:'Salty'},{k:'berry',n:'Berry fruit'},{k:'citrus',n:'Citrus fruit'},{k:'stone',n:'Stone fruit'},
+  {k:'choc',n:'Chocolate'},{k:'caramel',n:'Caramel'},{k:'smoky',n:'Smoky'},{k:'bitter',n:'Bitter'},
+  {k:'savory',n:'Savory'},{k:'body',n:'Body'},{k:'clean',n:'Clean'},{k:'finish',n:'Linger / finish'}
+];
+var METHODS=['Cupping','Drip','Espresso','Pour-over','French press','Moka pot','Other'];
+
+function C(id,name,roaster,cat,status,o){
+  var c={id:id,name:name,roaster:roaster||'',proc:'',cat:cat,status:status,roastDate:'',dose:15,note:'',
+    producer:'',varietal:'',roastLevel:'',roasterNotes:[],otherNotes:[],typical:[],src:'',caveat:''};
+  for(var k in o)c[k]=o[k];return c;
+}
+var U_SUBKO='https://www.subko.coffee/products/project-pearl-ratnagiri-estate-karnataka-naturals-anaerobic-honey-omni-roast';
+var U_PINK='https://www.thewaytocoffee.com/beans/pink-lemonade-ultra-light/';
+var U_RUMBA='https://eightouncecoffee.com/products/dak-rumba';
+var U_RAX='https://bluetokaicoffee.com/products/raxidi-lobo-estate-anaerobic-naturals';
+var U_UNAKKI='https://www.thewaytocoffee.com/beans/unakki-estate-washed/';
+var NF='Not found online. Add your own with Edit notes.';
 var COFFEES=[
-  {id:'subko-rat',name:'Subko Ratnagiri (Pearl)',roaster:'Subko',proc:'',cat:'nordic',status:'active',roastDate:'',dose:15,note:''},
-  {id:'pink-lem',name:'Pink Lemonade',roaster:'',proc:'',cat:'nordic',status:'active',roastDate:'',dose:15,note:''},
-  {id:'broot-sl',name:'Broot Sur Lie',roaster:'Broot',proc:'Sur lie',cat:'ml',status:'active',roastDate:'',dose:15,note:''},
-  {id:'broot-mt',name:'Broot Moss Theory',roaster:'Broot',proc:'',cat:'ml',status:'active',roastDate:'',dose:25,note:'Works well as a Japanese iced brew: 25g dose.'},
-  {id:'raxidi',name:'Roastery Raxidi Lobo',roaster:'Roastery',proc:'',cat:'med',status:'active',roastDate:'',dose:15,zp:5.8,note:''},
-  {id:'bold2',name:'Bold Edition #2',roaster:'',proc:'',cat:'md',status:'active',roastDate:'',dose:15,zp:6.8,note:''},
-  {id:'ph7',name:'PH-Seven Robusta-AA',roaster:'PH-Seven',proc:'',cat:'rob',status:'active',roastDate:'',dose:15,zp:7.2,note:'100% Robusta.'},
-  {id:'tims',name:'Tim Hortons Signature',roaster:'Tim Hortons',proc:'',cat:'med',status:'active',roastDate:'',dose:15,zp:6.2,note:''},
-  {id:'unakki',name:'ROAST Coffee Unakki Washed Arabica',roaster:'ROAST Coffee',proc:'Washed, Chandragiri 1220m, Agtron 68',cat:'ml',status:'active',roastDate:'2026-10-03',dose:15,zp:5.6,note:'Medium roast.'},
-  {id:'geisha',name:'ROAST Coffee Golden Geisha (Easy Pour sachets)',roaster:'ROAST Coffee',proc:'Geisha, nitro-flushed, 5 sachets',cat:'nordic',status:'active',roastDate:'',dose:15,note:'Drip sachets: roughly 150-160 g water each.'},
-  {id:'rumba',name:'DAK Coffee Roasters Rumba',roaster:'DAK Coffee Roasters',proc:'',cat:'nordic',status:'active',roastDate:'',dose:10,note:'20 g total in two 10 g packets, kept frozen. Grind from frozen.'},
-  {id:'araku-sel',name:'Araku Selection',roaster:'Araku',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'araku-mon',name:'Araku Monsoon Edit',roaster:'Araku',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'araku-mic',name:'Araku Micro Climate',roaster:'Araku',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'c7-baar',name:'Corridor Seven Baarbara',roaster:'Corridor Seven',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'c7-div',name:'Corridor Seven Divenchi',roaster:'Corridor Seven',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'tul-swell',name:'Tulum Swell',roaster:'Tulum',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'tul-lumen',name:'Tulum Lumen',roaster:'Tulum',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'tul-baar',name:'Tulum Baarbara',roaster:'Tulum',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'bloom-vvg',name:'Bloom Vin Van Gogh',roaster:'Bloom',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'bili-agh',name:'Bili Hu Aghora',roaster:'Bili Hu',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'bili-ara',name:'Bili Hu Arabica Blend',roaster:'Bili Hu',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'hl-sal',name:'Half Light Salawara #02',roaster:'Half Light',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'toise',name:'Toise Brewstudio The Enchanter',roaster:'Toise Brewstudio',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'elbueno',name:'El Bueno Golden Glow (Ratnagiri)',roaster:'El Bueno',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,est:1,note:''},
-  {id:'sbux',name:'Starbucks Benchmark',roaster:'Starbucks',proc:'',cat:'md',status:'archived',roastDate:'',dose:15,zp:6.6,est:1,note:'Used as a benchmark.'},
-  {id:'bt-sal',name:'Blue Tokai Salawara',roaster:'Blue Tokai',proc:'',cat:'ml',status:'archived',roastDate:'',dose:15,zp:5.6,note:'Bag finished.'},
-  {id:'grey-miz',name:'Grey Soul Mizoram #4',roaster:'Grey Soul',proc:'',cat:'md',status:'archived',roastDate:'',dose:15,zp:6.4,note:'Bag finished.'},
-  {id:'veer-sh',name:'Veer Attikan Sholiga',roaster:'Veer Attikan',proc:'',cat:'med',status:'archived',roastDate:'',dose:15,zp:5.8,note:'Bag finished.'}
+  C('subko-rat','Subko Ratnagiri (Pearl)','Subko','nordic','active',{proc:'Naturals + anaerobic honey',producer:'Ratnagiri Estate, Karnataka',varietal:'Arabica + Catuai',roastLevel:'Medium (Omni roast, Agtron 65)',roasterNotes:['Raw mango','Blossom honey','Hazelnut tart'],src:U_SUBKO,caveat:'From the Subko Project Pearl Omni Roast listing. Subko sells several Pearl lots, so check your bag.'}),
+  C('pink-lem','Pink Lemonade','Grey Soul Coffee Roasters','nordic','active',{proc:'Anaerobic natural, raised-bed dried',producer:'Tsiesema Village, Kohima, Nagaland',varietal:'Chandragiri',roastLevel:'Light / ultra-light',roasterNotes:['Orange','Apple','Chocolate','Pineapple','Blueberry'],otherNotes:[{n:'Fig-like finish',s:'sensory profile on the same listing'},{n:'Green grape',s:'sensory profile on the same listing'}],src:U_PINK,caveat:'Assumed to be the Grey Soul lot of this name.'}),
+  C('broot-sl','Broot Sur Lie','Broot','ml','active',{proc:'Sur lie',caveat:NF}),
+  C('broot-mt','Broot Moss Theory','Broot','ml','active',{dose:25,note:'Works well as a Japanese iced brew: 25 g dose.',caveat:NF}),
+  C('raxidi','Roastery Raxidi Lobo','Roastery','med','active',{zp:5.8,proc:'Anaerobic natural',producer:'Raxidi Lobo Estate',varietal:'Arabica SLN 5B',roastLevel:'Medium',roasterNotes:['Mosambi','Green apple','Plum'],src:U_RAX,caveat:'Notes are from Blue Tokai’s listing of this estate. Your bag’s roaster may describe it differently.'}),
+  C('bold2','Bold Edition #2','','md','active',{zp:6.8,caveat:NF}),
+  C('ph7','PH-Seven Robusta-AA','PH-Seven','rob','active',{zp:7.2,note:'100% Robusta.',typical:['Dark chocolate','Nutty','Woody','Earthy'],caveat:'No listing found. The chips below are what Indian robusta typically tastes like, not this roaster’s notes.'}),
+  C('tims','Tim Hortons Signature','Tim Hortons','med','active',{zp:6.2,caveat:NF}),
+  C('unakki','ROAST Coffee Unakki Washed Arabica','ROAST Coffee','ml','active',{base:90,zp:5.6,roastDate:'2026-10-03',proc:'Washed',producer:'Unakki Estate, Chikmagalur (Chandragiri, 1220 m)',varietal:'Chandragiri',roastLevel:'Medium (Agtron 68)',note:'Medium roast.',otherNotes:[{n:'Apricot',s:'Naivo Coffee Company, same estate'},{n:'Cane sugar',s:'Naivo Coffee Company, same estate'},{n:'Honey',s:'Naivo Coffee Company, same estate'}],src:U_UNAKKI,caveat:'ROAST’s own notes were not found. These are from another roaster’s lot of the same estate.'}),
+  C('geisha','ROAST Coffee Golden Geisha (Easy Pour sachets)','ROAST Coffee','nordic','active',{proc:'Geisha, nitro-flushed, 5 sachets',varietal:'Geisha',note:'Drip sachets: roughly 150-160 g water each.',typical:['Jasmine','Bergamot','Peach','Tea-like'],caveat:'No listing found. The chips below are what Geisha typically tastes like, not ROAST’s notes.'}),
+  C('rumba','DAK Coffee Roasters Rumba','DAK Coffee Roasters','nordic','active',{dose:10,proc:'Natural, yeast-assisted semi-anaerobic',producer:'Gatta Farm, Sidama, Ethiopia',varietal:'Local landrace',roastLevel:'Light',note:'20 g total in two 10 g packets, kept frozen. Grind from frozen.',roasterNotes:['Stewed strawberry','Apricot','Brown sugar'],src:U_RUMBA,caveat:'From a DAK Rumba listing. DAK rotates lots, so check your packet.'}),
+  C('araku-sel','Araku Selection','Araku','ml','archived',{est:1}),
+  C('araku-mon','Araku Monsoon Edit','Araku','ml','archived',{est:1}),
+  C('araku-mic','Araku Micro Climate','Araku','ml','archived',{est:1}),
+  C('c7-baar','Corridor Seven Baarbara','Corridor Seven','ml','archived',{est:1}),
+  C('c7-div','Corridor Seven Divenchi','Corridor Seven','ml','archived',{est:1}),
+  C('tul-swell','Tulum Swell','Tulum','ml','archived',{est:1}),
+  C('tul-lumen','Tulum Lumen','Tulum','ml','archived',{est:1}),
+  C('tul-baar','Tulum Baarbara','Tulum','ml','archived',{est:1}),
+  C('bloom-vvg','Bloom Vin Van Gogh','Bloom','ml','archived',{est:1}),
+  C('bili-agh','Bili Hu Aghora','Bili Hu','ml','archived',{est:1}),
+  C('bili-ara','Bili Hu Arabica Blend','Bili Hu','ml','archived',{est:1}),
+  C('hl-sal','Half Light Salawara #02','Half Light','ml','archived',{est:1}),
+  C('toise','Toise Brewstudio The Enchanter','Toise Brewstudio','ml','archived',{est:1}),
+  C('elbueno','El Bueno Golden Glow (Ratnagiri)','El Bueno','ml','archived',{est:1}),
+  C('sbux','Starbucks Benchmark','Starbucks','md','archived',{zp:6.6,est:1,note:'Used as a benchmark.'}),
+  C('bt-sal','Blue Tokai Salawara','Blue Tokai','ml','archived',{zp:5.6,note:'Bag finished.'}),
+  C('grey-miz','Grey Soul Mizoram #4','Grey Soul','md','archived',{zp:6.4,note:'Bag finished.'}),
+  C('veer-sh','Veer Attikan Sholiga','Veer Attikan','med','archived',{zp:5.8,note:'Bag finished.'})
 ];
 
-/* ---------- state & storage ---------- */
-var KEY='coffeelabos.v2';
-var S={coffees:JSON.parse(JSON.stringify(COFFEES)),log:[]};
-function load(){try{var j=JSON.parse(localStorage.getItem(KEY)||'null');if(j&&j.coffees&&j.coffees.length){S=j;if(!S.log)S.log=[]}}catch(e){}}
+/* ---------- state & storage (with migration from v2) ---------- */
+var KEY='coffeelabos.v3',OLDKEY='coffeelabos.v2';
+var S={v:3,coffees:clone(COFFEES),log:[]};
+function seedById(id){for(var i=0;i<COFFEES.length;i++)if(COFFEES[i].id===id)return COFFEES[i];return null}
+function fillMissing(c){var s=seedById(c.id);if(!s)return c;for(var k in s){if(c[k]===undefined)c[k]=clone(s[k])}return c}
+function dripKeyByName(n){for(var k in DRIP)if(DRIP[k].name===n)return k;return ''}
+function coffeeIdByName(n){for(var i=0;i<S.coffees.length;i++)if(S.coffees[i].name===n)return S.coffees[i].id;return ''}
+function newLogId(){return 'l'+Date.now().toString(36)+Math.floor(Math.random()*1000).toString(36)}
+function migrateLogEntry(l){
+  if(l.wheel!==undefined&&l.brewDate)return l;
+  var d=new Date(l.ts||Date.now());
+  return {id:newLogId(),ts:l.ts||Date.now(),brewDate:dstr(d),coffeeId:coffeeIdByName(l.coffee),name:l.coffee||'',roaster:'',roastDate:'',producer:'',varietal:'',roastLevel:'',process:'',
+    waterTemp:l.temp!=null?l.temp:'',dose:l.dose!=null?l.dose:'',yield:l.water!=null?l.water:'',time:l.time?fmt(l.time):'',dripper:dripKeyByName(l.dripper),
+    dial:l.grinder==='zp6'?('ZP6 '+Number(l.dial).toFixed(1)):('C3S '+l.dial),notes:l.note||'',tastes:'',rating:l.rating||0,methods:['Pour-over'],methodOther:'',wheel:{}};
+}
+function load(){
+  try{
+    var j=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(j&&j.coffees&&j.coffees.length){S=j;S.coffees.forEach(fillMissing);S.log=(S.log||[]).map(migrateLogEntry);return}
+    var o=JSON.parse(localStorage.getItem(OLDKEY)||'null');
+    if(o&&o.coffees&&o.coffees.length){S={v:3,coffees:o.coffees.map(function(c){return fillMissing(c)}),log:[]};S.log=(o.log||[]).map(migrateLogEntry);}
+  }catch(e){}
+}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 load();
 function getCoffee(id){for(var i=0;i<S.coffees.length;i++)if(S.coffees[i].id===id)return S.coffees[i];return null}
@@ -335,33 +500,34 @@ function go(v){
   $$('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)});
   if(v==='pantry')renderPantry();
   if(v==='vault')renderVault();
+  if(v==='logs')renderLogs();
   if(v==='lab')renderLab();
   window.scrollTo(0,0);
 }
 $('#nav').addEventListener('click',function(e){var b=e.target.closest('button');if(b)go(b.dataset.v)});
 
-/* ---------- brew state ---------- */
-var B={coffeeId:'',method:'hot',dripper:'orea',dose:15,temp:88,grinder:'zp6',zp:5.6,rating:0};
+/* ---------- brew engine ---------- */
+var B={coffeeId:'',method:'hot',dripper:'orea',dose:15,temp:91,grinder:'zp6',zp:5.6};
+var jForm=null;
 
 function baseOf(c){return c.base!=null?c.base:CAT[c.cat].base}
-function recZpOf(c,dripKey){return r1((c.zp!=null?c.zp:CAT[c.cat].zp)+DRIP[dripKey].gOff)}
-
+function recZpOf(c,dk){return r1((c.zp!=null?c.zp:CAT[c.cat].zp)+DRIP[dk].gOff)}
 function resetToCoffee(){
   var c=getCoffee(B.coffeeId);if(!c)return;
+  var ic=B.method==='iced';
   B.dose=c.dose||15;
-  B.temp=baseOf(c);
-  B.zp=recZpOf(c,B.dripper);
+  B.temp=baseOf(c)+(ic?2:0);
+  B.zp=r1(recZpOf(c,B.dripper)-(ic?0.2:0));
 }
-
 function compute(){
   var c=getCoffee(B.coffeeId);if(!c)return null;
-  var cat=CAT[c.cat],d=DRIP[B.dripper];
-  var base=baseOf(c),rec=recZpOf(c,B.dripper);
+  var cat=CAT[c.cat],d=DRIP[B.dripper],ic=B.method==='iced';
+  var base=baseOf(c)+(ic?2:0),rec=r1(recZpOf(c,B.dripper)-(ic?0.2:0));
   var e=clamp(0.6*(B.temp-base)-1.5*(B.zp-rec),-4,4);
   var ratio=r2(cat.ratio+clamp(e*0.15,-0.7,0.7));
   var total=Math.round(B.dose*ratio);
   var hot=total,ice=0;
-  if(B.method==='iced'){hot=Math.round(total*0.627);ice=total-hot}
+  if(ic){hot=Math.round(total*0.627);ice=total-hot}
   var bloomW=Math.round(B.dose*3);
   var bloomT=Math.round(clamp(45-e*4,30,60));
   var n=e<-1.5?5:4;
@@ -380,20 +546,20 @@ function compute(){
   else notes.push('Balanced. Low kettle height (under 4 cm), gentle centre-dominant stream, no swirl during main pours.');
   notes.push(d.note);
   if(c.note)notes.push(c.note);
-  if(B.method==='iced')notes.push('Japanese iced: put '+ice+' g of ice in the server and pour '+hot+' g hot water over the coffee.');
-  return {c:c,cat:cat,d:d,e:e,ratio:ratio,total:total,hot:hot,ice:ice,steps:steps,bloomT:bloomT,end:end,notes:notes,base:base,rec:rec,kettle:r1(B.temp+d.tOff)};
+  if(ic)notes.push('Japanese iced: put '+ice+' g of ice in the server and pour '+hot+' g hot water over the coffee.');
+  return {c:c,cat:cat,d:d,e:e,ratio:ratio,total:total,hot:hot,ice:ice,steps:steps,bloomT:bloomT,end:end,notes:notes,base:base,rec:rec,kettle:r1(B.temp+d.tOff),ic:ic};
 }
-
 var R=null;
 
 function update(){
   R=compute();if(!R)return;
   var c=R.c;
-  var okT=B.temp>=85&&B.temp<=90,okG=B.zp>=5.4&&B.zp<=7.4;
-  $('#tempVal').textContent=B.temp.toFixed(1)+'\u00B0C';
+  var lo=R.cat.range[0]+(R.ic?2:0),hi=R.cat.range[1]+(R.ic?2:0);
+  var okT=B.temp>=lo&&B.temp<=hi,okG=B.zp>=5.2&&B.zp<=7.4;
+  $('#tempVal').textContent=B.temp.toFixed(1)+'°C';
   $('#bTempR').value=B.temp;
-  $('#lawT').innerHTML=okT?'<span style="color:var(--good)">Inside Law 1 (85-90\u00B0C)</span>':'<span style="color:var(--warn)">Outside Law 1. This is an off-protocol brew.</span>';
-  $('#lawG').innerHTML=okG?'<span style="color:var(--good)">Inside Law 2 (coarse range)</span>':'<span style="color:var(--warn)">Outside Law 2 (ZP6 5.4-7.4).</span>';
+  $('#lawT').innerHTML=okT?'<span style="color:var(--good)">In the protocol range for this roast ('+lo+'-'+hi+'°C)</span>':'<span style="color:var(--warn)">Outside the protocol range ('+lo+'-'+hi+'°C) for '+esc(R.cat.label)+'. Fine if you are testing.</span>';
+  $('#lawG').innerHTML=okG?'<span style="color:var(--good)">In the coarse range (ZP6 5.2-7.4)</span>':'<span style="color:var(--warn)">'+(B.zp<5.2?'Finer than the coarse range: channeling risk on the ZP6.':'Very coarse: expect a thin cup.')+'</span>';
   $('#bDose').value=B.dose;
   $('#dialLbl').textContent=B.grinder==='zp6'?'ZP6 dial':'C3S clicks';
   var dial=$('#bDial');
@@ -409,24 +575,24 @@ function update(){
   $('#bCoffeeInfo').innerHTML=info.join('');
 
   $('#bBig').innerHTML=
-    '<div><b>'+(B.method==='iced'?R.hot:R.total)+'</b><small>'+(B.method==='iced'?'Hot water g':'Water g')+'</small></div>'+
+    '<div><b>'+(R.ic?R.hot:R.total)+'</b><small>'+(R.ic?'Hot water g':'Water g')+'</small></div>'+
     '<div><b>1:'+R.ratio.toFixed(2).replace(/0$/,'')+'</b><small>Ratio</small></div>'+
-    '<div><b>'+R.kettle.toFixed(1)+'\u00B0</b><small>Kettle</small></div>'+
+    '<div><b>'+R.kettle.toFixed(1)+'°</b><small>Kettle</small></div>'+
     '<div><b>'+(B.grinder==='zp6'?B.zp.toFixed(1):zpToC3(B.zp))+'</b><small>'+(B.grinder==='zp6'?'ZP6':'C3S')+'</small></div>';
 
   var chips=[];
   chips.push(R.e<-1.2?'<span class="chip bad">Leaning sour</span>':R.e>1.2?'<span class="chip bad">Leaning bitter</span>':'<span class="chip good">Balanced</span>');
   chips.push('<span class="chip blue">Dose '+B.dose+' g</span>');
-  if(B.method==='iced')chips.push('<span class="chip blue">+ '+R.ice+' g ice</span>');
+  if(R.ic)chips.push('<span class="chip blue">+ '+R.ice+' g ice</span>');
   chips.push('<span class="chip">Finish ~'+fmt(R.end)+'</span>');
   chips.push('<span class="chip">Bloom '+R.bloomT+'s</span>');
   $('#bChips').innerHTML=chips.join('');
 
   renderSteps();
   $('#bNotes').innerHTML=R.notes.map(function(n){return '<p style="margin:6px 0">'+esc(n)+'</p>'}).join('');
-  $('#lvT').textContent=currentTarget()||'\u2013';
+  $('#lvT').textContent=currentTarget()||'–';
+  if(jForm&&!jForm.isDirty())jForm.prefill();
 }
-
 function curStepIndex(t){
   if(!R)return -1;
   var idx=-1;
@@ -441,7 +607,7 @@ function currentTarget(){
 }
 function renderSteps(){
   if(!R)return;
-  var t=TM.elapsed(),idx=TM.running||t>0?curStepIndex(t):-1;
+  var t=TM.elapsed(),idx=(TM.running||t>0)?curStepIndex(t):-1;
   $('#bSteps').innerHTML=R.steps.map(function(s,i){
     var cls=i===idx?'cur':(i<idx?'done':'');
     return '<tr class="'+cls+'"><td>'+s.label+'</td><td>'+fmt(s.t)+'</td><td>+'+s.add+' g</td><td><b>'+s.cum+' g</b></td></tr>';
@@ -452,13 +618,13 @@ function renderSteps(){
 var TM={running:false,t0:0,acc:0,
   elapsed:function(){return (this.acc+(this.running?(performance.now()-this.t0):0))/1000},
   start:function(){if(!this.running){this.running=true;this.t0=performance.now();$('#tmrGo').textContent='Pause'}},
-  pause:function(){if(this.running){this.acc+=performance.now()-this.t0;this.running=false;$('#tmrGo').textContent='Resume'}},
+  pause:function(){if(this.running){this.acc+=performance.now()-this.t0;this.running=false;$('#tmrGo').textContent='Resume';if(jForm&&!jForm.isDirty())jForm.prefill()}},
   reset:function(){this.running=false;this.acc=0;$('#tmrGo').textContent='Start';draw()}
 };
 function draw(){
   $('#tmr').textContent=fmt(TM.elapsed());
   renderSteps();
-  $('#lvT').textContent=currentTarget()||'\u2013';
+  $('#lvT').textContent=currentTarget()||'–';
 }
 setInterval(function(){if(TM.running)draw()},200);
 $('#tmrGo').onclick=function(){TM.running?TM.pause():TM.start();draw()};
@@ -474,10 +640,18 @@ function fillSelects(){
   $('#bDrip').innerHTML=Object.keys(DRIP).map(function(k){return '<option value="'+k+'">'+DRIP[k].name+'</option>'}).join('');
   $('#bDrip').value=B.dripper;
   $('#nCat').innerHTML=Object.keys(CAT).map(function(k){return '<option value="'+k+'">'+CAT[k].label+'</option>'}).join('');
+  $('#coffeeNames').innerHTML=S.coffees.map(function(c){return '<option value="'+esc(c.name)+'">'}).join('');
 }
 $('#bCoffee').onchange=function(){B.coffeeId=this.value;resetToCoffee();update()};
-$('#bDrip').onchange=function(){B.dripper=this.value;var c=getCoffee(B.coffeeId);B.zp=recZpOf(c,B.dripper);update()};
-$('#bMethod').onclick=function(e){var b=e.target.closest('button');if(!b)return;B.method=b.dataset.v;update()};
+$('#bDrip').onchange=function(){B.dripper=this.value;var c=getCoffee(B.coffeeId);var ic=B.method==='iced';B.zp=r1(recZpOf(c,B.dripper)-(ic?0.2:0));update()};
+$('#bMethod').onclick=function(e){
+  var b=e.target.closest('button');if(!b||b.dataset.v===B.method)return;
+  var toIced=b.dataset.v==='iced';
+  B.method=b.dataset.v;
+  B.temp=r1(B.temp+(toIced?2:-2));
+  B.zp=r1(B.zp+(toIced?-0.2:0.2));
+  update();
+};
 $('#bGrinder').onclick=function(e){var b=e.target.closest('button');if(!b)return;B.grinder=b.dataset.v;update()};
 $('#bDose').onchange=function(){B.dose=clamp(parseFloat(this.value)||15,5,60);update()};
 $('#doseM').onclick=function(){B.dose=clamp(r1(B.dose-0.5),5,60);update()};
@@ -494,22 +668,307 @@ function nudgeDial(dir){
 }
 $('#dialM').onclick=function(){nudgeDial(-1)};
 $('#dialP').onclick=function(){nudgeDial(1)};
-$('#resetDial').onclick=function(){var c=getCoffee(B.coffeeId);B.zp=recZpOf(c,B.dripper);B.temp=baseOf(c);update()};
+$('#resetDial').onclick=function(){resetToCoffee();update()};
 
-/* stars + log */
-function drawStars(){
-  $('#stars').innerHTML=[1,2,3,4,5].map(function(i){return '<button data-v="'+i+'" class="'+(B.rating>=i?'on':'')+'">\u2605</button>'}).join(' ');
+/* ---------- tasting wheel ---------- */
+var NW=16,RING=22,MAXR=110,CX=170,CY=170;
+var SHORT={berry:'Berry',citrus:'Citrus',stone:'Stone fruit',finish:'Finish'};
+function polar(i,r){var a=(i/NW)*Math.PI*2;return [CX+Math.sin(a)*r,CY-Math.cos(a)*r]}
+function zeroWheel(){var v={};WHEEL.forEach(function(w){v[w.k]=0});return v}
+function hasWheel(l){if(!l||!l.wheel)return false;for(var k in l.wheel)if(l.wheel[k]>0)return true;return false}
+function wheelSVG(vals,opt){
+  opt=opt||{};
+  var labels=opt.labels!==false;
+  var surf=opt.surface||'var(--bg2)';
+  var s='<svg viewBox="'+(labels?'0 0 340 340':'36 36 268 268')+'" xmlns="http://www.w3.org/2000/svg"'+(opt.cls?' class="'+opt.cls+'"':'')+' role="img" aria-label="Tasting wheel">';
+  var r,i,p;
+  for(r=1;r<=5;r++)s+='<circle cx="'+CX+'" cy="'+CY+'" r="'+(r*RING)+'" style="fill:none;stroke:var(--line);stroke-width:1"/>';
+  for(i=0;i<NW;i++){p=polar(i,MAXR);s+='<line x1="'+CX+'" y1="'+CY+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" style="stroke:var(--line);stroke-width:1"/>'}
+  var pts=[];
+  for(i=0;i<NW;i++){var v=vals&&vals[WHEEL[i].k]||0;p=polar(i,v*RING);pts.push(p[0].toFixed(1)+','+p[1].toFixed(1))}
+  var any=false;for(i=0;i<NW;i++)if(vals&&vals[WHEEL[i].k]>0)any=true;
+  if(any){
+    s+='<polygon points="'+pts.join(' ')+'" style="fill:var(--s1);fill-opacity:.16;stroke:var(--s1);stroke-width:2;stroke-linejoin:round"/>';
+    for(i=0;i<NW;i++){
+      var vv=vals[WHEEL[i].k]||0;if(vv<=0)continue;
+      p=polar(i,vv*RING);
+      s+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(labels?6.5:5.5)+'" style="fill:'+surf+'"/><circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(labels?4.5:3.5)+'" style="fill:var(--s1)"/>';
+    }
+  }
+  if(labels){
+    for(i=0;i<NW;i++){
+      var a=(i/NW)*Math.PI*2,sn=Math.sin(a),cs=Math.cos(a);
+      var x=CX+sn*128,y=CY-cs*128;
+      var anc=sn>0.3?'start':(sn<-0.3?'end':'middle');
+      var dy=cs>0.7?-4:(cs<-0.7?11:4);
+      var nm=SHORT[WHEEL[i].k]||WHEEL[i].n;
+      var val=vals&&vals[WHEEL[i].k]||0;
+      s+='<text x="'+x.toFixed(1)+'" y="'+(y+dy).toFixed(1)+'" text-anchor="'+anc+'" style="font-size:10.5px;fill:'+(val>0?'var(--text)':'var(--mute)')+';font-weight:'+(val>0?'700':'400')+'">'+esc(nm)+'</text>';
+    }
+  }
+  return s+'</svg>';
 }
-$('#stars').onclick=function(e){var b=e.target.closest('button');if(!b)return;B.rating=parseInt(b.dataset.v,10);drawStars()};
-$('#saveLog').onclick=function(){
-  if(!R)return;
-  S.log.unshift({ts:Date.now(),coffee:R.c.name,dripper:R.d.name,method:B.method,dose:B.dose,temp:B.temp,
-    grinder:B.grinder,dial:B.grinder==='zp6'?B.zp:zpToC3(B.zp),water:R.hot,ratio:R.ratio,time:Math.round(TM.elapsed()),rating:B.rating,note:$('#bNote').value.trim()});
-  save();$('#bNote').value='';B.rating=0;drawStars();toast('Brew saved to log');
-};
+function createWheel(host,initial,onChange){
+  var vals=initial;
+  function draw(){host.innerHTML=wheelSVG(vals,{labels:true})}
+  host.addEventListener('click',function(e){
+    var svg=host.querySelector('svg');if(!svg)return;
+    var rect=svg.getBoundingClientRect();
+    var x=(e.clientX-rect.left)*(340/rect.width),y=(e.clientY-rect.top)*(340/rect.height);
+    var dx=x-CX,dy=y-CY,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist>MAXR+16||dist<4)return;
+    var ang=Math.atan2(dx,-dy);if(ang<0)ang+=Math.PI*2;
+    var i=Math.round(ang/(Math.PI*2/NW))%NW;
+    var lvl=clamp(Math.round(dist/RING),1,5);
+    var k=WHEEL[i].k;
+    vals[k]=(vals[k]===lvl)?0:lvl;
+    draw();
+    if(onChange)onChange(vals);
+  });
+  draw();
+  return {get:function(){return vals},set:function(v){vals=zeroWheel();if(v)for(var k in v)if(k in vals)vals[k]=v[k]||0;draw()}};
+}
 
-/* ---------- pantry ---------- */
-function coffeeItem(c,mode){
+/* ---------- journal form (used in the Brew tab and in the edit sheet) ---------- */
+function formHTML(){
+  var dripOpts='<option value="">Not recorded</option>'+Object.keys(DRIP).map(function(k){return '<option value="'+k+'">'+esc(DRIP[k].name)+'</option>'}).join('');
+  var meth=METHODS.map(function(m){return '<label><input type="checkbox" data-m="'+esc(m)+'">'+esc(m)+'</label>'}).join('');
+  return ''+
+  '<div class="journal">'+
+  '<div class="fg">'+
+    '<div class="fld full"><label>Coffee estate / blend name</label><input type="text" list="coffeeNames" data-f="name" placeholder="Pick from your coffees or type"></div>'+
+    '<div class="fld"><label>Roaster</label><input type="text" data-f="roaster"></div>'+
+    '<div class="fld"><label>Roast date</label><input type="date" data-f="roastDate"></div>'+
+    '<div class="fld full"><label>Producer</label><input type="text" data-f="producer"></div>'+
+    '<div class="fld"><label>Varietal</label><input type="text" data-f="varietal"></div>'+
+    '<div class="fld"><label>Roast level</label><input type="text" data-f="roastLevel"></div>'+
+    '<div class="fld"><label>Process</label><input type="text" data-f="process"></div>'+
+    '<div class="fld"><label>Brew date</label><input type="date" data-f="brewDate"></div>'+
+  '</div>'+
+  '<div class="fg4" style="margin-top:2px">'+
+    '<div class="fld"><label>Water temp</label><input type="number" step="0.5" inputmode="decimal" data-f="waterTemp" placeholder="&deg;C"></div>'+
+    '<div class="fld"><label>Dose</label><input type="number" step="0.5" inputmode="decimal" data-f="dose" placeholder="g"></div>'+
+    '<div class="fld"><label>Yield</label><input type="number" step="1" inputmode="decimal" data-f="yield" placeholder="g"></div>'+
+    '<div class="fld"><label>Time</label><input type="text" data-f="time" placeholder="m:ss"></div>'+
+  '</div>'+
+  '<div class="fg">'+
+    '<div class="fld"><label>Dripper</label><select data-f="dripper">'+dripOpts+'</select></div>'+
+    '<div class="fld"><label>Grind setting</label><input type="text" data-f="dial" placeholder="e.g. ZP6 5.6"></div>'+
+  '</div>'+
+  '<div class="boxlabel">Notes</div>'+
+  '<textarea class="ruled" data-f="notes" placeholder="How did it taste? What would you change?"></textarea>'+
+  '<div class="fld"><label>Flavours tasted (comma separated)</label><input type="text" data-f="tastes" placeholder="e.g. mango, honey, hazelnut"></div>'+
+  '<div class="two">'+
+    '<div><div class="boxlabel">Rating</div><div class="stars" data-stars></div>'+
+    '<div class="boxlabel">Brew method</div><div class="checks">'+meth+'</div>'+
+    '<div class="fld"><label>Other method</label><input type="text" data-f="methodOther"></div></div>'+
+    '<div><div class="boxlabel">Tasting wheel <span style="text-transform:none;letter-spacing:0">(tap a spoke at the ring you taste; tap again to clear)</span></div><div class="wheelbox" data-wheel></div></div>'+
+  '</div>'+
+  '<details style="margin:8px 0 0"><summary>Set the wheel with sliders instead</summary><div data-sliders></div></details>'+
+  '</div>';
+}
+
+function createLogForm(root){
+  root.innerHTML=formHTML();
+  var vals=zeroWheel(),rating=0,dirty=false,coffeeId='';
+  var starsEl=$('[data-stars]',root),slEl=$('[data-sliders]',root);
+  function f(n){return $('[data-f="'+n+'"]',root)}
+  function setF(n,v){var el=f(n);if(el)el.value=(v==null?'':v)}
+  function getF(n){var el=f(n);return el?el.value.trim():''}
+
+  function drawStars(){
+    var h='';
+    for(var i=1;i<=5;i++)h+='<button type="button" data-s="'+i+'" class="'+(rating>=i?'on':'')+'" aria-label="'+i+' stars">★</button>';
+    starsEl.innerHTML=h;
+  }
+  starsEl.addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    var n=parseInt(b.dataset.s,10);rating=(rating===n)?0:n;dirty=true;drawStars();
+  });
+  drawStars();
+
+  var wheel=createWheel($('[data-wheel]',root),vals,function(v){vals=v;dirty=true;syncSliders()});
+  function buildSliders(){
+    slEl.innerHTML=WHEEL.map(function(w){return '<div class="sl"><span>'+esc(w.n)+'</span><input type="range" min="0" max="5" step="1" value="0" data-sl="'+w.k+'"><b data-sv="'+w.k+'">0</b></div>'}).join('');
+  }
+  function syncSliders(){
+    WHEEL.forEach(function(w){var s=$('[data-sl="'+w.k+'"]',slEl),b=$('[data-sv="'+w.k+'"]',slEl);if(s){s.value=vals[w.k]||0;b.textContent=vals[w.k]||0}});
+  }
+  buildSliders();
+  slEl.addEventListener('input',function(e){
+    var k=e.target.getAttribute('data-sl');if(!k)return;
+    vals[k]=parseInt(e.target.value,10)||0;dirty=true;wheel.set(vals);vals=wheel.get();syncSliders();
+  });
+
+  root.addEventListener('input',function(e){if(e.isTrusted&&!e.target.hasAttribute('data-sl'))dirty=true});
+  root.addEventListener('change',function(e){
+    if(e.target.getAttribute&&e.target.getAttribute('data-f')==='name'){
+      var nm=e.target.value.trim(),hit=null;
+      for(var i=0;i<S.coffees.length;i++)if(S.coffees[i].name===nm){hit=S.coffees[i];break}
+      if(hit){coffeeId=hit.id;fillFromCoffee(hit,true)}else coffeeId='';
+    }
+  });
+  function fillFromCoffee(c,onlyBlank){
+    var map={roaster:c.roaster,roastDate:c.roastDate,producer:c.producer,varietal:c.varietal,roastLevel:c.roastLevel||CAT[c.cat].label,process:c.proc};
+    for(var k in map){if(!onlyBlank||!getF(k))setF(k,map[k])}
+  }
+  function checkedMethods(){return $$('[data-m]',root).filter(function(x){return x.checked}).map(function(x){return x.getAttribute('data-m')})}
+  function setMethods(arr){$$('[data-m]',root).forEach(function(x){x.checked=arr.indexOf(x.getAttribute('data-m'))>=0})}
+
+  var api={
+    isDirty:function(){return dirty},
+    prefill:function(){
+      var c=getCoffee(B.coffeeId);if(!c||!R)return;
+      coffeeId=c.id;
+      setF('name',c.name);setF('roaster',c.roaster);setF('roastDate',c.roastDate);setF('producer',c.producer);
+      setF('varietal',c.varietal);setF('roastLevel',c.roastLevel||CAT[c.cat].label);setF('process',c.proc);
+      setF('brewDate',today());setF('waterTemp',B.temp);setF('dose',B.dose);setF('yield',R.total);
+      var t=TM.elapsed();setF('time',t>0?fmt(t):'');
+      setF('dripper',B.dripper);
+      setF('dial','ZP6 '+B.zp.toFixed(1)+' / C3S '+zpToC3(B.zp));
+      setMethods(['Pour-over']);
+    },
+    clear:function(){
+      $$('[data-f]',root).forEach(function(el){el.value=''});
+      setMethods([]);rating=0;drawStars();wheel.set(null);vals=wheel.get();syncSliders();coffeeId='';dirty=false;
+    },
+    get:function(){
+      var name=getF('name'),id='';
+      for(var i=0;i<S.coffees.length;i++)if(S.coffees[i].name===name){id=S.coffees[i].id;break}
+      if(!id&&coffeeId){var cc=getCoffee(coffeeId);if(cc&&cc.name===name)id=coffeeId}
+      return {coffeeId:id,name:name,roaster:getF('roaster'),roastDate:getF('roastDate'),producer:getF('producer'),varietal:getF('varietal'),
+        roastLevel:getF('roastLevel'),process:getF('process'),brewDate:getF('brewDate'),waterTemp:num(getF('waterTemp')),dose:num(getF('dose')),
+        yield:num(getF('yield')),time:getF('time'),dripper:getF('dripper'),dial:getF('dial'),notes:getF('notes'),tastes:getF('tastes'),
+        rating:rating,methods:checkedMethods(),methodOther:getF('methodOther'),wheel:clone(vals)};
+    },
+    set:function(l){
+      api.clear();
+      ['name','roaster','roastDate','producer','varietal','roastLevel','process','brewDate','waterTemp','dose','yield','time','dripper','dial','notes','tastes','methodOther'].forEach(function(k){setF(k,l[k])});
+      setMethods(l.methods||[]);rating=l.rating||0;drawStars();wheel.set(l.wheel);vals=wheel.get();syncSliders();coffeeId=l.coffeeId||'';dirty=false;
+    }
+  };
+  return api;
+}
+
+function entryHasData(e){
+  return !!(e.name||e.notes||e.tastes||e.rating||hasWheel(e));
+}
+
+/* ---------- save / edit / delete journal entries ---------- */
+var eForm=null,editingId='';
+function saveJournal(){
+  var e=jForm.get();
+  if(!entryHasData(e)){toast('Add a coffee name, a note, a rating or a wheel first');return}
+  e.id=newLogId();e.ts=Date.now();
+  if(!e.brewDate)e.brewDate=today();
+  S.log.unshift(e);save();
+  jForm.clear();jForm.prefill();
+  TM.reset();
+  toast('Saved to journal');
+}
+function openEdit(id){
+  var l=null;for(var i=0;i<S.log.length;i++)if(S.log[i].id===id){l=S.log[i];break}
+  if(!l)return;
+  editingId=id;eForm.set(l);$('#modal').classList.add('on');
+}
+function closeEdit(){$('#modal').classList.remove('on');editingId=''}
+function saveEdit(){
+  var n=eForm.get();
+  for(var i=0;i<S.log.length;i++){
+    if(S.log[i].id===editingId){n.id=editingId;n.ts=S.log[i].ts;if(!n.brewDate)n.brewDate=dstr(new Date(n.ts));S.log[i]=n;break}
+  }
+  save();closeEdit();renderLogs();renderPantry();renderVault();toast('Entry updated');
+}
+function deleteEntry(id){
+  if(!confirm('Delete this journal entry?'))return;
+  S.log=S.log.filter(function(l){return l.id!==id});
+  save();renderLogs();renderPantry();renderVault();toast('Entry deleted');
+}
+$('#jSave').onclick=saveJournal;
+$('#jFill').onclick=function(){R&&jForm.prefill();toast('Filled from this brew')};
+$('#jClear').onclick=function(){jForm.clear()};
+$('#eCancel').onclick=closeEdit;
+$('#eSave').onclick=saveEdit;
+$('#modal').addEventListener('click',function(e){if(e.target===$('#modal'))closeEdit()});
+
+/* ---------- taste helpers ---------- */
+var STOP=['green','dark','light','sweet','fruit','notes','like','with','raw','tart'];
+function logsFor(c){return S.log.filter(function(l){return l.coffeeId===c.id||(!l.coffeeId&&l.name&&l.name===c.name)})}
+function avgWheel(ls){
+  var w=ls.filter(hasWheel);if(!w.length)return null;
+  var out=zeroWheel();
+  w.forEach(function(l){WHEEL.forEach(function(x){out[x.k]+=l.wheel[x.k]||0})});
+  WHEEL.forEach(function(x){out[x.k]=r2(out[x.k]/w.length)});
+  return {vals:out,n:w.length};
+}
+function topAttrs(vals,n){
+  if(!vals)return [];
+  return WHEEL.map(function(w){return {n:w.n,v:vals[w.k]||0}}).filter(function(x){return x.v>0}).sort(function(a,b){return b.v-a.v}).slice(0,n);
+}
+function topText(vals,n){return topAttrs(vals,n).map(function(x){return x.n+' '+(Math.round(x.v*10)/10)}).join(' \u00B7 ')}
+function noteHit(note,blob){
+  var toks=note.toLowerCase().split(/[^a-z]+/).filter(function(t){return t.length>=4&&STOP.indexOf(t)<0});
+  return toks.some(function(t){return new RegExp('\\b'+t.replace(/s$/,'')).test(blob)});
+}
+function spark(vals){
+  var pts=vals.filter(function(v){return v!=null});
+  if(pts.length<2)return '';
+  var W=120,H=30,p=5,n=vals.length,s='<svg viewBox="0 0 '+W+' '+H+'" style="width:120px;height:30px" role="img" aria-label="Rating over time">',path='',pen=false,lastx=0,lasty=0;
+  vals.forEach(function(v,i){
+    if(v==null){pen=false;return}
+    var x=p+(W-2*p)*(n===1?0.5:i/(n-1)),y=p+(H-2*p)*(1-v/5);
+    path+=(pen?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' ';pen=true;lastx=x;lasty=y;
+  });
+  s+='<path d="'+path+'" style="fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round"/>';
+  s+='<circle cx="'+lastx.toFixed(1)+'" cy="'+lasty.toFixed(1)+'" r="6" style="fill:var(--card)"/><circle cx="'+lastx.toFixed(1)+'" cy="'+lasty.toFixed(1)+'" r="4" style="fill:var(--s1)"/>';
+  return s+'</svg>';
+}
+function sortAsc(a,b){return (a.brewDate+String(a.ts)).localeCompare(b.brewDate+String(b.ts))}
+
+function tastePanel(c){
+  var ls=logsFor(c).slice().sort(sortAsc);
+  var blob=ls.map(function(l){return (l.notes||'')+' '+(l.tastes||'')}).join(' ').toLowerCase();
+  var h='<details class="tp"><summary>Taste notes'+(ls.length?' ('+ls.length+' tasted)':'')+'</summary>';
+  h+='<div class="secthead">Roaster\u2019s notes</div>';
+  if(c.roasterNotes&&c.roasterNotes.length){
+    h+='<div class="chips">'+c.roasterNotes.map(function(n){var hit=ls.length&&noteHit(n,blob);return '<span class="chip '+(hit?'hit':'tag')+'">'+(hit?'\u2713 ':'')+esc(n)+'</span>'}).join('')+'</div>';
+    if(ls.length)h+='<div class="src">\u2713 means you have mentioned it in your own notes.</div>';
+  }else h+='<div class="note" style="margin:2px 0">None listed yet.</div>';
+  if(c.src)h+='<div class="src"><a href="'+esc(c.src)+'" target="_blank" rel="noopener">Source listing</a></div>';
+  if(c.caveat)h+='<div class="src">'+esc(c.caveat)+'</div>';
+  if(c.otherNotes&&c.otherNotes.length){
+    var srcs=[];c.otherNotes.forEach(function(o){if(srcs.indexOf(o.s)<0)srcs.push(o.s)});
+    h+='<div class="secthead">Other reported notes (less common)</div><div class="chips">'+c.otherNotes.map(function(o){
+      var hit=ls.length&&noteHit(o.n,blob);return '<span class="chip '+(hit?'hit':'tag')+'" title="'+esc(o.s)+'">'+(hit?'\u2713 ':'')+esc(o.n)+'</span>'}).join('')+'</div><div class="src">From: '+esc(srcs.join('; '))+'</div>';
+  }
+  if(c.typical&&c.typical.length){
+    h+='<div class="secthead">Typical for this style (not the roaster\u2019s notes)</div><div class="chips">'+c.typical.map(function(n){return '<span class="chip dim">'+esc(n)+'</span>'}).join('')+'</div>';
+  }
+  h+='<div class="secthead">Your tasting</div>';
+  if(!ls.length){
+    h+='<div class="note" style="margin:2px 0">Not logged yet. Use the Brew journal after your next cup.</div>';
+  }else{
+    var rated=ls.filter(function(l){return l.rating>0});
+    var avg=rated.length?(rated.reduce(function(a,l){return a+l.rating},0)/rated.length):0;
+    var last=ls[ls.length-1];
+    h+='<div class="note" style="margin:2px 0">Tasted '+ls.length+' time'+(ls.length>1?'s':'')+(avg?' \u00B7 average '+avg.toFixed(1)+' of 5':'')+' \u00B7 last '+esc(shortDay(last.brewDate))+'</div>';
+    var cnt={};
+    ls.forEach(function(l){(l.tastes||'').split(',').forEach(function(t){t=t.trim().toLowerCase();if(t)cnt[t]=(cnt[t]||0)+1})});
+    var tags=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]}).slice(0,10);
+    if(tags.length)h+='<div class="chips">'+tags.map(function(t){return '<span class="chip tag">'+esc(t)+(cnt[t]>1?' \u00D7'+cnt[t]:'')+'</span>'}).join('')+'</div>';
+    var aw=avgWheel(ls);
+    if(aw){
+      h+='<div class="note" style="margin:6px 0 2px">Average wheel of '+aw.n+' brew'+(aw.n>1?'s':'')+': '+esc(topText(aw.vals,4))+'</div><div class="wheelbox" style="max-width:220px;margin:0 auto">'+wheelSVG(aw.vals,{labels:false,surface:'var(--card)'})+'</div>';
+    }
+    var sp=spark(ls.map(function(l){return l.rating>0?l.rating:null}));
+    if(sp)h+='<div class="note" style="margin:6px 0 0">Rating over time</div>'+sp;
+  }
+  h+='<div class="row n" style="gap:8px;margin-top:10px"><button class="sm" data-a="editnotes" data-id="'+esc(c.id)+'">Edit notes</button>'+(c.status==='active'?'<button class="sm pri" data-a="brew" data-id="'+esc(c.id)+'">Brew &amp; log</button>':'')+'</div>';
+  return h+'</details>';
+}
+
+/* ---------- pantry & vault ---------- */
+function coffeeItem(c){
   var d=daysOff(c.roastDate);
   var rz=recZpOf(c,'neo');
   var meta=[CAT[c.cat].label];
@@ -520,14 +979,19 @@ function coffeeItem(c,mode){
   var acts=c.status==='active'
     ?'<button class="sm pri" data-a="brew" data-id="'+esc(c.id)+'">Brew</button><button class="sm" data-a="finish" data-id="'+esc(c.id)+'">Finished</button>'
     :'<button class="sm pri" data-a="restock" data-id="'+esc(c.id)+'">Restock</button>';
-  return '<div class="item"><div><h3>'+esc(c.name)+'</h3><div class="meta">'+meta.join(' &middot; ')+'</div><div class="meta">'+line+'</div>'+(rd?'<div class="meta">'+rd+'</div>':'')+(c.est?'<div class="meta">Category estimated, edit by restocking</div>':'')+'</div><div class="acts">'+acts+'</div></div>';
+  return '<div class="item"><div class="top"><div><h3>'+esc(c.name)+'</h3><div class="meta">'+meta.join(' &middot; ')+'</div><div class="meta">'+line+'</div>'+(rd?'<div class="meta">'+rd+'</div>':'')+(c.est?'<div class="meta">Category estimated, edit by restocking</div>':'')+'</div><div class="acts">'+acts+'</div></div>'+tastePanel(c)+'</div>';
 }
+function openPanels(listEl){return $$('details.tp[open]',listEl).map(function(d){var b=$('button[data-id]',d);return b?b.getAttribute('data-id'):''})}
+function reopen(listEl,ids){ids.forEach(function(id){if(!id)return;var b=$('details.tp button[data-id="'+id+'"]',listEl);if(b)b.closest('details.tp').open=true})}
 function renderPantry(){
+  var el=$('#pList'),keep=openPanels(el);
   var cs=active();
   $('#pCount').textContent='('+cs.length+')';
-  $('#pList').innerHTML=cs.length?cs.map(function(c){return coffeeItem(c)}).join(''):'<div class="note">Pantry is empty. Restock a coffee from the Vault.</div>';
+  el.innerHTML=cs.length?cs.map(coffeeItem).join(''):'<div class="note">Pantry is empty. Restock a coffee from the Vault.</div>';
+  reopen(el,keep);
 }
 function renderVault(){
+  var el=$('#vList'),keep=openPanels(el);
   var q=$('#vSearch').value.trim().toLowerCase();
   var f=($('#vFilter button.on')||{dataset:{v:'all'}}).dataset.v;
   var list=S.coffees.filter(function(c){
@@ -536,12 +1000,16 @@ function renderVault(){
     return !q||(c.name+' '+c.roaster).toLowerCase().indexOf(q)>=0;
   });
   $('#vCount').textContent='('+list.length+' of '+S.coffees.length+')';
-  $('#vList').innerHTML=list.map(function(c){return coffeeItem(c)}).join('')||'<div class="note">No matches.</div>';
+  el.innerHTML=list.map(coffeeItem).join('')||'<div class="note">No matches.</div>';
+  reopen(el,keep);
 }
 function listClick(e){
   var b=e.target.closest('button[data-a]');if(!b)return;
-  var c=getCoffee(b.dataset.id),a=b.dataset.a;if(!c)return;
-  if(a==='brew'){B.coffeeId=c.id;resetToCoffee();fillSelects();update();go('brew')}
+  var a=b.dataset.a,id=b.dataset.id;
+  if(a==='edit'){openEdit(id);return}
+  if(a==='del'){deleteEntry(id);return}
+  var c=getCoffee(id);if(!c)return;
+  if(a==='brew'){B.coffeeId=c.id;resetToCoffee();fillSelects();if(jForm){jForm.clear()}update();go('brew')}
   else if(a==='finish'){c.status='archived';save();renderPantry();renderVault();fillSelects();update();toast(c.name+' archived')}
   else if(a==='restock'){
     var d=prompt('Roast date for '+c.name+' (YYYY-MM-DD, blank if unknown):',today());
@@ -549,43 +1017,256 @@ function listClick(e){
     c.status='active';c.roastDate=(d||'').trim();
     save();renderPantry();renderVault();fillSelects();update();toast(c.name+' back in pantry');
   }
+  else if(a==='editnotes'){
+    var v=prompt('Roaster\u2019s notes for '+c.name+', separated by commas:',(c.roasterNotes||[]).join(', '));
+    if(v===null)return;
+    c.roasterNotes=v.split(',').map(function(x){return x.trim()}).filter(Boolean);
+    c.caveat=c.roasterNotes.length&&!c.src?'Notes added by you.':c.caveat;
+    save();renderPantry();renderVault();toast('Notes saved');
+  }
 }
 $('#pList').onclick=listClick;
 $('#vList').onclick=listClick;
+$('#lList').onclick=listClick;
 $('#vSearch').oninput=renderVault;
 $('#vFilter').onclick=function(e){var b=e.target.closest('button');if(!b)return;$$('#vFilter button').forEach(function(x){x.classList.toggle('on',x===b)});renderVault()};
 $('#nAdd').onclick=function(){
   var name=$('#nName').value.trim();if(!name){toast('Enter a name');return}
   var id='c'+Date.now().toString(36);
-  S.coffees.unshift({id:id,name:name,roaster:$('#nRoaster').value.trim(),proc:$('#nProc').value.trim(),cat:$('#nCat').value,status:'active',roastDate:$('#nDate').value,dose:15,note:''});
+  var c=C(id,name,$('#nRoaster').value.trim(),$('#nCat').value,'active',{proc:$('#nProc').value.trim(),roastDate:$('#nDate').value});
+  S.coffees.unshift(c);
   save();['#nName','#nRoaster','#nProc','#nDate'].forEach(function(s){$(s).value=''});
   renderPantry();fillSelects();update();toast('Added to pantry and vault');
 };
 
-/* ---------- lab ---------- */
-function renderLab(){
-  $('#catTable').innerHTML=Object.keys(CAT).map(function(k){var c=CAT[k];return '<tr><td>'+c.label+'</td><td>1:'+c.ratio+'</td><td>'+c.base+'\u00B0C</td><td>'+c.zp+'</td></tr>'}).join('');
-  $('#dripList').innerHTML=Object.keys(DRIP).map(function(k){var d=DRIP[k];return '<div class="item"><div><h3>'+d.name+'</h3><div class="meta">'+d.shape+'</div><div class="meta">'+esc(d.note)+'</div></div></div>'}).join('');
-  $('#lCount').textContent='('+S.log.length+')';
-  $('#logList').innerHTML=S.log.length?S.log.slice(0,40).map(function(l){
-    var dt=new Date(l.ts);
-    return '<div class="item"><div><h3>'+esc(l.coffee)+' '+(l.rating?'<span style="color:var(--accent)">'+'\u2605'.repeat(l.rating)+'</span>':'')+'</h3><div class="meta">'+dt.toLocaleDateString()+' &middot; '+esc(l.dripper)+' &middot; '+l.dose+' g / '+l.water+' g (1:'+l.ratio+') &middot; '+l.temp+'\u00B0C &middot; '+(l.grinder==='zp6'?'ZP6 '+Number(l.dial).toFixed(1):'C3S '+l.dial)+(l.time?' &middot; '+fmt(l.time):'')+'</div>'+(l.note?'<div class="meta">'+esc(l.note)+'</div>':'')+'</div></div>';
-  }).join(''):'<div class="note">No brews logged yet.</div>';
+/* ---------- logs: filters ---------- */
+var F={q:'',coffee:'',drip:'',method:'',rating:0,range:'all',from:'',to:'',sort:'new'};
+var filtersReady=false;
+function fillSel(el,pairs){
+  var keep=el.value;
+  el.innerHTML=pairs.map(function(p){return '<option value="'+esc(p[0])+'">'+esc(p[1])+'</option>'}).join('');
+  var ok=pairs.some(function(p){return String(p[0])===keep});
+  el.value=ok?keep:pairs[0][0];
 }
-$('#exp').onclick=function(){
-  var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='coffee-lab-os-backup.json';a.click();
+function initFilters(){
+  if(filtersReady)return;filtersReady=true;
+  fillSel($('#fDrip'),[['','All drippers']].concat(Object.keys(DRIP).map(function(k){return [k,DRIP[k].name]})));
+  fillSel($('#fMethod'),[['','All methods']].concat(METHODS.map(function(m){return [m,m]})));
+  fillSel($('#fRating'),[['0','Any rating'],['3','3 stars and up'],['4','4 stars and up'],['5','5 stars only']]);
+  fillSel($('#fRange'),[['all','All time'],['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days'],['custom','Custom range']]);
+  fillSel($('#fSort'),[['new','Newest first'],['old','Oldest first'],['hi','Highest rated'],['lo','Lowest rated']]);
+  function rd(){
+    F.q=$('#fQ').value.trim().toLowerCase();F.coffee=$('#fCoffee').value;F.drip=$('#fDrip').value;F.method=$('#fMethod').value;
+    F.rating=parseInt($('#fRating').value,10)||0;F.range=$('#fRange').value;F.from=$('#fFrom').value;F.to=$('#fTo').value;F.sort=$('#fSort').value;
+    var cu=F.range==='custom';$('#fFrom').style.display=cu?'block':'none';$('#fTo').style.display=cu?'block':'none';
+    renderLogs();
+  }
+  ['#fQ','#fCoffee','#fDrip','#fMethod','#fRating','#fRange','#fSort','#fFrom','#fTo'].forEach(function(s){$(s).addEventListener(s==='#fQ'?'input':'change',rd)});
+  $('#fClear').onclick=function(){
+    $('#fQ').value='';['#fCoffee','#fDrip','#fMethod'].forEach(function(s){$(s).value=''});$('#fRating').value='0';$('#fRange').value='all';$('#fSort').value='new';$('#fFrom').value='';$('#fTo').value='';
+    rd();
+  };
+}
+function coffeeKey(l){return l.coffeeId||('n:'+(l.name||''))}
+function logsFiltered(){
+  var cutoff='';
+  if(F.range!=='all'&&F.range!=='custom')cutoff=dstr(new Date(Date.now()-parseInt(F.range,10)*86400000));
+  var out=S.log.filter(function(l){
+    if(F.coffee&&coffeeKey(l)!==F.coffee)return false;
+    if(F.drip&&l.dripper!==F.drip)return false;
+    if(F.method&&(l.methods||[]).indexOf(F.method)<0)return false;
+    if(F.rating&&(l.rating||0)<F.rating)return false;
+    if(cutoff&&l.brewDate<cutoff)return false;
+    if(F.range==='custom'){if(F.from&&l.brewDate<F.from)return false;if(F.to&&l.brewDate>F.to)return false}
+    if(F.q){var hay=[l.name,l.roaster,l.notes,l.tastes,l.process,l.producer,l.varietal].join(' ').toLowerCase();if(hay.indexOf(F.q)<0)return false}
+    return true;
+  });
+  return out;
+}
+function sortLogs(arr){
+  var a=arr.slice();
+  if(F.sort==='old')return a.sort(sortAsc);
+  if(F.sort==='hi')return a.sort(function(x,y){return (y.rating||0)-(x.rating||0)||sortAsc(y,x)});
+  if(F.sort==='lo')return a.sort(function(x,y){return (x.rating||6)-(y.rating||6)||sortAsc(y,x)});
+  return a.sort(function(x,y){return sortAsc(y,x)});
+}
+
+/* ---------- logs: trend chart ---------- */
+var trend=[{k:'sweet',slot:0},{k:'acid',slot:1},{k:'bitter',slot:2}];
+var tableOn=false;
+function seriesName(k){if(k==='rating')return 'Rating';for(var i=0;i<WHEEL.length;i++)if(WHEEL[i].k===k)return WHEEL[i].n;return k}
+function valOf(l,k){if(k==='rating')return l.rating>0?l.rating:null;return hasWheel(l)?(l.wheel[k]||0):null}
+function drawAttrChips(){
+  var all=WHEEL.map(function(w){return [w.k,w.n]}).concat([['rating','Rating']]);
+  $('#lAttrs').innerHTML=all.map(function(a){
+    var t=trend.filter(function(x){return x.k===a[0]})[0];
+    return '<button type="button" class="attr'+(t?' on':'')+'" data-k="'+a[0]+'"><span class="sw"'+(t?' style="background:var(--s'+(t.slot+1)+')"':'')+'></span>'+esc(a[1])+'</button>';
+  }).join('');
+}
+$('#lAttrs').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-k]');if(!b)return;
+  var k=b.dataset.k,i;
+  for(i=0;i<trend.length;i++)if(trend[i].k===k){trend.splice(i,1);renderLogs();return}
+  if(trend.length>=4){toast('Up to four at a time');return}
+  var used=trend.map(function(t){return t.slot}),slot=0;
+  while(used.indexOf(slot)>=0)slot++;
+  trend.push({k:k,slot:slot});renderLogs();
+});
+$('#lTableBtn').onclick=function(){tableOn=!tableOn;$('#lTable').style.display=tableOn?'block':'none';this.textContent=tableOn?'Hide table':'Show table'};
+
+function drawTrend(rows){
+  var host=$('#lChart');
+  var usable=rows.filter(function(l){return trend.some(function(t){return valOf(l,t.k)!=null})});
+  if(!trend.length){host.innerHTML='<div class="empty">Pick at least one attribute above.</div>';return}
+  if(usable.length<2){host.innerHTML='<div class="empty">Log at least two brews with a wheel or rating to see a trend.</div>';return}
+  rows=usable;
+  var W=340,H=214,L=26,Rt=56,T=10,Bt=28,pw=W-L-Rt,ph=H-T-Bt,n=rows.length;
+  var X=function(i){return L+pw*i/(n-1)},Y=function(v){return T+ph*(1-v/5)};
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Taste trend line chart">',g,i;
+  for(g=0;g<=5;g++){
+    s+='<line x1="'+L+'" x2="'+(W-Rt)+'" y1="'+Y(g).toFixed(1)+'" y2="'+Y(g).toFixed(1)+'" style="stroke:var(--line);stroke-width:1"/>';
+    s+='<text x="'+(L-6)+'" y="'+(Y(g)+3.5).toFixed(1)+'" text-anchor="end" style="font-size:10px;fill:var(--mute)">'+g+'</text>';
+  }
+  var ticks=n<=3?[0,n-1]:[0,Math.floor((n-1)/2),n-1];
+  ticks.forEach(function(ti,j){
+    s+='<text x="'+X(ti).toFixed(1)+'" y="'+(H-8)+'" text-anchor="'+(j===0?'start':(ti===n-1?'end':'middle'))+'" style="font-size:10px;fill:var(--mute)">'+esc(shortDay(rows[ti].brewDate))+'</text>';
+  });
+  var labels=[];
+  trend.forEach(function(t){
+    var col='var(--s'+(t.slot+1)+')',path='',pen=false,lastI=-1;
+    rows.forEach(function(l,idx){
+      var v=valOf(l,t.k);
+      if(v==null){pen=false;return}
+      path+=(pen?'L':'M')+X(idx).toFixed(1)+' '+Y(v).toFixed(1)+' ';pen=true;lastI=idx;
+    });
+    s+='<path d="'+path+'" style="fill:none;stroke:'+col+';stroke-width:2;stroke-linejoin:round;stroke-linecap:round"/>';
+    if(n<=30)rows.forEach(function(l,idx){var v=valOf(l,t.k);if(v==null)return;s+='<circle cx="'+X(idx).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="6" style="fill:var(--card)"/><circle cx="'+X(idx).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="4" style="fill:'+col+'"/>'});
+    if(lastI>=0)labels.push({y:Y(valOf(rows[lastI],t.k)),x:X(lastI),name:seriesName(t.k)});
+  });
+  labels.sort(function(a,b){return a.y-b.y});
+  var clash=false;for(i=1;i<labels.length;i++)if(labels[i].y-labels[i-1].y<12)clash=true;
+  if(!clash)labels.forEach(function(lb){s+='<text x="'+(lb.x+9).toFixed(1)+'" y="'+(lb.y+3.5).toFixed(1)+'" style="font-size:10px;fill:var(--text)">'+esc(lb.name)+'</text>'});
+  s+='<line class="vl" x1="0" x2="0" y1="'+T+'" y2="'+(T+ph)+'" style="stroke:var(--mute);stroke-width:1;display:none"/></svg><div class="tip"></div>';
+  host.innerHTML='<div class="chartwrap" tabindex="0">'+s+'</div>';
+  var wrap=$('.chartwrap',host),svg=$('svg',wrap),tip=$('.tip',wrap),vl=$('.vl',wrap);
+  function show(idx){
+    idx=clamp(idx,0,n-1);var x=X(idx),l=rows[idx];
+    vl.setAttribute('x1',x);vl.setAttribute('x2',x);vl.style.display='block';
+    var h='<b>'+esc(dayLabel(l.brewDate))+'</b><div style="color:var(--mute);margin-bottom:3px">'+esc(l.name||'Untitled brew')+'</div>';
+    trend.forEach(function(t){var v=valOf(l,t.k);h+='<div class="k"><i style="background:var(--s'+(t.slot+1)+')"></i>'+esc(seriesName(t.k))+': '+(v==null?'\u2013':v)+'</div>'});
+    tip.innerHTML=h;tip.style.display='block';
+    tip.style.left=clamp(x/W*100,24,76)+'%';tip.style.transform='translateX(-50%)';tip.style.top='4px';
+    wrap._idx=idx;
+  }
+  function hide(){vl.style.display='none';tip.style.display='none'}
+  function idxFrom(ev){var r=svg.getBoundingClientRect();var px=(ev.clientX-r.left)*(W/r.width);return Math.round((px-L)/pw*(n-1))}
+  wrap.addEventListener('pointermove',function(e){show(idxFrom(e))});
+  wrap.addEventListener('pointerdown',function(e){show(idxFrom(e))});
+  wrap.addEventListener('pointerleave',hide);
+  wrap.addEventListener('keydown',function(e){
+    if(e.key==='ArrowLeft'){e.preventDefault();show((wrap._idx==null?n-1:wrap._idx)-1)}
+    else if(e.key==='ArrowRight'){e.preventDefault();show((wrap._idx==null?0:wrap._idx)+1)}
+    else if(e.key==='Escape')hide();
+  });
+  /* table view twin */
+  var t='<table><thead><tr><th>Date</th><th>Coffee</th>'+trend.map(function(x){return '<th>'+esc(seriesName(x.k))+'</th>'}).join('')+'</tr></thead><tbody>';
+  rows.forEach(function(l){t+='<tr><td>'+esc(shortDay(l.brewDate))+'</td><td>'+esc(l.name||'Untitled')+'</td>'+trend.map(function(x){var v=valOf(l,x.k);return '<td>'+(v==null?'\u2013':v)+'</td>'}).join('')+'</tr>'});
+  $('#lTable').innerHTML=t+'</tbody></table>';
+}
+
+/* ---------- logs: render ---------- */
+function entryHTML(l,showDate){
+  var st=l.rating?('<span class="stars-s">'+'\u2605'.repeat(l.rating)+'\u2606'.repeat(5-l.rating)+'</span>'):'';
+  var ch=[];
+  if(showDate)ch.push('<span class="chip">'+esc(shortDay(l.brewDate))+'</span>');
+  if(l.dripper&&DRIP[l.dripper])ch.push('<span class="chip">'+esc(DRIP[l.dripper].name)+'</span>');
+  if(l.dose!==''||l.yield!=='')ch.push('<span class="chip">'+(l.dose!==''?l.dose+' g':'?')+' \u2192 '+(l.yield!==''?l.yield+' g':'?')+'</span>');
+  if(l.waterTemp!=='')ch.push('<span class="chip">'+l.waterTemp+'\u00B0C</span>');
+  if(l.time)ch.push('<span class="chip">'+esc(l.time)+'</span>');
+  if(l.dial)ch.push('<span class="chip">'+esc(l.dial)+'</span>');
+  var m=(l.methods||[]).slice();if(l.methodOther)m.push(l.methodOther);
+  if(m.length)ch.push('<span class="chip">'+esc(m.join(', '))+'</span>');
+  var meta=[l.roaster,l.process,l.roastLevel].filter(Boolean).join(' \u00B7 ');
+  var tags=(l.tastes||'').split(',').map(function(t){return t.trim()}).filter(Boolean).map(function(t){return '<span class="chip tag">'+esc(t)+'</span>'}).join('');
+  var top=topText(l.wheel,3);
+  return '<div class="item"><div class="entry"><div class="l"><h3>'+esc(l.name||'Untitled brew')+' '+st+'</h3>'+(meta?'<div class="meta">'+esc(meta)+'</div>':'')+
+    '<div class="chips">'+ch.join('')+'</div>'+(top?'<div class="meta">Strongest: '+esc(top)+'</div>':'')+(tags?'<div class="chips">'+tags+'</div>':'')+
+    (l.notes?'<p>'+esc(l.notes)+'</p>':'')+
+    '<div class="row n" style="gap:8px;margin-top:8px"><button class="sm" data-a="edit" data-id="'+esc(l.id)+'">Edit</button><button class="sm dng" data-a="del" data-id="'+esc(l.id)+'">Delete</button></div></div>'+
+    (hasWheel(l)?wheelSVG(l.wheel,{labels:false,cls:'mini',surface:'var(--card)'}):'')+'</div></div>';
+}
+function renderLogs(){
+  initFilters();
+  var seen={},pairs=[['','All coffees']];
+  S.log.forEach(function(l){var k=coffeeKey(l);if(!seen[k]&&(l.name||l.coffeeId)){seen[k]=1;pairs.push([k,l.name||'Untitled'])}});
+  fillSel($('#fCoffee'),pairs);
+  F.coffee=$('#fCoffee').value;
+  var ls=logsFiltered();
+  var sorted=sortLogs(ls);
+  $('#lCount').textContent='('+ls.length+' of '+S.log.length+')';
+
+  var rated=ls.filter(function(l){return l.rating>0});
+  var avg=rated.length?(rated.reduce(function(a,l){return a+l.rating},0)/rated.length).toFixed(1):'\u2013';
+  var dc={};ls.forEach(function(l){if(l.dripper&&DRIP[l.dripper])dc[l.dripper]=(dc[l.dripper]||0)+1});
+  var topD=Object.keys(dc).sort(function(a,b){return dc[b]-dc[a]})[0];
+  $('#lTiles').innerHTML='<div class="tile"><b>'+ls.length+'</b><small>Brews</small></div><div class="tile"><b>'+avg+'</b><small>Avg rating</small></div><div class="tile"><b style="font-size:14px;padding:4px 0">'+(topD?esc(DRIP[topD].name):'\u2013')+'</b><small>Top dripper</small></div>';
+
+  drawAttrChips();
+  drawTrend(ls.slice().sort(sortAsc));
+
+  var aw=avgWheel(ls);
+  $('#lAvgNote').textContent=aw?('Average of '+aw.n+' brew'+(aw.n>1?'s':'')+' with a wheel. Strongest: '+topText(aw.vals,4)):'No wheels logged for this selection yet.';
+  $('#lAvg').innerHTML=aw?wheelSVG(aw.vals,{labels:true,surface:'var(--card)'}):'';
+
+  if(!sorted.length){$('#lList').innerHTML='<div class="empty">'+(S.log.length?'No entries match these filters.':'Nothing logged yet. Use the Brew journal on the Brew tab.')+'</div>';return}
+  var byDate=(F.sort==='new'||F.sort==='old'),h='',lastDay='';
+  sorted.forEach(function(l){
+    if(byDate&&l.brewDate!==lastDay){h+='<div class="dayh">'+esc(dayLabel(l.brewDate))+'</div>';lastDay=l.brewDate}
+    h+=entryHTML(l,!byDate);
+  });
+  $('#lList').innerHTML=h;
+}
+
+/* ---------- lab & data ---------- */
+function renderLab(){
+  $('#catTable').innerHTML=Object.keys(CAT).map(function(k){var c=CAT[k];return '<tr><td>'+c.label+'</td><td>'+c.range[0]+'-'+c.range[1]+'\u00B0C</td><td>1:'+c.ratio+'</td><td>'+c.zp+'</td></tr>'}).join('');
+  $('#dripList').innerHTML=Object.keys(DRIP).map(function(k){var d=DRIP[k];return '<div class="item"><h3>'+d.name+'</h3><div class="meta">'+d.shape+'</div><div class="meta">'+esc(d.note)+'</div></div>'}).join('');
+}
+function download(name,text,type){
+  var blob=new Blob([text],{type:type});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+}
+$('#exp').onclick=function(){download('coffee-lab-os-backup.json',JSON.stringify(S,null,2),'application/json')};
+$('#expCsv').onclick=function(){
+  var cols=['brewDate','name','roaster','roastDate','producer','varietal','roastLevel','process','dripper','methods','waterTemp','dose','yield','time','dial','rating','notes','tastes'];
+  var head=cols.concat(WHEEL.map(function(w){return 'wheel_'+w.k}));
+  function q(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+  var lines=[head.join(',')];
+  sortLogs(S.log).forEach(function(l){
+    var row=cols.map(function(c){return q(c==='methods'?(l.methods||[]).concat(l.methodOther?[l.methodOther]:[]).join('; '):l[c])});
+    WHEEL.forEach(function(w){row.push((l.wheel&&l.wheel[w.k])||0)});
+    lines.push(row.join(','));
+  });
+  download('coffee-lab-os-journal.csv',lines.join('\n'),'text/csv');
 };
 $('#imp').onclick=function(){$('#impFile').click()};
 $('#impFile').onchange=function(){
   var f=this.files[0];if(!f)return;
   var r=new FileReader();
-  r.onload=function(){try{var j=JSON.parse(r.result);if(!j.coffees)throw 0;S=j;if(!S.log)S.log=[];save();fillSelects();resetToCoffee();update();renderLab();toast('Backup imported')}catch(e){toast('Not a valid backup file')}};
+  r.onload=function(){
+    try{
+      var j=JSON.parse(r.result);if(!j.coffees)throw 0;
+      S={v:3,coffees:j.coffees.map(fillMissing),log:[]};
+      S.log=(j.log||[]).map(migrateLogEntry);
+      save();fillSelects();resetToCoffee();update();renderLab();renderPantry();toast('Backup imported');
+    }catch(e){toast('Not a valid backup file')}
+  };
   r.readAsText(f);
 };
 $('#reset').onclick=function(){
-  if(!confirm('Reset pantry, vault and log to factory data?'))return;
-  S={coffees:JSON.parse(JSON.stringify(COFFEES)),log:[]};save();B.coffeeId='';fillSelects();resetToCoffee();update();renderLab();toast('Reset done');
+  if(!confirm('Reset pantry, vault and journal to factory data?'))return;
+  S={v:3,coffees:clone(COFFEES),log:[]};save();B.coffeeId='';fillSelects();resetToCoffee();update();renderLab();renderPantry();toast('Reset done');
 };
 
 /* ---------- scale ---------- */
@@ -594,7 +1275,7 @@ var SC={
   raw:0,tareOff:0,w:0,prevW:0,samples:[],flow:0,buf:[],logs:[],
   SVC:['49535343-fe7d-4ae5-8fa9-9fafd205e455','00001820-0000-1000-8000-00805f9b34fb'],
   NEW_N:'49535343-1e4d-4bd9-ba61-23c647249616',NEW_W:'49535343-8841-43f4-a8d4-ecbe34729bb3',OLD_C:'00002a80-0000-1000-8000-00805f9b34fb',
-  say:function(m){$('#scaleState').textContent=m;$('#sS').textContent=m.length>14?m.slice(0,12)+'\u2026':m},
+  say:function(m){$('#scaleState').textContent=m;$('#sS').textContent=m.length>14?m.slice(0,12)+'…':m},
   log:function(m){this.logs.unshift(m);if(this.logs.length>40)this.logs.pop();$('#scLog').textContent=this.logs.join('\n')},
   tare:function(){this.tareOff=this.raw;this.samples=[];this.flow=0;this.push(this.raw)},
   push:function(raw){
@@ -643,11 +1324,11 @@ var SC={
   connect:async function(){
     if(!navigator.bluetooth){this.say('Web Bluetooth not supported');toast('Use Chrome or Edge, not iPhone Safari');return}
     try{
-      this.say('Choose scale\u2026');
+      this.say('Choose scale…');
       this.dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:this.SVC});
       var self=this;
       this.dev.addEventListener('gattserverdisconnected',function(){self.onDrop()});
-      this.say('Connecting\u2026');
+      this.say('Connecting…');
       var srv=await this.dev.gatt.connect();
       var svc=null;
       for(var i=0;i<this.SVC.length&&!svc;i++){try{svc=await srv.getPrimaryService(this.SVC[i])}catch(e){}}
@@ -682,7 +1363,7 @@ var SC={
   onDrop:function(){clearInterval(this.hb);this.connected=false;this.say('Scale disconnected')},
   disconnect:function(){
     if(this.demo){clearInterval(this.demo);this.demo=null}
-    if(this.dev&&this.dev.gatt.connected)this.dev.gatt.disconnect();
+    if(this.dev&&this.dev.gatt&&this.dev.gatt.connected)this.dev.gatt.disconnect();
     clearInterval(this.hb);this.connected=false;this.say('Disconnected');
   },
   runDemo:function(){
@@ -710,14 +1391,15 @@ $('#scTare').onclick=function(){SC.tare()};
 $('#scDemo').onclick=function(){SC.runDemo();go('brew')};
 
 /* ---------- boot ---------- */
+jForm=createLogForm($('#bForm'));
+eForm=createLogForm($('#eForm'));
 fillSelects();
 if(B.coffeeId)resetToCoffee();
-drawStars();
 update();
+jForm.prefill();
 draw();
 renderPantry();
-
-if('serviceWorker' in navigator){/* no service worker: keep the app a single file */}
+window.__coloOK=true;
 })();
 </script>
 </body>
