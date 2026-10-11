@@ -152,6 +152,15 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 .empty{color:var(--mute);font-size:13px;padding:12px 0;text-align:center}
 .src{font-size:11px;color:var(--mute)}
 .secthead{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mute);margin:10px 0 2px}
+.catrow{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:6px;align-items:center;margin:6px 0;font-size:13px}
+.catrow input{padding:8px 6px;text-align:center;font-size:15px;border-radius:8px}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.hrow h2{margin:0!important}
+#fBtns{flex-wrap:wrap}
+#fBtns button{min-width:100px}
+.seg button{font-size:13px}
+.how td{vertical-align:top;font-size:13px}
+.how td:first-child{color:var(--text);font-weight:600;width:38%}
 </style>
 </head>
 <body>
@@ -188,7 +197,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
     <div class="note" id="lawT"></div>
 
     <label>Grinder</label>
-    <div class="seg" id="bGrinder"><button data-v="zp6" class="on">1Zpresso ZP6</button><button data-v="c3s">Timemore C3S</button></div>
+    <div class="seg" id="bGrinder"></div>
     <label id="dialLbl">ZP6 dial</label>
     <div class="stepper">
       <button id="dialM">&minus;</button>
@@ -208,6 +217,11 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
     <div class="chips" id="bChips"></div>
     <table><thead><tr><th>Step</th><th>At</th><th>Pour</th><th>Scale to</th></tr></thead><tbody id="bSteps"></tbody></table>
     <div class="note" id="bNotes"></div>
+    <div class="row n" style="gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="sm pri" id="saveRecipe">Save as this coffee&rsquo;s default recipe</button>
+      <button class="sm" id="editCoffeeBtn">Edit coffee</button>
+    </div>
+    <div class="note" id="recipeInfo"></div>
   </div>
 
   <div class="card">
@@ -244,17 +258,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
     <h2>Live pantry <span id="pCount" style="color:var(--mute)"></span></h2>
     <div id="pList"></div>
   </div>
-  <details class="card">
-    <summary>+ Add a new coffee</summary>
-    <label>Name</label><input type="text" id="nName" placeholder="e.g. Subko Pearl">
-    <label>Roaster</label><input type="text" id="nRoaster">
-    <label>Process / origin (optional)</label><input type="text" id="nProc">
-    <div class="grid2">
-      <div><label>Category</label><select id="nCat"></select></div>
-      <div><label>Roast date</label><input type="date" id="nDate"></div>
-    </div>
-    <div style="margin-top:12px"><button class="pri" id="nAdd">Add to pantry &amp; vault</button></div>
-  </details>
+  <div class="card"><button class="pri" id="addCoffee" style="width:100%">+ Add a new coffee</button><div class="note">Includes the recipe: best dripper, water temperature, grind, ratio, dose, bloom and pours.</div></div>
 </section>
 
 <!-- ================= VAULT ================= -->
@@ -334,17 +338,37 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 <!-- ================= LAB ================= -->
 <section id="v-lab" class="view">
   <div class="card">
-    <h2>The protocol</h2>
-    <div class="note"><b>Coarse grind stays:</b> ZP6 about 5.2-7.4 (C3S 12-18 clicks). <b>Temperature follows the roast</b> instead of one cap for everything. Hotter or finer pushes extraction up; cooler or coarser pushes it down, and the engine adjusts ratio, bloom and pulses when you stray from a coffee's baseline.</div>
-    <table><thead><tr><th>Category</th><th>Kettle</th><th>Ratio</th><th>ZP6</th></tr></thead><tbody id="catTable"></tbody></table>
+    <h2>Roast categories</h2>
+    <div class="note" style="margin-top:0">Defaults for every coffee that has no saved recipe of its own. The target range is the temperature &plusmn;1&deg;C. Edit a number and it saves.</div>
+    <div id="catEdit"></div>
+    <div class="row n" style="margin-top:8px"><button class="sm" id="catReset">Reset categories to factory</button></div>
   </div>
   <div class="card">
-    <h2>Drippers</h2>
+    <div class="hrow"><h2>Drippers</h2><button class="sm pri" id="dripAdd">+ Add dripper</button></div>
     <div id="dripList"></div>
+  </div>
+  <div class="card">
+    <div class="hrow"><h2>Grinders</h2><button class="sm pri" id="grAdd">+ Add grinder</button></div>
+    <div class="note" style="margin-top:0">Recipes are stored on the ZP6 scale. Each grinder here converts that to its own dial, so adding a new grinder never changes a saved recipe.</div>
+    <div id="grList"></div>
   </div>
   <div class="card">
     <h2>Orea V1 rules</h2>
     <div class="note">Remove the Switch converter until you own the Switch base. Run the Orea in its open flat-bed configuration, otherwise the plug restricts drainage and water puddles.</div>
+  </div>
+  <div class="card">
+    <h2>What updates itself, and where to change the rest</h2>
+    <table class="how"><tbody>
+      <tr><td>A coffee&rsquo;s details, status and notes</td><td>Pantry or Vault, then <b>Edit</b>.</td></tr>
+      <tr><td>A coffee&rsquo;s recipe (best dripper, temperature, ratio, grind, dose, bloom, pours)</td><td>Edit the coffee, or dial it in on the Brew tab and tap <b>Save as this coffee&rsquo;s default recipe</b>.</td></tr>
+      <tr><td>Defaults for a roast category</td><td>The Roast categories card above. They apply to every coffee without its own recipe.</td></tr>
+      <tr><td>Drippers and their offsets</td><td>The Drippers card above.</td></tr>
+      <tr><td>A new grinder</td><td>The Grinders card above. Set the dial that matches ZP6 5.4 and the steps per ZP6 unit.</td></tr>
+      <tr><td>Journal entries</td><td>Logs tab, <b>Edit</b> or <b>Delete</b>.</td></tr>
+      <tr><td>New coffees added in a future version of the site</td><td>Appear by themselves. Your edits are never overwritten.</td></tr>
+      <tr><td>Backups</td><td>The Data card below. Export includes everything on this page.</td></tr>
+      <tr><td>Needs a code change</td><td>The taste-wheel attributes, the brew-method checkboxes, the iced-brew adjustment (+2&deg;C and 0.2 finer), the pour-schedule formula and the Bluetooth scale protocol.</td></tr>
+    </tbody></table>
   </div>
   <div class="card">
     <h2>Data</h2>
@@ -353,7 +377,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
     <div class="row" style="margin-top:8px"><button id="imp">Import JSON</button></div>
     <input type="file" id="impFile" accept="application/json" style="display:none">
     <div style="margin-top:10px"><button class="dng sm" id="reset">Reset to factory data</button></div>
-    <div class="note" style="margin-top:12px">Coffee Lab OS v3 &middot; if this line is visible, the full page loaded.</div>
+    <div class="note" style="margin-top:12px">Coffee Lab OS v3.1 &middot; if this line is visible, the full page loaded.</div>
   </div>
 </section>
 </main>
@@ -372,6 +396,11 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
   <div id="eForm"></div>
   <div class="row" style="margin-top:12px"><button id="eCancel">Cancel</button><button class="pri" id="eSave">Save changes</button></div>
 </div></div>
+<div class="modal" id="fmodal"><div class="sheet">
+  <h2 id="fTitle" style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--accent)"></h2>
+  <div id="fBody"></div>
+  <div class="row" id="fBtns" style="margin-top:12px"></div>
+</div></div>
 <datalist id="coffeeNames"></datalist>
 <div class="toast" id="toast"></div>
 <script>
@@ -387,8 +416,11 @@ var r2=function(v){return Math.round(v*100)/100};
 var fmt=function(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var clone=function(o){return JSON.parse(JSON.stringify(o))};
-var zpToC3=function(z){return Math.round(13+(z-5.4)*2.5)};
-var c3ToZp=function(c){return r1(5.4+(c-13)/2.5)};
+function gr(id){for(var i=0;i<GR.length;i++)if(GR[i].id===id)return GR[i];return GR[0]}
+function dialFromZp(g,zp){var v=g.base+(zp-5.4)*g.per;return g.dec>0?r1(v):Math.round(v)}
+function zpFromDial(g,d){return r1(5.4+(d-g.base)/g.per)}
+function dialTxt(g,zp){var v=dialFromZp(g,zp);return g.short+' '+(g.dec>0?v.toFixed(1):v)}
+function allDialsTxt(zp){return GR.map(function(g){return dialTxt(g,zp)}).join(' / ')}
 function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove('on')},2400)}
 function pad2(n){return String(n).padStart(2,'0')}
 function dstr(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())}
@@ -415,6 +447,12 @@ var DRIP={
   kalita:{name:'Kalita 102-D',shape:'Flat-bed wedge',gOff:-0.1,tOff:0,note:'Flat bed is forgiving. Pour in steady even circles, no swirl.'},
   orea:{name:'Orea V1 Stainless',shape:'Flat-bed, open base',gOff:-0.2,tOff:0,note:'Fast vertical drainage and double-wall heat retention. Open configuration only, converter removed. Kalita Wave style paper.'}
 };
+var CAT_DEF=clone(CAT),DRIP_DEF=clone(DRIP);
+var GR_DEF=[
+  {id:'zp6',name:'1Zpresso ZP6',short:'ZP6',base:5.4,per:1,dec:1,step:0.1,builtin:true},
+  {id:'c3s',name:'Timemore C3S',short:'C3S',base:13,per:2.5,dec:0,step:1}
+];
+var GR=clone(GR_DEF);
 var WHEEL=[
   {k:'sweet',n:'Sweet'},{k:'acid',n:'Acidic'},{k:'floral',n:'Floral'},{k:'spicy',n:'Spicy'},
   {k:'salty',n:'Salty'},{k:'berry',n:'Berry fruit'},{k:'citrus',n:'Citrus fruit'},{k:'stone',n:'Stone fruit'},
@@ -433,12 +471,13 @@ var U_PINK='https://www.thewaytocoffee.com/beans/pink-lemonade-ultra-light/';
 var U_RUMBA='https://eightouncecoffee.com/products/dak-rumba';
 var U_RAX='https://bluetokaicoffee.com/products/raxidi-lobo-estate-anaerobic-naturals';
 var U_UNAKKI='https://www.thewaytocoffee.com/beans/unakki-estate-washed/';
-var NF='Not found online. Add your own with Edit notes.';
+var NF='Not found online. Add your own with Edit coffee.';
 var COFFEES=[
   C('subko-rat','Subko Ratnagiri (Pearl)','Subko','nordic','active',{proc:'Naturals + anaerobic honey',producer:'Ratnagiri Estate, Karnataka',varietal:'Arabica + Catuai',roastLevel:'Medium (Omni roast, Agtron 65)',roasterNotes:['Raw mango','Blossom honey','Hazelnut tart'],src:U_SUBKO,caveat:'From the Subko Project Pearl Omni Roast listing. Subko sells several Pearl lots, so check your bag.'}),
   C('pink-lem','Pink Lemonade','Grey Soul Coffee Roasters','nordic','active',{proc:'Anaerobic natural, raised-bed dried',producer:'Tsiesema Village, Kohima, Nagaland',varietal:'Chandragiri',roastLevel:'Light / ultra-light',roasterNotes:['Orange','Apple','Chocolate','Pineapple','Blueberry'],otherNotes:[{n:'Fig-like finish',s:'sensory profile on the same listing'},{n:'Green grape',s:'sensory profile on the same listing'}],src:U_PINK,caveat:'Assumed to be the Grey Soul lot of this name.'}),
   C('broot-sl','Broot Sur Lie','Broot','ml','active',{proc:'Sur lie',caveat:NF}),
   C('broot-mt','Broot Moss Theory','Broot','ml','active',{dose:25,note:'Works well as a Japanese iced brew: 25 g dose.',caveat:NF}),
+  C('broot-df','Broot Deep Field','BROOT Coffee Roasters (New Delhi)','ml','active',{since:2,roastDate:'2026-10-06',proc:'Natural (sun-dried)',producer:'Tribal smallholder cooperatives, Eastern Ghats (900-1,100 m)',varietal:'Arabica (regional highland selections)',roastLevel:'Medium-light (Depth 36)',caveat:NF}),
   C('raxidi','Roastery Raxidi Lobo','Roastery','med','active',{zp:5.8,proc:'Anaerobic natural',producer:'Raxidi Lobo Estate',varietal:'Arabica SLN 5B',roastLevel:'Medium',roasterNotes:['Mosambi','Green apple','Plum'],src:U_RAX,caveat:'Notes are from Blue Tokai’s listing of this estate. Your bag’s roaster may describe it differently.'}),
   C('bold2','Bold Edition #2','','md','active',{zp:6.8,caveat:NF}),
   C('ph7','PH-Seven Robusta-AA','PH-Seven','rob','active',{zp:7.2,note:'100% Robusta.',typical:['Dark chocolate','Nutty','Woody','Earthy'],caveat:'No listing found. The chips below are what Indian robusta typically tastes like, not this roaster’s notes.'}),
@@ -481,7 +520,7 @@ function migrateLogEntry(l){
     waterTemp:l.temp!=null?l.temp:'',dose:l.dose!=null?l.dose:'',yield:l.water!=null?l.water:'',time:l.time?fmt(l.time):'',dripper:dripKeyByName(l.dripper),
     dial:l.grinder==='zp6'?('ZP6 '+Number(l.dial).toFixed(1)):('C3S '+l.dial),notes:l.note||'',tastes:'',rating:l.rating||0,methods:['Pour-over'],methodOther:'',wheel:{}};
 }
-function load(){
+function loadRaw(){
   try{
     var j=JSON.parse(localStorage.getItem(KEY)||'null');
     if(j&&j.coffees&&j.coffees.length){S=j;S.coffees.forEach(fillMissing);S.log=(S.log||[]).map(migrateLogEntry);return}
@@ -490,6 +529,31 @@ function load(){
   }catch(e){}
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function mergeSeeds(){
+  if(!S.seeded)S.seeded=[];
+  COFFEES.filter(function(c){return c.since>1}).forEach(function(c){
+    if(S.seeded.indexOf(c.id)>=0)return;
+    S.seeded.push(c.id);
+    if(!getCoffee(c.id))S.coffees.unshift(clone(c));
+  });
+}
+function applyCustom(){
+  Object.keys(DRIP).forEach(function(k){delete DRIP[k]});
+  Object.keys(DRIP_DEF).forEach(function(k){DRIP[k]=clone(DRIP_DEF[k])});
+  var sd=S.drippers||{};
+  Object.keys(sd).forEach(function(k){DRIP[k]=Object.assign({gOff:0,tOff:0,shape:'',note:''},DRIP[k]||{},sd[k])});
+  Object.keys(CAT_DEF).forEach(function(k){CAT[k]=clone(CAT_DEF[k])});
+  var sc=S.cat||{};
+  Object.keys(sc).forEach(function(k){
+    if(!CAT[k])return;var o=sc[k];
+    if(typeof o.base==='number')CAT[k].base=o.base;
+    if(typeof o.ratio==='number')CAT[k].ratio=o.ratio;
+    if(typeof o.zp==='number')CAT[k].zp=o.zp;
+    CAT[k].range=[r1(CAT[k].base-1),r1(CAT[k].base+1)];
+  });
+  GR=(S.grinders&&S.grinders.length)?S.grinders:clone(GR_DEF);
+}
+function load(){loadRaw();mergeSeeds();applyCustom();save()}
 load();
 function getCoffee(id){for(var i=0;i<S.coffees.length;i++)if(S.coffees[i].id===id)return S.coffees[i];return null}
 function active(){return S.coffees.filter(function(c){return c.status==='active'})}
@@ -510,27 +574,36 @@ $('#nav').addEventListener('click',function(e){var b=e.target.closest('button');
 var B={coffeeId:'',method:'hot',dripper:'orea',dose:15,temp:91,grinder:'zp6',zp:5.6};
 var jForm=null;
 
-function baseOf(c){return c.base!=null?c.base:CAT[c.cat].base}
-function recZpOf(c,dk){return r1((c.zp!=null?c.zp:CAT[c.cat].zp)+DRIP[dk].gOff)}
+function recOf(c){return c.recipe||{}}
+function baseOf(c){var r=recOf(c);return r.temp!=null?r.temp:(c.base!=null?c.base:CAT[c.cat].base)}
+function recZpOf(c,dk){
+  var r=recOf(c),ref=(r.zp!=null&&r.dripper&&DRIP[r.dripper])?DRIP[r.dripper].gOff:0;
+  var z=r.zp!=null?r.zp:(c.zp!=null?c.zp:CAT[c.cat].zp);
+  return r1(z-ref+DRIP[dk].gOff);
+}
+function ratioOf(c){var r=recOf(c);return r.ratio!=null?r.ratio:CAT[c.cat].ratio}
+function bestDripper(c){var r=recOf(c);return (r.dripper&&DRIP[r.dripper])?r.dripper:''}
 function resetToCoffee(){
   var c=getCoffee(B.coffeeId);if(!c)return;
-  var ic=B.method==='iced';
+  var ic=B.method==='iced',bd=bestDripper(c);
+  if(bd)B.dripper=bd;
+  if(!DRIP[B.dripper])B.dripper=Object.keys(DRIP)[0];
   B.dose=c.dose||15;
   B.temp=baseOf(c)+(ic?2:0);
   B.zp=r1(recZpOf(c,B.dripper)-(ic?0.2:0));
 }
 function compute(){
   var c=getCoffee(B.coffeeId);if(!c)return null;
-  var cat=CAT[c.cat],d=DRIP[B.dripper],ic=B.method==='iced';
+  var cat=CAT[c.cat],d=DRIP[B.dripper],ic=B.method==='iced',rc=recOf(c);
   var base=baseOf(c)+(ic?2:0),rec=r1(recZpOf(c,B.dripper)-(ic?0.2:0));
   var e=clamp(0.6*(B.temp-base)-1.5*(B.zp-rec),-4,4);
-  var ratio=r2(cat.ratio+clamp(e*0.15,-0.7,0.7));
+  var ratio=r2(ratioOf(c)+clamp(e*0.15,-0.7,0.7));
   var total=Math.round(B.dose*ratio);
   var hot=total,ice=0;
   if(ic){hot=Math.round(total*0.627);ice=total-hot}
   var bloomW=Math.round(B.dose*3);
-  var bloomT=Math.round(clamp(45-e*4,30,60));
-  var n=e<-1.5?5:4;
+  var bloomT=Math.round(clamp((rc.bloomT!=null?rc.bloomT:45)-e*4,30,60));
+  var n=clamp((rc.pours!=null?Math.round(rc.pours):4)+(e<-1.5?1:0),2,7);
   var step=e>1?40:32;
   var steps=[{label:'Bloom',t:0,cum:bloomW,add:bloomW}];
   var prev=bloomW;
@@ -541,7 +614,7 @@ function compute(){
   }
   var end=steps[steps.length-1].t+55;
   var notes=[];
-  if(e<-1.2)notes.push('Under-extraction risk (sour, hollow). Compensated: tighter ratio, longer bloom'+(n===5?', one extra pulse':'')+'. Add a gentle swirl after the bloom and pour a little higher (5-6 cm).');
+  if(e<-1.2)notes.push('Under-extraction risk (sour, hollow). Compensated: tighter ratio, longer bloom'+(e<-1.5?', one extra pulse':'')+'. Add a gentle swirl after the bloom and pour a little higher (5-6 cm).');
   else if(e>1.2)notes.push('Over-extraction risk (bitter, dry). Compensated: wider ratio, shorter bloom, slower pulses. Keep pours low and centre-only, no swirl.');
   else notes.push('Balanced. Low kettle height (under 4 cm), gentle centre-dominant stream, no swirl during main pours.');
   notes.push(d.note);
@@ -554,17 +627,22 @@ var R=null;
 function update(){
   R=compute();if(!R)return;
   var c=R.c;
-  var lo=R.cat.range[0]+(R.ic?2:0),hi=R.cat.range[1]+(R.ic?2:0);
-  var okT=B.temp>=lo&&B.temp<=hi,okG=B.zp>=5.2&&B.zp<=7.4;
+  renderGrinderBtns();
+  var okT=Math.abs(B.temp-R.base)<=1.0001,okG=B.zp>=5.2&&B.zp<=7.4;
   $('#tempVal').textContent=B.temp.toFixed(1)+'°C';
   $('#bTempR').value=B.temp;
-  $('#lawT').innerHTML=okT?'<span style="color:var(--good)">In the protocol range for this roast ('+lo+'-'+hi+'°C)</span>':'<span style="color:var(--warn)">Outside the protocol range ('+lo+'-'+hi+'°C) for '+esc(R.cat.label)+'. Fine if you are testing.</span>';
+  $('#lawT').innerHTML=okT?'<span style="color:var(--good)">On target for this coffee ('+R.base+'°C ±1)</span>':'<span style="color:var(--warn)">More than 1°C from this coffee\'s '+R.base+'°C target. Fine if you are testing.</span>';
   $('#lawG').innerHTML=okG?'<span style="color:var(--good)">In the coarse range (ZP6 5.2-7.4)</span>':'<span style="color:var(--warn)">'+(B.zp<5.2?'Finer than the coarse range: channeling risk on the ZP6.':'Very coarse: expect a thin cup.')+'</span>';
   $('#bDose').value=B.dose;
-  $('#dialLbl').textContent=B.grinder==='zp6'?'ZP6 dial':'C3S clicks';
+  var g=gr(B.grinder);
+  $('#dialLbl').textContent=g.name+(g.dec>0?' dial':' setting');
   var dial=$('#bDial');
-  if(B.grinder==='zp6'){dial.step='0.1';dial.value=B.zp.toFixed(1)}else{dial.step='1';dial.value=zpToC3(B.zp)}
-  $('#dialHint').textContent='Recommended: ZP6 '+R.rec.toFixed(1)+' / C3S '+zpToC3(R.rec)+' clicks';
+  dial.step=String(g.step);
+  dial.value=g.dec>0?dialFromZp(g,B.zp).toFixed(1):dialFromZp(g,B.zp);
+  $('#dialHint').textContent='Recommended: '+allDialsTxt(R.rec);
+  $('#bDrip').value=B.dripper;
+  var hasRec=!!(c.recipe&&Object.keys(c.recipe).length);
+  $('#recipeInfo').textContent=hasRec?'Using the saved recipe for this coffee.':'Using the '+R.cat.label+' category defaults. Dial it in, then save it as this coffee\'s recipe.';
   $$('#bGrinder button').forEach(function(b){b.classList.toggle('on',b.dataset.v===B.grinder)});
   $$('#bMethod button').forEach(function(b){b.classList.toggle('on',b.dataset.v===B.method)});
 
@@ -578,7 +656,7 @@ function update(){
     '<div><b>'+(R.ic?R.hot:R.total)+'</b><small>'+(R.ic?'Hot water g':'Water g')+'</small></div>'+
     '<div><b>1:'+R.ratio.toFixed(2).replace(/0$/,'')+'</b><small>Ratio</small></div>'+
     '<div><b>'+R.kettle.toFixed(1)+'°</b><small>Kettle</small></div>'+
-    '<div><b>'+(B.grinder==='zp6'?B.zp.toFixed(1):zpToC3(B.zp))+'</b><small>'+(B.grinder==='zp6'?'ZP6':'C3S')+'</small></div>';
+    '<div><b>'+(g.dec>0?dialFromZp(g,B.zp).toFixed(1):dialFromZp(g,B.zp))+'</b><small>'+esc(g.short)+'</small></div>';
 
   var chips=[];
   chips.push(R.e<-1.2?'<span class="chip bad">Leaning sour</span>':R.e>1.2?'<span class="chip bad">Leaning bitter</span>':'<span class="chip good">Balanced</span>');
@@ -637,9 +715,9 @@ function fillSelects(){
   $('#bCoffee').innerHTML=cs.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>'}).join('');
   if(!getCoffee(B.coffeeId)||getCoffee(B.coffeeId).status!=='active'){B.coffeeId=cs.length?cs[0].id:'';resetToCoffee()}
   $('#bCoffee').value=B.coffeeId;
+  if(!DRIP[B.dripper])B.dripper=Object.keys(DRIP)[0];
   $('#bDrip').innerHTML=Object.keys(DRIP).map(function(k){return '<option value="'+k+'">'+DRIP[k].name+'</option>'}).join('');
   $('#bDrip').value=B.dripper;
-  $('#nCat').innerHTML=Object.keys(CAT).map(function(k){return '<option value="'+k+'">'+CAT[k].label+'</option>'}).join('');
   $('#coffeeNames').innerHTML=S.coffees.map(function(c){return '<option value="'+esc(c.name)+'">'}).join('');
 }
 $('#bCoffee').onchange=function(){B.coffeeId=this.value;resetToCoffee();update()};
@@ -652,6 +730,10 @@ $('#bMethod').onclick=function(e){
   B.zp=r1(B.zp+(toIced?-0.2:0.2));
   update();
 };
+function renderGrinderBtns(){
+  if(!GR.some(function(g){return g.id===B.grinder}))B.grinder=GR[0].id;
+  $('#bGrinder').innerHTML=GR.map(function(g){return '<button data-v="'+esc(g.id)+'" class="'+(g.id===B.grinder?'on':'')+'">'+esc(g.name)+'</button>'}).join('');
+}
 $('#bGrinder').onclick=function(e){var b=e.target.closest('button');if(!b)return;B.grinder=b.dataset.v;update()};
 $('#bDose').onchange=function(){B.dose=clamp(parseFloat(this.value)||15,5,60);update()};
 $('#doseM').onclick=function(){B.dose=clamp(r1(B.dose-0.5),5,60);update()};
@@ -659,16 +741,26 @@ $('#doseP').onclick=function(){B.dose=clamp(r1(B.dose+0.5),5,60);update()};
 $('#bTempR').oninput=function(){B.temp=parseFloat(this.value);update()};
 $('#bDial').onchange=function(){
   var v=parseFloat(this.value);if(isNaN(v))return;
-  B.zp=B.grinder==='zp6'?r1(clamp(v,2,10)):c3ToZp(clamp(v,5,30));update();
+  B.zp=clamp(zpFromDial(gr(B.grinder),v),2,10);update();
 };
 function nudgeDial(dir){
-  if(B.grinder==='zp6')B.zp=r1(clamp(B.zp+dir*0.1,2,10));
-  else B.zp=c3ToZp(clamp(zpToC3(B.zp)+dir,5,30));
+  var g=gr(B.grinder),cur=dialFromZp(g,B.zp);
+  var nv=g.dec>0?r1(cur+dir*g.step):cur+dir*g.step;
+  B.zp=clamp(zpFromDial(g,nv),2,10);
   update();
 }
 $('#dialM').onclick=function(){nudgeDial(-1)};
 $('#dialP').onclick=function(){nudgeDial(1)};
 $('#resetDial').onclick=function(){resetToCoffee();update()};
+$('#saveRecipe').onclick=function(){
+  var c=getCoffee(B.coffeeId);if(!c||!R)return;
+  var ic=B.method==='iced';
+  c.recipe={dripper:B.dripper,temp:r1(B.temp-(ic?2:0)),zp:r1(B.zp+(ic?0.2:0)),ratio:R.ratio,bloomT:R.bloomT,pours:R.steps.length-1};
+  c.dose=B.dose;
+  save();update();renderPantry();renderVault();
+  toast('Saved as the default recipe for '+c.name);
+};
+$('#editCoffeeBtn').onclick=function(){openCoffeeForm(B.coffeeId)};
 
 /* ---------- tasting wheel ---------- */
 var NW=16,RING=22,MAXR=110,CX=170,CY=170;
@@ -825,7 +917,7 @@ function createLogForm(root){
       setF('brewDate',today());setF('waterTemp',B.temp);setF('dose',B.dose);setF('yield',R.total);
       var t=TM.elapsed();setF('time',t>0?fmt(t):'');
       setF('dripper',B.dripper);
-      setF('dial','ZP6 '+B.zp.toFixed(1)+' / C3S '+zpToC3(B.zp));
+      setF('dial',allDialsTxt(B.zp));
       setMethods(['Pour-over']);
     },
     clear:function(){
@@ -890,6 +982,13 @@ $('#jClear').onclick=function(){jForm.clear()};
 $('#eCancel').onclick=closeEdit;
 $('#eSave').onclick=saveEdit;
 $('#modal').addEventListener('click',function(e){if(e.target===$('#modal'))closeEdit()});
+function refreshDripSelects(){
+  $$('select[data-f="dripper"]').forEach(function(sel){
+    var v=sel.value;
+    sel.innerHTML='<option value="">Not recorded</option>'+Object.keys(DRIP).map(function(k){return '<option value="'+k+'">'+esc(DRIP[k].name)+'</option>'}).join('');
+    sel.value=v;
+  });
+}
 
 /* ---------- taste helpers ---------- */
 var STOP=['green','dark','light','sweet','fruit','notes','like','with','raw','tart'];
@@ -963,22 +1062,22 @@ function tastePanel(c){
     var sp=spark(ls.map(function(l){return l.rating>0?l.rating:null}));
     if(sp)h+='<div class="note" style="margin:6px 0 0">Rating over time</div>'+sp;
   }
-  h+='<div class="row n" style="gap:8px;margin-top:10px"><button class="sm" data-a="editnotes" data-id="'+esc(c.id)+'">Edit notes</button>'+(c.status==='active'?'<button class="sm pri" data-a="brew" data-id="'+esc(c.id)+'">Brew &amp; log</button>':'')+'</div>';
+  h+='<div class="row n" style="gap:8px;margin-top:10px"><button class="sm" data-a="editcoffee" data-id="'+esc(c.id)+'">Edit coffee</button>'+(c.status==='active'?'<button class="sm pri" data-a="brew" data-id="'+esc(c.id)+'">Brew &amp; log</button>':'')+'</div>';
   return h+'</details>';
 }
 
 /* ---------- pantry & vault ---------- */
 function coffeeItem(c){
   var d=daysOff(c.roastDate);
-  var rz=recZpOf(c,'neo');
+  var bd=bestDripper(c),rz=recZpOf(c,bd||'neo');
   var meta=[CAT[c.cat].label];
   if(c.roaster)meta.push(esc(c.roaster));
   if(c.proc)meta.push(esc(c.proc));
-  var line='ZP6 '+rz.toFixed(1)+' / C3S '+zpToC3(rz)+' &middot; '+baseOf(c)+'\u00B0C &middot; 1:'+CAT[c.cat].ratio+(c.dose?' &middot; '+c.dose+' g':'');
+  var line=esc(allDialsTxt(rz))+' &middot; '+baseOf(c)+'\u00B0C &middot; 1:'+ratioOf(c)+(c.dose?' &middot; '+c.dose+' g':'')+(bd?' &middot; best: '+esc(DRIP[bd].name):'')+(c.recipe&&Object.keys(c.recipe).length?' &middot; saved recipe':'');
   var rd=c.roastDate?'Roasted '+esc(c.roastDate)+(d!=null?' ('+d+' d)':''):'';
   var acts=c.status==='active'
-    ?'<button class="sm pri" data-a="brew" data-id="'+esc(c.id)+'">Brew</button><button class="sm" data-a="finish" data-id="'+esc(c.id)+'">Finished</button>'
-    :'<button class="sm pri" data-a="restock" data-id="'+esc(c.id)+'">Restock</button>';
+    ?'<button class="sm pri" data-a="brew" data-id="'+esc(c.id)+'">Brew</button><button class="sm" data-a="editcoffee" data-id="'+esc(c.id)+'">Edit</button><button class="sm" data-a="finish" data-id="'+esc(c.id)+'">Finished</button>'
+    :'<button class="sm pri" data-a="restock" data-id="'+esc(c.id)+'">Restock</button><button class="sm" data-a="editcoffee" data-id="'+esc(c.id)+'">Edit</button>';
   return '<div class="item"><div class="top"><div><h3>'+esc(c.name)+'</h3><div class="meta">'+meta.join(' &middot; ')+'</div><div class="meta">'+line+'</div>'+(rd?'<div class="meta">'+rd+'</div>':'')+(c.est?'<div class="meta">Category estimated, edit by restocking</div>':'')+'</div><div class="acts">'+acts+'</div></div>'+tastePanel(c)+'</div>';
 }
 function openPanels(listEl){return $$('details.tp[open]',listEl).map(function(d){var b=$('button[data-id]',d);return b?b.getAttribute('data-id'):''})}
@@ -1008,6 +1107,7 @@ function listClick(e){
   var a=b.dataset.a,id=b.dataset.id;
   if(a==='edit'){openEdit(id);return}
   if(a==='del'){deleteEntry(id);return}
+  if(a==='editcoffee'){openCoffeeForm(id);return}
   var c=getCoffee(id);if(!c)return;
   if(a==='brew'){B.coffeeId=c.id;resetToCoffee();fillSelects();if(jForm){jForm.clear()}update();go('brew')}
   else if(a==='finish'){c.status='archived';save();renderPantry();renderVault();fillSelects();update();toast(c.name+' archived')}
@@ -1017,27 +1117,13 @@ function listClick(e){
     c.status='active';c.roastDate=(d||'').trim();
     save();renderPantry();renderVault();fillSelects();update();toast(c.name+' back in pantry');
   }
-  else if(a==='editnotes'){
-    var v=prompt('Roaster\u2019s notes for '+c.name+', separated by commas:',(c.roasterNotes||[]).join(', '));
-    if(v===null)return;
-    c.roasterNotes=v.split(',').map(function(x){return x.trim()}).filter(Boolean);
-    c.caveat=c.roasterNotes.length&&!c.src?'Notes added by you.':c.caveat;
-    save();renderPantry();renderVault();toast('Notes saved');
-  }
 }
 $('#pList').onclick=listClick;
 $('#vList').onclick=listClick;
 $('#lList').onclick=listClick;
 $('#vSearch').oninput=renderVault;
 $('#vFilter').onclick=function(e){var b=e.target.closest('button');if(!b)return;$$('#vFilter button').forEach(function(x){x.classList.toggle('on',x===b)});renderVault()};
-$('#nAdd').onclick=function(){
-  var name=$('#nName').value.trim();if(!name){toast('Enter a name');return}
-  var id='c'+Date.now().toString(36);
-  var c=C(id,name,$('#nRoaster').value.trim(),$('#nCat').value,'active',{proc:$('#nProc').value.trim(),roastDate:$('#nDate').value});
-  S.coffees.unshift(c);
-  save();['#nName','#nRoaster','#nProc','#nDate'].forEach(function(s){$(s).value=''});
-  renderPantry();fillSelects();update();toast('Added to pantry and vault');
-};
+$('#addCoffee').onclick=function(){openCoffeeForm(null)};
 
 /* ---------- logs: filters ---------- */
 var F={q:'',coffee:'',drip:'',method:'',rating:0,range:'all',from:'',to:'',sort:'new'};
@@ -1201,6 +1287,8 @@ function renderLogs(){
   S.log.forEach(function(l){var k=coffeeKey(l);if(!seen[k]&&(l.name||l.coffeeId)){seen[k]=1;pairs.push([k,l.name||'Untitled'])}});
   fillSel($('#fCoffee'),pairs);
   F.coffee=$('#fCoffee').value;
+  fillSel($('#fDrip'),[['','All drippers']].concat(Object.keys(DRIP).map(function(k){return [k,DRIP[k].name]})));
+  F.drip=$('#fDrip').value;
   var ls=logsFiltered();
   var sorted=sortLogs(ls);
   $('#lCount').textContent='('+ls.length+' of '+S.log.length+')';
@@ -1229,9 +1317,17 @@ function renderLogs(){
 
 /* ---------- lab & data ---------- */
 function renderLab(){
-  $('#catTable').innerHTML=Object.keys(CAT).map(function(k){var c=CAT[k];return '<tr><td>'+c.label+'</td><td>'+c.range[0]+'-'+c.range[1]+'\u00B0C</td><td>1:'+c.ratio+'</td><td>'+c.zp+'</td></tr>'}).join('');
-  $('#dripList').innerHTML=Object.keys(DRIP).map(function(k){var d=DRIP[k];return '<div class="item"><h3>'+d.name+'</h3><div class="meta">'+d.shape+'</div><div class="meta">'+esc(d.note)+'</div></div>'}).join('');
+  renderCatEdit();
+  $('#dripList').innerHTML=Object.keys(DRIP).map(function(k){
+    var d=DRIP[k],custom=!DRIP_DEF[k];
+    return '<div class="item"><div class="top"><div><h3>'+esc(d.name)+(custom?' <span class="chip">custom</span>':'')+'</h3><div class="meta">'+esc(d.shape)+' &middot; grind '+(d.gOff>0?'+':'')+d.gOff+' ZP6 &middot; kettle '+(d.tOff>0?'+':'')+d.tOff+'\u00B0C</div><div class="meta">'+esc(d.note)+'</div></div><div class="acts"><button class="sm" data-a="editdrip" data-id="'+esc(k)+'">Edit</button></div></div></div>';
+  }).join('');
+  $('#grList').innerHTML=GR.map(function(g){
+    return '<div class="item"><div class="top"><div><h3>'+esc(g.name)+(g.builtin?' <span class="chip">reference scale</span>':'')+'</h3><div class="meta">ZP6 5.4 = '+esc(g.short)+' '+(g.dec>0?Number(g.base).toFixed(1):g.base)+' &middot; '+g.per+' per 1.0 ZP6 &middot; step '+g.step+'</div></div><div class="acts">'+(g.builtin?'':'<button class="sm" data-a="editgr" data-id="'+esc(g.id)+'">Edit</button>')+'</div></div></div>';
+  }).join('');
 }
+$('#dripList').onclick=function(e){var b=e.target.closest('button[data-a="editdrip"]');if(b)openDripperForm(b.dataset.id)};
+$('#grList').onclick=function(e){var b=e.target.closest('button[data-a="editgr"]');if(b)openGrinderForm(b.dataset.id)};
 function download(name,text,type){
   var blob=new Blob([text],{type:type});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
@@ -1257,16 +1353,233 @@ $('#impFile').onchange=function(){
   r.onload=function(){
     try{
       var j=JSON.parse(r.result);if(!j.coffees)throw 0;
-      S={v:3,coffees:j.coffees.map(fillMissing),log:[]};
+      S={v:3,coffees:j.coffees.map(fillMissing),log:[],grinders:j.grinders,drippers:j.drippers,cat:j.cat,seeded:j.seeded};
       S.log=(j.log||[]).map(migrateLogEntry);
-      save();fillSelects();resetToCoffee();update();renderLab();renderPantry();toast('Backup imported');
+      mergeSeeds();applyCustom();save();fillSelects();resetToCoffee();update();renderLab();renderPantry();toast('Backup imported');
     }catch(e){toast('Not a valid backup file')}
   };
   r.readAsText(f);
 };
 $('#reset').onclick=function(){
   if(!confirm('Reset pantry, vault and journal to factory data?'))return;
-  S={v:3,coffees:clone(COFFEES),log:[]};save();B.coffeeId='';fillSelects();resetToCoffee();update();renderLab();renderPantry();toast('Reset done');
+  S={v:3,coffees:clone(COFFEES),log:[]};mergeSeeds();applyCustom();save();B.coffeeId='';B.grinder='zp6';fillSelects();resetToCoffee();update();renderLab();renderPantry();toast('Reset done');
+};
+
+/* ---------- generic form modal ---------- */
+var FM=null;
+function formVals(){var v={};$$('#fBody [data-k]').forEach(function(el){v[el.getAttribute('data-k')]=el.value.trim()});return v}
+function closeForm(){$('#fmodal').classList.remove('on');FM=null}
+function openForm(spec){
+  FM=spec;
+  $('#fTitle').textContent=spec.title;
+  var h='<div class="fg">';
+  spec.fields.forEach(function(f){
+    if(f.section){h+='<div class="full secthead" style="margin-top:12px">'+esc(f.section)+'</div>';return}
+    var v=f.value==null?'':f.value;
+    h+='<div class="fld'+(f.full?' full':'')+'"><label>'+esc(f.label)+'</label>';
+    if(f.type==='select'){
+      h+='<select data-k="'+f.k+'">'+f.options.map(function(o){return '<option value="'+esc(o[0])+'"'+(String(o[0])===String(v)?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+'</select>';
+    }else if(f.type==='textarea'){
+      h+='<textarea data-k="'+f.k+'" style="min-height:70px" placeholder="'+esc(f.placeholder||'')+'">'+esc(v)+'</textarea>';
+    }else{
+      h+='<input type="'+(f.type||'text')+'" data-k="'+f.k+'" value="'+esc(v)+'" placeholder="'+esc(f.placeholder||'')+'"'+(f.step?' step="'+f.step+'"':'')+(f.type==='number'?' inputmode="decimal"':'')+'>';
+    }
+    h+='</div>';
+  });
+  h+='</div><div class="note" id="fHint"></div>';
+  $('#fBody').innerHTML=h;
+  var btns=$('#fBtns');btns.innerHTML='';
+  function addBtn(label,cls,fn){var b=document.createElement('button');b.textContent=label;if(cls)b.className=cls;b.onclick=fn;btns.appendChild(b)}
+  addBtn('Cancel','',closeForm);
+  (spec.extra||[]).forEach(function(x){addBtn(x.label,x.cls||'',function(){x.fn(formVals())})});
+  addBtn(spec.saveLabel||'Save','pri',function(){if(spec.onSave(formVals())!==false)closeForm()});
+  function hint(){if(spec.hint)$('#fHint').innerHTML=spec.hint(formVals())}
+  $('#fBody').oninput=hint;$('#fBody').onchange=hint;hint();
+  $('#fmodal').classList.add('on');
+  $('#fmodal .sheet').scrollTop=0;
+}
+$('#fmodal').addEventListener('click',function(e){if(e.target===$('#fmodal'))closeForm()});
+
+function numOrNull(s){var n=parseFloat(s);return isNaN(n)?null:n}
+function afterCustom(resetBrew){
+  if(resetBrew)resetToCoffee();
+  save();fillSelects();refreshDripSelects();update();renderPantry();renderVault();renderLab();
+  if($('#v-logs').classList.contains('on'))renderLogs();
+}
+function ensureGrinders(){if(!S.grinders)S.grinders=clone(GR);GR=S.grinders}
+
+/* ---------- add / edit coffee (with its recipe) ---------- */
+function openCoffeeForm(id){
+  var c=id?getCoffee(id):null,isNew=!c;
+  var rc=c?(c.recipe||{}):{};
+  var catOpts=Object.keys(CAT).map(function(k){return [k,CAT[k].label]});
+  var dripOpts=[['','Not set (pick on the Brew tab)']].concat(Object.keys(DRIP).map(function(k){return [k,DRIP[k].name]}));
+  var dflt=c?{t:baseOf(c),r:ratioOf(c),z:(c.zp!=null?c.zp:CAT[c.cat].zp)}:{t:CAT.ml.base,r:CAT.ml.ratio,z:CAT.ml.zp};
+  var fields=[
+    {k:'name',label:'Coffee / blend name',full:true,value:c?c.name:''},
+    {k:'roaster',label:'Roaster',value:c?c.roaster:''},
+    {k:'roastDate',label:'Roast date',type:'date',value:c?c.roastDate:''},
+    {k:'cat',label:'Roast category (sets the defaults below)',type:'select',options:catOpts,value:c?c.cat:'ml',full:true},
+    {k:'roastLevel',label:'Roast level',value:c?c.roastLevel:''},
+    {k:'proc',label:'Process',value:c?c.proc:''},
+    {k:'producer',label:'Producer / origin',value:c?c.producer:'',full:true},
+    {k:'varietal',label:'Varietal',value:c?c.varietal:'',full:true},
+    {k:'roasterNotes',label:'Roaster\u2019s tasting notes (comma separated)',full:true,value:c?(c.roasterNotes||[]).join(', '):''},
+    {k:'note',label:'Your technique notes (shown on the Brew tab)',type:'textarea',full:true,value:c?c.note:''}
+  ];
+  if(!isNew)fields.push({k:'status',label:'Status',type:'select',options:[['active','In pantry'],['archived','Archived (finished)']],value:c.status,full:true});
+  fields=fields.concat([
+    {section:'Recipe (leave blank to use the category defaults)'},
+    {k:'dripper',label:'Best dripper',type:'select',options:dripOpts,value:rc.dripper||'',full:true},
+    {k:'dose',label:'Dose (g)',type:'number',step:'0.5',value:c?c.dose:'',placeholder:'15'},
+    {k:'temp',label:'Water temp (\u00B0C)',type:'number',step:'0.5',value:rc.temp!=null?rc.temp:'',placeholder:String(dflt.t)},
+    {k:'ratio',label:'Ratio (1:x)',type:'number',step:'0.1',value:rc.ratio!=null?rc.ratio:'',placeholder:String(dflt.r)},
+    {k:'zp',label:'Grind (ZP6 dial, for the best dripper)',type:'number',step:'0.1',value:rc.zp!=null?rc.zp:'',placeholder:String(dflt.z)},
+    {k:'bloomT',label:'Bloom (seconds)',type:'number',step:'1',value:rc.bloomT!=null?rc.bloomT:'',placeholder:'45'},
+    {k:'pours',label:'Number of pours',type:'number',step:'1',value:rc.pours!=null?rc.pours:'',placeholder:'4'}
+  ]);
+  var extra=[];
+  if(!isNew){
+    extra.push({label:'Clear saved recipe',fn:function(){
+      delete c.recipe;closeForm();afterCustom(B.coffeeId===c.id);toast('Recipe cleared. Using category defaults.');
+    }});
+    extra.push({label:'Delete coffee',cls:'dng',fn:function(){
+      if(!confirm('Delete '+c.name+' from the pantry and vault? Journal entries are kept.'))return;
+      S.coffees=S.coffees.filter(function(x){return x.id!==c.id});closeForm();afterCustom(true);toast('Coffee deleted');
+    }});
+  }
+  openForm({
+    title:isNew?'Add a coffee':'Edit coffee',
+    fields:fields,extra:extra,saveLabel:isNew?'Add coffee':'Save',
+    hint:function(v){
+      var cat=CAT[v.cat]||CAT.ml;
+      var h='Defaults for '+esc(cat.label)+': '+cat.base+'\u00B0C, 1:'+cat.ratio+', grind '+esc(allDialsTxt(cat.zp))+'.';
+      var z=parseFloat(v.zp);if(!isNaN(z))h+='<br>Your grind ZP6 '+z.toFixed(1)+' = '+esc(allDialsTxt(z))+'.';
+      var d=parseFloat(v.dose),r=parseFloat(v.ratio);if(!isNaN(d)&&!isNaN(r))h+='<br>Water: '+Math.round(d*r)+' g.';
+      return h;
+    },
+    onSave:function(v){
+      if(!v.name){toast('Enter a name');return false}
+      var t=c||C('c'+Date.now().toString(36),v.name,'',v.cat,'active',{});
+      t.name=v.name;t.roaster=v.roaster;t.roastDate=v.roastDate;t.cat=v.cat;t.roastLevel=v.roastLevel;t.proc=v.proc;
+      t.producer=v.producer;t.varietal=v.varietal;t.note=v.note;
+      var notes=v.roasterNotes.split(',').map(function(x){return x.trim()}).filter(Boolean);
+      if(JSON.stringify(notes)!==JSON.stringify(t.roasterNotes||[])){
+        t.roasterNotes=notes;
+        t.caveat=notes.length?(t.src?(String(t.caveat||'').indexOf('Edited by you')>=0?t.caveat:(t.caveat||'')+' Edited by you.'):'Notes added by you.'):t.caveat;
+      }
+      if(v.status)t.status=v.status;
+      t.dose=numOrNull(v.dose)||15;
+      var rn={};
+      if(v.dripper)rn.dripper=v.dripper;
+      ['temp','ratio','zp','bloomT','pours'].forEach(function(k){var n=numOrNull(v[k]);if(n!=null)rn[k]=n});
+      if(Object.keys(rn).length)t.recipe=rn;else delete t.recipe;
+      delete t.est;
+      if(isNew)S.coffees.unshift(t);
+      afterCustom(B.coffeeId===t.id);
+      toast(isNew?'Coffee added':'Coffee saved');
+    }
+  });
+}
+
+/* ---------- drippers ---------- */
+function openDripperForm(key){
+  var d=key?DRIP[key]:null,custom=key&&!DRIP_DEF[key];
+  var extra=[];
+  if(key&&custom)extra.push({label:'Delete',cls:'dng',fn:function(){
+    if(!confirm('Delete '+d.name+'? Journal entries keep their other details.'))return;
+    delete S.drippers[key];applyCustom();closeForm();afterCustom(true);toast('Dripper deleted');
+  }});
+  if(key&&!custom)extra.push({label:'Reset to default',fn:function(){
+    if(S.drippers)delete S.drippers[key];applyCustom();closeForm();afterCustom(true);toast('Dripper reset');
+  }});
+  openForm({
+    title:key?'Edit dripper':'Add dripper',
+    fields:[
+      {k:'name',label:'Name',full:true,value:d?d.name:''},
+      {k:'shape',label:'Shape / material',full:true,value:d?d.shape:''},
+      {k:'gOff',label:'Grind offset (ZP6 units; negative = finer)',type:'number',step:'0.1',value:d?d.gOff:0},
+      {k:'tOff',label:'Kettle offset (\u00B0C above target)',type:'number',step:'0.5',value:d?d.tOff:0},
+      {k:'note',label:'Technique note (shown on the Brew tab)',type:'textarea',full:true,value:d?d.note:''}
+    ],
+    extra:extra,
+    hint:function(){return 'Offsets are relative to a plain conical V60. A fast-draining flat-bed might use -0.1 to -0.2 grind; a thick ceramic that steals heat might use kettle +1.'},
+    onSave:function(v){
+      if(!v.name){toast('Enter a name');return false}
+      if(!S.drippers)S.drippers={};
+      var k=key||('d'+Date.now().toString(36));
+      S.drippers[k]={name:v.name,shape:v.shape,gOff:numOrNull(v.gOff)||0,tOff:numOrNull(v.tOff)||0,note:v.note};
+      applyCustom();afterCustom(true);toast('Dripper saved');
+    }
+  });
+}
+$('#dripAdd').onclick=function(){openDripperForm(null)};
+
+/* ---------- grinders ---------- */
+function openGrinderForm(id){
+  var g=id?gr(id):null;
+  if(g&&g.builtin){toast('ZP6 is the reference scale and cannot be edited');return}
+  var extra=[];
+  if(g)extra.push({label:'Delete',cls:'dng',fn:function(){
+    if(!confirm('Delete '+g.name+'? Recipes are unaffected.'))return;
+    ensureGrinders();S.grinders=S.grinders.filter(function(x){return x.id!==g.id});GR=S.grinders;
+    if(B.grinder===g.id)B.grinder='zp6';
+    closeForm();afterCustom(false);toast('Grinder deleted');
+  }});
+  openForm({
+    title:g?'Edit grinder':'Add grinder',
+    fields:[
+      {k:'name',label:'Name',full:true,value:g?g.name:'',placeholder:'e.g. 1Zpresso K-Ultra'},
+      {k:'short',label:'Short label',value:g?g.short:'',placeholder:'K-Ultra'},
+      {k:'dec',label:'Dial type',type:'select',options:[['0','Whole clicks'],['1','Numbered dial with tenths']],value:g?String(g.dec):'0'},
+      {k:'base',label:'Dial reading that matches ZP6 5.4',type:'number',step:'0.1',value:g?g.base:''},
+      {k:'per',label:'Dial steps per 1.0 ZP6 unit',type:'number',step:'0.1',value:g?g.per:''},
+      {k:'step',label:'Smallest step (for the + / - buttons)',type:'number',step:'0.1',value:g?g.step:1}
+    ],
+    extra:extra,
+    hint:function(v){
+      var b=parseFloat(v.base),p=parseFloat(v.per);
+      var h='Calibrate by brewing the same coffee on both grinders and finding the dial that tastes like ZP6 5.4. That is the first number. C3S example: 13 clicks at ZP6 5.4, 2.5 clicks per 1.0. Recipes are stored in ZP6 units, so changing this later never alters a saved recipe.';
+      if(!isNaN(b)&&!isNaN(p)&&p>0){h+='<br>Preview: ZP6 5.4 = '+b+', ZP6 6.0 = '+(Math.round((b+0.6*p)*10)/10)+', ZP6 7.0 = '+(Math.round((b+1.6*p)*10)/10)+'.'}
+      return h;
+    },
+    onSave:function(v){
+      var b=numOrNull(v.base),p=numOrNull(v.per),st=numOrNull(v.step);
+      if(!v.name){toast('Enter a name');return false}
+      if(b==null||p==null||p<=0){toast('Enter the matching dial reading and steps per ZP6 unit');return false}
+      ensureGrinders();
+      var o={id:g?g.id:'g'+Date.now().toString(36),name:v.name,short:v.short||v.name.split(' ').slice(-1)[0],base:b,per:p,dec:parseInt(v.dec,10)||0,step:st>0?st:1};
+      if(g){for(var i=0;i<S.grinders.length;i++)if(S.grinders[i].id===g.id)S.grinders[i]=o}
+      else S.grinders.push(o);
+      GR=S.grinders;
+      afterCustom(false);toast('Grinder saved');
+    }
+  });
+}
+$('#grAdd').onclick=function(){openGrinderForm(null)};
+
+/* ---------- roast category defaults ---------- */
+function renderCatEdit(){
+  var h='<div class="catrow"><span class="lbl" style="margin:0">Category</span><span class="lbl" style="margin:0">Temp \u00B0C</span><span class="lbl" style="margin:0">Ratio 1:</span><span class="lbl" style="margin:0">ZP6</span></div>';
+  Object.keys(CAT).forEach(function(k){
+    var c=CAT[k];
+    h+='<div class="catrow" data-cat="'+k+'"><span>'+esc(c.label)+'</span>'+
+      '<input type="number" step="0.5" inputmode="decimal" data-f="base" value="'+c.base+'">'+
+      '<input type="number" step="0.1" inputmode="decimal" data-f="ratio" value="'+c.ratio+'">'+
+      '<input type="number" step="0.1" inputmode="decimal" data-f="zp" value="'+c.zp+'"></div>';
+  });
+  $('#catEdit').innerHTML=h;
+}
+$('#catEdit').addEventListener('change',function(e){
+  var row=e.target.closest('[data-cat]');if(!row)return;
+  var k=row.getAttribute('data-cat'),o={};
+  ['base','ratio','zp'].forEach(function(f){var n=parseFloat($('[data-f="'+f+'"]',row).value);o[f]=isNaN(n)?CAT[k][f]:n});
+  if(!S.cat)S.cat={};
+  S.cat[k]=o;applyCustom();afterCustom(true);toast('Category saved');
+});
+$('#catReset').onclick=function(){
+  if(!confirm('Reset all roast categories to the factory protocol?'))return;
+  delete S.cat;applyCustom();afterCustom(true);toast('Categories reset');
 };
 
 /* ---------- scale ---------- */
