@@ -501,7 +501,7 @@ var COFFEES=[
 ];
 
 /* ---------- state & storage ---------- */
-var KEY='coffeelabos.v3',OLDKEY='coffeelabos.v2';
+var KEY='coffeelabos.v3';
 var S={v:3,coffees:clone(COFFEES),log:[]};
 
 function seedById(id){for(var i=0;i<COFFEES.length;i++)if(COFFEES[i].id===id)return COFFEES[i];return null}
@@ -534,7 +534,6 @@ function mergeSeeds(){
     if(!cur){
       S.coffees.unshift(clone(c));
     } else {
-      // Sync roaster, notes, and default recipe
       if(!cur.recipe && c.recipe) cur.recipe=clone(c.recipe);
       if(!cur.roasterNotes && c.roasterNotes) cur.roasterNotes=clone(c.roasterNotes);
     }
@@ -575,23 +574,26 @@ function go(v){
 }
 $('#nav').addEventListener('click',function(e){var b=e.target.closest('button');if(b)go(b.dataset.v)});
 
-/* ---------- intelligent dripper matching ---------- */
+/* ---------- intelligent dripper matching & best dripper helper ---------- */
+function bestDripper(c){
+  if(!c)return '';
+  var r=c.recipe||{};
+  return (r.dripper&&DRIP[r.dripper])?r.dripper:'';
+}
+
 function getAutoDripper(c){
   if(!c)return 'neo';
-  var rc=c.recipe||{};
-  if(rc.dripper&&DRIP[rc.dripper])return rc.dripper;
+  var bd=bestDripper(c);
+  if(bd)return bd;
 
   var blob=((c.proc||'')+' '+(c.roastLevel||'')+' '+(c.note||'')+' '+(c.roasterNotes||[]).join(' ')).toLowerCase();
   
-  // Rule 1: High ferment / funky / co-ferment -> flat bed Orea V1 for sweetness & body
   if(blob.indexOf('anaerobic')>=0||blob.indexOf('co-ferment')>=0||blob.indexOf('funky')>=0||blob.indexOf('honey')>=0||blob.indexOf('natural')>=0){
     return DRIP.orea?'orea':'neo';
   }
-  // Rule 2: Clean Washed / Nordic / Delicate Citric -> Amber Neo V60 for clarity & stall prevention
   if(c.cat==='nordic'||blob.indexOf('washed')>=0||blob.indexOf('citrus')>=0||blob.indexOf('grape')>=0){
     return 'neo';
   }
-  // Rule 3: Medium comfort / chocolate -> Ceramic V60 or Kalita
   if(c.cat==='med'||c.cat==='md'||blob.indexOf('chocolate')>=0){
     return DRIP.ceramic?'ceramic':'neo';
   }
@@ -615,7 +617,6 @@ function resetToCoffee(){
   var c=getCoffee(B.coffeeId);if(!c)return;
   var ic=B.method==='iced';
   
-  // Intelligent auto dripper suggestion
   B.dripper=getAutoDripper(c);
   if(!DRIP[B.dripper])B.dripper=Object.keys(DRIP)[0];
 
