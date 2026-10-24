@@ -6,14 +6,13 @@
 <meta name="theme-color" content="#14100d">
 <title>Coffee Lab OS</title>
 <script>
-/* Watchdog: if the app script is cut off or crashes, say so instead of failing silently. */
 window.__coloOK=false;
 window.addEventListener('error',function(e){window.__coloErr=(e&&e.message)||'error'});
 setTimeout(function(){
   if(window.__coloOK)return;
   var d=document.createElement('div');
   d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99;background:#a8382a;color:#fff;padding:12px 14px;font:14px/1.4 system-ui,sans-serif';
-  d.textContent='Coffee Lab OS did not start'+(window.__coloErr?' ('+window.__coloErr+')':'')+'. The file is probably cut off. Re-upload index.html using Add file > Upload files instead of pasting.';
+  d.textContent='Coffee Lab OS did not start'+(window.__coloErr?' ('+window.__coloErr+')':'')+'. Re-upload index.html.';
   (document.body||document.documentElement).appendChild(d);
 },2500);
 </script>
@@ -98,11 +97,10 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:10px 16px;border-radius:99px;font-size:13px;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
 .toast.on{opacity:1}
 
-/* ---------- notebook journal form ---------- */
+/* journal form */
 .journal{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg2)}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
 .fg .full{grid-column:1/-1}
-.fg .third{grid-column:span 1}
 .fld label{margin:8px 0 2px;font-size:11px;text-transform:uppercase;letter-spacing:.8px}
 .fld input,.fld select{border-radius:8px;border-color:var(--line);background:var(--card);padding:9px 10px;font-size:15px}
 .fg4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
@@ -122,7 +120,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:480px){.two{grid-template-columns:1fr}.fg4{grid-template-columns:1fr 1fr}}
 
-/* ---------- logs ---------- */
+/* logs */
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .filters .full{grid-column:1/-1}
 .filters select,.filters input{padding:9px 10px;font-size:14px;border-radius:10px}
@@ -166,7 +164,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 <body>
 <header>
   <h1>Coffee <span>Lab OS</span></h1>
-  <p>Sai' Competition Lab &middot; Hyderabad &middot; Roast-Matched Protocol: coarse grind, temperature by roast</p>
+  <p>Sai' Competition Lab &middot; Hyderabad &middot; Intelligent Dripper Matching &amp; Adaptive Extraction</p>
 </header>
 
 <main>
@@ -179,7 +177,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
     <div class="grid2">
       <div><label>Method</label>
         <div class="seg" id="bMethod"><button data-v="hot" class="on">Hot</button><button data-v="iced">Iced</button></div></div>
-      <div><label>Dripper</label><select id="bDrip"></select></div>
+      <div><label>Dripper <span id="autoDripTag" style="color:var(--accent);font-size:11px;text-transform:none"></span></label><select id="bDrip"></select></div>
     </div>
     <div id="bCoffeeInfo" class="chips"></div>
   </div>
@@ -198,7 +196,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 
     <label>Grinder</label>
     <div class="seg" id="bGrinder"></div>
-    <label id="dialLbl">ZP6 dial</label>
+    <label id="dialLbl">Grinder dial</label>
     <div class="stepper">
       <button id="dialM">&minus;</button>
       <input type="number" id="bDial" step="0.1" inputmode="decimal">
@@ -258,7 +256,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
     <h2>Live pantry <span id="pCount" style="color:var(--mute)"></span></h2>
     <div id="pList"></div>
   </div>
-  <div class="card"><button class="pri" id="addCoffee" style="width:100%">+ Add a new coffee</button><div class="note">Includes the recipe: best dripper, water temperature, grind, ratio, dose, bloom and pours.</div></div>
+  <div class="card"><button class="pri" id="addCoffee" style="width:100%">+ Add a new coffee</button><div class="note">Includes the recipe: auto-matched dripper, water temperature, grind, ratio, dose, and pulses.</div></div>
 </section>
 
 <!-- ================= VAULT ================= -->
@@ -316,7 +314,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 <section id="v-scale" class="view">
   <div class="card">
     <h2>Bluetooth scale</h2>
-    <div class="note">Works in Chrome or Edge on Android and desktop over HTTPS (GitHub Pages is fine). iPhone Safari does not support Web Bluetooth. Built for Acaia-protocol scales such as the MisChief Lunar; other scales may need a different parser.</div>
+    <div class="note">Works in Chrome or Edge on Android and desktop over HTTPS. Compatible with Acaia-protocol scales.</div>
     <div class="row" style="margin:10px 0">
       <button class="pri" id="scConnect">Connect scale</button>
       <button id="scDisc">Disconnect</button>
@@ -331,7 +329,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
       <div><b id="sF">&ndash;</b><small>Flow g/s</small></div>
       <div><b id="sS" style="font-size:14px;padding-top:6px">idle</b><small>Status</small></div>
     </div>
-    <details><summary>Raw Bluetooth log (send this if the weight looks wrong)</summary><pre id="scLog">no data yet</pre></details>
+    <details><summary>Raw Bluetooth log</summary><pre id="scLog">no data yet</pre></details>
   </div>
 </section>
 
@@ -339,7 +337,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 <section id="v-lab" class="view">
   <div class="card">
     <h2>Roast categories</h2>
-    <div class="note" style="margin-top:0">Defaults for every coffee that has no saved recipe of its own. The target range is the temperature &plusmn;1&deg;C. Edit a number and it saves.</div>
+    <div class="note" style="margin-top:0">Protocol defaults when no custom recipe is saved. Target range is base &plusmn;1&deg;C.</div>
     <div id="catEdit"></div>
     <div class="row n" style="margin-top:8px"><button class="sm" id="catReset">Reset categories to factory</button></div>
   </div>
@@ -349,35 +347,8 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
   </div>
   <div class="card">
     <div class="hrow"><h2>Grinders</h2><button class="sm pri" id="grAdd">+ Add grinder</button></div>
-    <div class="note" style="margin-top:0">Recipes are stored on the ZP6 scale. Each grinder here converts that to its own dial, so adding a new grinder never changes a saved recipe.</div>
+    <div class="note" style="margin-top:0">Recipes are stored in reference ZP6 units and translated cleanly to K7 or C3S.</div>
     <div id="grList"></div>
-  </div>
-  <div class="card">
-    <h2>Orea V1 rules</h2>
-    <div class="note">Remove the Switch converter until you own the Switch base. Run the Orea in its open flat-bed configuration, otherwise the plug restricts drainage and water puddles.</div>
-  </div>
-  <div class="card">
-    <h2>What updates itself, and where to change the rest</h2>
-    <table class="how"><tbody>
-      <tr><td>A coffee&rsquo;s details, status and notes</td><td>Pantry or Vault, then <b>Edit</b>.</td></tr>
-      <tr><td>A coffee&rsquo;s recipe (best dripper, temperature, ratio, grind, dose, bloom, pours)</td><td>Edit the coffee, or dial it in on the Brew tab and tap <b>Save as this coffee&rsquo;s default recipe</b>.</td></tr>
-      <tr><td>Defaults for a roast category</td><td>The Roast categories card above. They apply to every coffee without its own recipe.</td></tr>
-      <tr><td>Drippers and their offsets</td><td>The Drippers card above.</td></tr>
-      <tr><td>A new grinder</td><td>The Grinders card above. Set the dial that matches ZP6 5.4 and the steps per ZP6 unit.</td></tr>
-      <tr><td>Journal entries</td><td>Logs tab, <b>Edit</b> or <b>Delete</b>.</td></tr>
-      <tr><td>New coffees added in a future version of the site</td><td>Appear by themselves. Your edits are never overwritten.</td></tr>
-      <tr><td>Backups</td><td>The Data card below. Export includes everything on this page.</td></tr>
-      <tr><td>Needs a code change</td><td>The taste-wheel attributes, the brew-method checkboxes, the iced-brew adjustment (+2&deg;C and 0.2 finer), the pour-schedule formula and the Bluetooth scale protocol.</td></tr>
-    </tbody></table>
-  </div>
-  <div class="card">
-    <h2>Data</h2>
-    <div class="note">Everything is saved in this browser only. Export a backup before clearing browser data.</div>
-    <div class="row" style="margin-top:8px"><button id="exp">Export JSON</button><button id="expCsv">Export logs CSV</button></div>
-    <div class="row" style="margin-top:8px"><button id="imp">Import JSON</button></div>
-    <input type="file" id="impFile" accept="application/json" style="display:none">
-    <div style="margin-top:10px"><button class="dng sm" id="reset">Reset to factory data</button></div>
-    <div class="note" style="margin-top:12px">Coffee Lab OS v3.1 &middot; if this line is visible, the full page loaded.</div>
   </div>
 </section>
 </main>
@@ -403,6 +374,7 @@ pre{background:var(--bg2);border:1px solid var(--line);border-radius:12px;paddin
 </div></div>
 <datalist id="coffeeNames"></datalist>
 <div class="toast" id="toast"></div>
+
 <script>
 (function(){
 'use strict';
@@ -440,19 +412,22 @@ var CAT={
   rob:{label:'100% Robusta',ratio:14.0,base:85,range:[84,86],zp:7.2}
 };
 var DRIP={
-  origami:{name:'Origami 02',shape:'Conical, fluted',gOff:0,tOff:0,note:'Fluted walls drain fast. Keep pours centre-dominant and low.'},
-  neo:{name:'Amber Neo V60',shape:'Conical, spiral ribs',gOff:0,tOff:0,note:'Open ribs keep flow brisk. Pairs well with a firm bloom swirl.'},
-  balloon:{name:'Balloon-Glass V60',shape:'Conical, glass',gOff:0,tOff:0.5,note:'Glass loses heat. Preheat well and set the kettle half a degree higher.'},
-  ceramic:{name:'Ceramic V60',shape:'Conical, ceramic',gOff:0,tOff:1,note:'Thermal mass steals heat. Preheat thoroughly; kettle +1°C keeps the slurry on target.'},
-  kalita:{name:'Kalita 102-D',shape:'Flat-bed wedge',gOff:-0.1,tOff:0,note:'Flat bed is forgiving. Pour in steady even circles, no swirl.'},
-  orea:{name:'Orea V1 Stainless',shape:'Flat-bed, open base',gOff:-0.2,tOff:0,note:'Fast vertical drainage and double-wall heat retention. Open configuration only, converter removed. Kalita Wave style paper.'}
+  neo:{name:'Amber Neo V60',shape:'Conical, 72 spiral ribs',gOff:0,tOff:0,note:'Brisk laminar drainage. Highlights delicate florals, bright citric acidity, and prevents washed stall.'},
+  orea:{name:'Orea V1 Stainless',shape:'Flat-bed, open base',gOff:-0.2,tOff:0,note:'Fast vertical drainage and high thermal retention. Delivers exceptional sweetness and syrupy body for ferments.'},
+  origami:{name:'Origami 02',shape:'Conical, fluted',gOff:0,tOff:0,note:'Fluted walls drain very fast. Keep pours center-dominant and low.'},
+  kalita:{name:'Kalita 102-D',shape:'Flat-bed wedge',gOff:-0.1,tOff:0,note:'Forgiving flat bed. Pour in steady even circles to bring out chocolate and caramel sugars.'},
+  ceramic:{name:'Ceramic V60',shape:'Conical, ceramic',gOff:0,tOff:1,note:'Heavy thermal mass. Preheat thoroughly; kettle +1°C keeps the slurry on target for medium roasts.'},
+  balloon:{name:'Balloon-Glass V60',shape:'Conical, glass',gOff:0,tOff:0.5,note:'Glass loses heat. Preheat well and set kettle half a degree higher.'}
 };
 var CAT_DEF=clone(CAT),DRIP_DEF=clone(DRIP);
+
 var GR_DEF=[
   {id:'zp6',name:'1Zpresso ZP6',short:'ZP6',base:5.4,per:1,dec:1,step:0.1,builtin:true},
+  {id:'k7',name:'KINGrinder K7',short:'K7',base:75,per:12.5,dec:0,step:1},
   {id:'c3s',name:'Timemore C3S',short:'C3S',base:13,per:2.5,dec:0,step:1}
 ];
 var GR=clone(GR_DEF);
+
 var WHEEL=[
   {k:'sweet',n:'Sweet'},{k:'acid',n:'Acidic'},{k:'floral',n:'Floral'},{k:'spicy',n:'Spicy'},
   {k:'salty',n:'Salty'},{k:'berry',n:'Berry fruit'},{k:'citrus',n:'Citrus fruit'},{k:'stone',n:'Stone fruit'},
@@ -466,77 +441,106 @@ function C(id,name,roaster,cat,status,o){
     producer:'',varietal:'',roastLevel:'',roasterNotes:[],otherNotes:[],typical:[],src:'',caveat:''};
   for(var k in o)c[k]=o[k];return c;
 }
-var U_SUBKO='https://www.subko.coffee/products/project-pearl-ratnagiri-estate-karnataka-naturals-anaerobic-honey-omni-roast';
-var U_PINK='https://www.thewaytocoffee.com/beans/pink-lemonade-ultra-light/';
-var U_RUMBA='https://eightouncecoffee.com/products/dak-rumba';
-var U_RAX='https://bluetokaicoffee.com/products/raxidi-lobo-estate-anaerobic-naturals';
-var U_UNAKKI='https://www.thewaytocoffee.com/beans/unakki-estate-washed/';
-var NF='Not found online. Add your own with Edit coffee.';
+
+/* Master beans array */
 var COFFEES=[
-  C('subko-rat','Subko Ratnagiri (Pearl)','Subko','nordic','active',{proc:'Naturals + anaerobic honey',producer:'Ratnagiri Estate, Karnataka',varietal:'Arabica + Catuai',roastLevel:'Medium (Omni roast, Agtron 65)',roasterNotes:['Raw mango','Blossom honey','Hazelnut tart'],src:U_SUBKO,caveat:'From the Subko Project Pearl Omni Roast listing. Subko sells several Pearl lots, so check your bag.'}),
-  C('pink-lem','Pink Lemonade','Grey Soul Coffee Roasters','nordic','active',{proc:'Anaerobic natural, raised-bed dried',producer:'Tsiesema Village, Kohima, Nagaland',varietal:'Chandragiri',roastLevel:'Light / ultra-light',roasterNotes:['Orange','Apple','Chocolate','Pineapple','Blueberry'],otherNotes:[{n:'Fig-like finish',s:'sensory profile on the same listing'},{n:'Green grape',s:'sensory profile on the same listing'}],src:U_PINK,caveat:'Assumed to be the Grey Soul lot of this name.'}),
-  C('broot-sl','Broot Sur Lie','Broot','ml','active',{proc:'Sur lie',caveat:NF}),
-  C('broot-mt','Broot Moss Theory','Broot','ml','active',{dose:25,note:'Works well as a Japanese iced brew: 25 g dose.',caveat:NF}),
-  C('broot-df','Broot Deep Field','BROOT Coffee Roasters (New Delhi)','ml','active',{since:2,roastDate:'2026-10-06',proc:'Natural (sun-dried)',producer:'Tribal smallholder cooperatives, Eastern Ghats (900-1,100 m)',varietal:'Arabica (regional highland selections)',roastLevel:'Medium-light (Depth 36)',caveat:NF}),
-  C('raxidi','Roastery Raxidi Lobo','Roastery','med','active',{zp:5.8,proc:'Anaerobic natural',producer:'Raxidi Lobo Estate',varietal:'Arabica SLN 5B',roastLevel:'Medium',roasterNotes:['Mosambi','Green apple','Plum'],src:U_RAX,caveat:'Notes are from Blue Tokai’s listing of this estate. Your bag’s roaster may describe it differently.'}),
-  C('bold2','Bold Edition #2','','md','active',{zp:6.8,caveat:NF}),
-  C('ph7','PH-Seven Robusta-AA','PH-Seven','rob','active',{zp:7.2,note:'100% Robusta.',typical:['Dark chocolate','Nutty','Woody','Earthy'],caveat:'No listing found. The chips below are what Indian robusta typically tastes like, not this roaster’s notes.'}),
-  C('tims','Tim Hortons Signature','Tim Hortons','med','active',{zp:6.2,caveat:NF}),
-  C('unakki','ROAST Coffee Unakki Washed Arabica','ROAST Coffee','ml','active',{base:90,zp:5.6,roastDate:'2026-10-03',proc:'Washed',producer:'Unakki Estate, Chikmagalur (Chandragiri, 1220 m)',varietal:'Chandragiri',roastLevel:'Medium (Agtron 68)',note:'Medium roast.',otherNotes:[{n:'Apricot',s:'Naivo Coffee Company, same estate'},{n:'Cane sugar',s:'Naivo Coffee Company, same estate'},{n:'Honey',s:'Naivo Coffee Company, same estate'}],src:U_UNAKKI,caveat:'ROAST’s own notes were not found. These are from another roaster’s lot of the same estate.'}),
-  C('geisha','ROAST Coffee Golden Geisha (Easy Pour sachets)','ROAST Coffee','nordic','active',{proc:'Geisha, nitro-flushed, 5 sachets',varietal:'Geisha',note:'Drip sachets: roughly 150-160 g water each.',typical:['Jasmine','Bergamot','Peach','Tea-like'],caveat:'No listing found. The chips below are what Geisha typically tastes like, not ROAST’s notes.'}),
-  C('rumba','DAK Coffee Roasters Rumba','DAK Coffee Roasters','nordic','active',{dose:10,proc:'Natural, yeast-assisted semi-anaerobic',producer:'Gatta Farm, Sidama, Ethiopia',varietal:'Local landrace',roastLevel:'Light',note:'20 g total in two 10 g packets, kept frozen. Grind from frozen.',roasterNotes:['Stewed strawberry','Apricot','Brown sugar'],src:U_RUMBA,caveat:'From a DAK Rumba listing. DAK rotates lots, so check your packet.'}),
-  C('araku-sel','Araku Selection','Araku','ml','archived',{est:1}),
-  C('araku-mon','Araku Monsoon Edit','Araku','ml','archived',{est:1}),
-  C('araku-mic','Araku Micro Climate','Araku','ml','archived',{est:1}),
-  C('c7-baar','Corridor Seven Baarbara','Corridor Seven','ml','archived',{est:1}),
-  C('c7-div','Corridor Seven Divenchi','Corridor Seven','ml','archived',{est:1}),
-  C('tul-swell','Tulum Swell','Tulum','ml','archived',{est:1}),
-  C('tul-lumen','Tulum Lumen','Tulum','ml','archived',{est:1}),
-  C('tul-baar','Tulum Baarbara','Tulum','ml','archived',{est:1}),
-  C('bloom-vvg','Bloom Vin Van Gogh','Bloom','ml','archived',{est:1}),
-  C('bili-agh','Bili Hu Aghora','Bili Hu','ml','archived',{est:1}),
-  C('bili-ara','Bili Hu Arabica Blend','Bili Hu','ml','archived',{est:1}),
-  C('hl-sal','Half Light Salawara #02','Half Light','ml','archived',{est:1}),
-  C('toise','Toise Brewstudio The Enchanter','Toise Brewstudio','ml','archived',{est:1}),
-  C('elbueno','El Bueno Golden Glow (Ratnagiri)','El Bueno','ml','archived',{est:1}),
-  C('sbux','Starbucks Benchmark','Starbucks','md','archived',{zp:6.6,est:1,note:'Used as a benchmark.'}),
-  C('bt-sal','Blue Tokai Salawara','Blue Tokai','ml','archived',{zp:5.6,note:'Bag finished.'}),
-  C('grey-miz','Grey Soul Mizoram #4','Grey Soul','md','archived',{zp:6.4,note:'Bag finished.'}),
-  C('veer-sh','Veer Attikan Sholiga','Veer Attikan','med','archived',{zp:5.8,note:'Bag finished.'})
+  /* ACTIVE PANTRY */
+  C('subko-cw3','Subko Kerehaklu (Lot CW3)','Subko Specialty Coffee Roasters','nordic','active',{
+    roastDate:'2026-08-26',proc:'Aerobic Washed (Cultured 47H)',producer:'Pranoy Thipaiah, Kerehaklu Estate (Karnataka)',varietal:'SLN 9 (1158 MASL)',roastLevel:'Light Filter (Agtron 89)',
+    roasterNotes:['Orange Creamsicle','Green Grape','Caramel'],note:'High flow required to highlight sparkling malic/citric acidity. Brew @ 94°C on Amber Neo V60.',
+    recipe:{dripper:'neo',temp:94,zp:5.2,ratio:16.0,bloomT:45,pours:3}
+  }),
+  C('ng-nana','Nice Guys Coffee Nana','Nice Guys Coffee','med','active',{
+    roastDate:'2026-10-06',proc:'Washed',producer:'Baba Budangiri, Karnataka',varietal:'100% Arabica',roastLevel:'Medium',
+    roasterNotes:['Milk Chocolate','Citrus','Dates'],note:'Smooth, balanced comfort profile. Keep temp @ 90°C to accentuate sweet dates and milk chocolate.',
+    recipe:{dripper:'neo',temp:90,zp:5.4,ratio:16.0,bloomT:45,pours:3}
+  }),
+  C('bw-future','Black & White: Strawberry Shortcake','Black & White Coffee Roasters','nordic','active',{
+    proc:'Anaerobic Natural / Co-ferment',producer:'Single Estate',varietal:'Arabica',roastLevel:'Light (Funky Ferment)',
+    roasterNotes:['Strawberry','Lemon Zest','Sponge Cake','Cool Whip'],note:'High solubles and funky esters! Use lower water temp (89°C) and flat bed or Neo to avoid vinegar astringency.',
+    recipe:{dripper:'orea',temp:89,zp:5.6,ratio:16.0,bloomT:45,pours:3}
+  }),
+  C('broot-df','Broot Deep Field','BROOT Coffee Roasters','ml','active',{
+    roastDate:'2026-10-06',proc:'Natural (sun-dried)',producer:'Smallholder Cooperatives, Eastern Ghats (Koraput)',varietal:'Arabica',roastLevel:'Medium-light (Depth 36)',
+    roasterNotes:['Jaggery','Milk Chocolate','Candied Orange'],note:'Natural sweetness and cocoa body. Thrives on flat-bed Orea V1 or Amber Neo.',
+    recipe:{dripper:'orea',temp:91,zp:5.6,ratio:15.5,bloomT:45,pours:4}
+  }),
+  C('unakki','ROAST Coffee Unakki Washed Arabica','ROAST Coffee','ml','active',{
+    base:91,zp:5.4,roastDate:'2026-10-03',proc:'Washed',producer:'Unakki Estate, Chikmagalur',varietal:'Chandragiri',roastLevel:'Medium-Light (Agtron 68)',
+    roasterNotes:['Apricot','Cane Sugar','Honey'],note:'Delicate washed sweetness and stone fruit. Fast Neo V60 prevents stalling.',
+    recipe:{dripper:'neo',temp:92,zp:5.4,ratio:16.0,bloomT:45,pours:3}
+  }),
+  C('rumba','DAK Coffee Roasters Rumba','DAK Coffee Roasters','nordic','active',{
+    dose:10,proc:'Natural, yeast-assisted semi-anaerobic',producer:'Gatta Farm, Sidama, Ethiopia',varietal:'Local landrace',roastLevel:'Light',
+    roasterNotes:['Stewed Strawberry','Apricot','Brown Sugar'],note:'Kept frozen. Grind straight from frozen.',
+    recipe:{dripper:'orea',temp:92,zp:5.4,ratio:16.0,bloomT:45,pours:3}
+  }),
+  C('pink-lem','Pink Lemonade','Grey Soul Coffee Roasters','nordic','active',{
+    proc:'Anaerobic natural, raised-bed dried',producer:'Tsiesema Village, Kohima, Nagaland',varietal:'Chandragiri',roastLevel:'Light / ultra-light',
+    roasterNotes:['Orange','Apple','Chocolate','Pineapple','Blueberry'],
+    recipe:{dripper:'neo',temp:93,zp:5.4,ratio:16.0,bloomT:45,pours:3}
+  }),
+  C('subko-rat','Subko Ratnagiri (Pearl)','Subko','nordic','active',{
+    proc:'Naturals + anaerobic honey',producer:'Ratnagiri Estate, Karnataka',varietal:'Arabica + Catuai',roastLevel:'Medium (Omni roast, Agtron 65)',
+    roasterNotes:['Raw mango','Blossom honey','Hazelnut tart'],
+    recipe:{dripper:'orea',temp:91,zp:5.6,ratio:15.5,bloomT:45,pours:4}
+  }),
+
+  /* FINISHED / ARCHIVED BAGS */
+  C('broot-sl','Broot Sur Lie','Broot','ml','archived',{note:'Bag finished.'}),
+  C('bold2','Bold Edition #2','','md','archived',{zp:6.8,note:'Bag finished.'}),
+  C('ph7','PH-Seven Robusta-AA','PH-Seven','rob','archived',{zp:7.2,note:'100% Robusta. Bag finished.'}),
+  C('tims','Tim Hortons Signature','Tim Hortons','med','archived',{zp:6.2,note:'Bag finished.'}),
+  C('raxidi','Roastery Raxidi Lobo','Roastery','med','archived',{proc:'Anaerobic natural',note:'Bag finished.'}),
+  C('geisha','ROAST Coffee Golden Geisha','ROAST Coffee','nordic','archived',{proc:'Geisha easy-pour sachets',note:'Finished.'}),
+  C('araku-mon','Araku Monsoon Edit','Araku','ml','archived',{note:'Archived recipe for Amber Neo.'}),
+  C('broot-mt','Broot Moss Theory','Broot','ml','archived',{note:'Bag finished.'}),
+  C('bt-sal','Blue Tokai Salawara','Blue Tokai','ml','archived',{note:'Bag finished.'}),
+  C('grey-miz','Grey Soul Mizoram #4','Grey Soul','md','archived',{note:'Bag finished.'}),
+  C('veer-sh','Veer Attikan Sholiga','Veer Attikan','med','archived',{note:'Bag finished.'})
 ];
 
-/* ---------- state & storage (with migration from v2) ---------- */
+/* ---------- state & storage ---------- */
 var KEY='coffeelabos.v3',OLDKEY='coffeelabos.v2';
 var S={v:3,coffees:clone(COFFEES),log:[]};
+
 function seedById(id){for(var i=0;i<COFFEES.length;i++)if(COFFEES[i].id===id)return COFFEES[i];return null}
 function fillMissing(c){var s=seedById(c.id);if(!s)return c;for(var k in s){if(c[k]===undefined)c[k]=clone(s[k])}return c}
 function dripKeyByName(n){for(var k in DRIP)if(DRIP[k].name===n)return k;return ''}
 function coffeeIdByName(n){for(var i=0;i<S.coffees.length;i++)if(S.coffees[i].name===n)return S.coffees[i].id;return ''}
 function newLogId(){return 'l'+Date.now().toString(36)+Math.floor(Math.random()*1000).toString(36)}
+
 function migrateLogEntry(l){
   if(l.wheel!==undefined&&l.brewDate)return l;
   var d=new Date(l.ts||Date.now());
   return {id:newLogId(),ts:l.ts||Date.now(),brewDate:dstr(d),coffeeId:coffeeIdByName(l.coffee),name:l.coffee||'',roaster:'',roastDate:'',producer:'',varietal:'',roastLevel:'',process:'',
     waterTemp:l.temp!=null?l.temp:'',dose:l.dose!=null?l.dose:'',yield:l.water!=null?l.water:'',time:l.time?fmt(l.time):'',dripper:dripKeyByName(l.dripper),
-    dial:l.grinder==='zp6'?('ZP6 '+Number(l.dial).toFixed(1)):('C3S '+l.dial),notes:l.note||'',tastes:'',rating:l.rating||0,methods:['Pour-over'],methodOther:'',wheel:{}};
+    dial:l.grinder==='zp6'?('ZP6 '+Number(l.dial).toFixed(1)):('K7 '+l.dial),notes:l.note||'',tastes:'',rating:l.rating||0,methods:['Pour-over'],methodOther:'',wheel:{}};
 }
+
 function loadRaw(){
   try{
     var j=JSON.parse(localStorage.getItem(KEY)||'null');
-    if(j&&j.coffees&&j.coffees.length){S=j;S.coffees.forEach(fillMissing);S.log=(S.log||[]).map(migrateLogEntry);return}
-    var o=JSON.parse(localStorage.getItem(OLDKEY)||'null');
-    if(o&&o.coffees&&o.coffees.length){S={v:3,coffees:o.coffees.map(function(c){return fillMissing(c)}),log:[]};S.log=(o.log||[]).map(migrateLogEntry);}
+    if(j&&j.coffees&&j.coffees.length){
+      S=j;S.coffees.forEach(fillMissing);S.log=(S.log||[]).map(migrateLogEntry);return;
+    }
   }catch(e){}
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
 function mergeSeeds(){
-  if(!S.seeded)S.seeded=[];
-  COFFEES.filter(function(c){return c.since>1}).forEach(function(c){
-    if(S.seeded.indexOf(c.id)>=0)return;
-    S.seeded.push(c.id);
-    if(!getCoffee(c.id))S.coffees.unshift(clone(c));
+  COFFEES.forEach(function(c){
+    var cur=getCoffee(c.id);
+    if(!cur){
+      S.coffees.unshift(clone(c));
+    } else {
+      // Sync roaster, notes, and default recipe
+      if(!cur.recipe && c.recipe) cur.recipe=clone(c.recipe);
+      if(!cur.roasterNotes && c.roasterNotes) cur.roasterNotes=clone(c.roasterNotes);
+    }
   });
 }
+
 function applyCustom(){
   Object.keys(DRIP).forEach(function(k){delete DRIP[k]});
   Object.keys(DRIP_DEF).forEach(function(k){DRIP[k]=clone(DRIP_DEF[k])});
@@ -553,6 +557,7 @@ function applyCustom(){
   });
   GR=(S.grinders&&S.grinders.length)?S.grinders:clone(GR_DEF);
 }
+
 function load(){loadRaw();mergeSeeds();applyCustom();save()}
 load();
 function getCoffee(id){for(var i=0;i<S.coffees.length;i++)if(S.coffees[i].id===id)return S.coffees[i];return null}
@@ -570,8 +575,31 @@ function go(v){
 }
 $('#nav').addEventListener('click',function(e){var b=e.target.closest('button');if(b)go(b.dataset.v)});
 
+/* ---------- intelligent dripper matching ---------- */
+function getAutoDripper(c){
+  if(!c)return 'neo';
+  var rc=c.recipe||{};
+  if(rc.dripper&&DRIP[rc.dripper])return rc.dripper;
+
+  var blob=((c.proc||'')+' '+(c.roastLevel||'')+' '+(c.note||'')+' '+(c.roasterNotes||[]).join(' ')).toLowerCase();
+  
+  // Rule 1: High ferment / funky / co-ferment -> flat bed Orea V1 for sweetness & body
+  if(blob.indexOf('anaerobic')>=0||blob.indexOf('co-ferment')>=0||blob.indexOf('funky')>=0||blob.indexOf('honey')>=0||blob.indexOf('natural')>=0){
+    return DRIP.orea?'orea':'neo';
+  }
+  // Rule 2: Clean Washed / Nordic / Delicate Citric -> Amber Neo V60 for clarity & stall prevention
+  if(c.cat==='nordic'||blob.indexOf('washed')>=0||blob.indexOf('citrus')>=0||blob.indexOf('grape')>=0){
+    return 'neo';
+  }
+  // Rule 3: Medium comfort / chocolate -> Ceramic V60 or Kalita
+  if(c.cat==='med'||c.cat==='md'||blob.indexOf('chocolate')>=0){
+    return DRIP.ceramic?'ceramic':'neo';
+  }
+  return 'neo';
+}
+
 /* ---------- brew engine ---------- */
-var B={coffeeId:'',method:'hot',dripper:'orea',dose:15,temp:91,grinder:'zp6',zp:5.6};
+var B={coffeeId:'',method:'hot',dripper:'neo',dose:15,temp:91,grinder:'k7',zp:5.6};
 var jForm=null;
 
 function recOf(c){return c.recipe||{}}
@@ -582,16 +610,20 @@ function recZpOf(c,dk){
   return r1(z-ref+DRIP[dk].gOff);
 }
 function ratioOf(c){var r=recOf(c);return r.ratio!=null?r.ratio:CAT[c.cat].ratio}
-function bestDripper(c){var r=recOf(c);return (r.dripper&&DRIP[r.dripper])?r.dripper:''}
+
 function resetToCoffee(){
   var c=getCoffee(B.coffeeId);if(!c)return;
-  var ic=B.method==='iced',bd=bestDripper(c);
-  if(bd)B.dripper=bd;
+  var ic=B.method==='iced';
+  
+  // Intelligent auto dripper suggestion
+  B.dripper=getAutoDripper(c);
   if(!DRIP[B.dripper])B.dripper=Object.keys(DRIP)[0];
+
   B.dose=c.dose||15;
   B.temp=baseOf(c)+(ic?2:0);
   B.zp=r1(recZpOf(c,B.dripper)-(ic?0.2:0));
 }
+
 function compute(){
   var c=getCoffee(B.coffeeId);if(!c)return null;
   var cat=CAT[c.cat],d=DRIP[B.dripper],ic=B.method==='iced',rc=recOf(c);
@@ -603,7 +635,7 @@ function compute(){
   if(ic){hot=Math.round(total*0.627);ice=total-hot}
   var bloomW=Math.round(B.dose*3);
   var bloomT=Math.round(clamp((rc.bloomT!=null?rc.bloomT:45)-e*4,30,60));
-  var n=clamp((rc.pours!=null?Math.round(rc.pours):4)+(e<-1.5?1:0),2,7);
+  var n=clamp((rc.pours!=null?Math.round(rc.pours):3)+(e<-1.5?1:0),2,5);
   var step=e>1?40:32;
   var steps=[{label:'Bloom',t:0,cum:bloomW,add:bloomW}];
   var prev=bloomW;
@@ -612,14 +644,14 @@ function compute(){
     steps.push({label:'Pour '+i,t:bloomT+(i-1)*step,cum:cum,add:cum-prev});
     prev=cum;
   }
-  var end=steps[steps.length-1].t+55;
+  var end=steps[steps.length-1].t+50;
   var notes=[];
-  if(e<-1.2)notes.push('Under-extraction risk (sour, hollow). Compensated: tighter ratio, longer bloom'+(e<-1.5?', one extra pulse':'')+'. Add a gentle swirl after the bloom and pour a little higher (5-6 cm).');
-  else if(e>1.2)notes.push('Over-extraction risk (bitter, dry). Compensated: wider ratio, shorter bloom, slower pulses. Keep pours low and centre-only, no swirl.');
-  else notes.push('Balanced. Low kettle height (under 4 cm), gentle centre-dominant stream, no swirl during main pours.');
-  notes.push(d.note);
+  if(e<-1.2)notes.push('Under-extraction tendency: Tighter ratio and prolonged bloom applied.');
+  else if(e>1.2)notes.push('Over-extraction risk: Lower agitation and wider pulse spacing applied.');
+  else notes.push('Optimal balance. Steady, low-height pour to preserve flavor clarity and silky sweetness.');
+  if(d.note)notes.push(d.note);
   if(c.note)notes.push(c.note);
-  if(ic)notes.push('Japanese iced: put '+ice+' g of ice in the server and pour '+hot+' g hot water over the coffee.');
+  if(ic)notes.push('Japanese Flash-Iced: Add '+ice+' g clean ice into server; brew '+hot+' g hot directly over ice.');
   return {c:c,cat:cat,d:d,e:e,ratio:ratio,total:total,hot:hot,ice:ice,steps:steps,bloomT:bloomT,end:end,notes:notes,base:base,rec:rec,kettle:r1(B.temp+d.tOff),ic:ic};
 }
 var R=null;
@@ -628,38 +660,42 @@ function update(){
   R=compute();if(!R)return;
   var c=R.c;
   renderGrinderBtns();
-  var okT=Math.abs(B.temp-R.base)<=1.0001,okG=B.zp>=5.2&&B.zp<=7.4;
+  var okT=Math.abs(B.temp-R.base)<=1.0001,okG=B.zp>=4.8&&B.zp<=7.4;
   $('#tempVal').textContent=B.temp.toFixed(1)+'°C';
   $('#bTempR').value=B.temp;
-  $('#lawT').innerHTML=okT?'<span style="color:var(--good)">On target for this coffee ('+R.base+'°C ±1)</span>':'<span style="color:var(--warn)">More than 1°C from this coffee\'s '+R.base+'°C target. Fine if you are testing.</span>';
-  $('#lawG').innerHTML=okG?'<span style="color:var(--good)">In the coarse range (ZP6 5.2-7.4)</span>':'<span style="color:var(--warn)">'+(B.zp<5.2?'Finer than the coarse range: channeling risk on the ZP6.':'Very coarse: expect a thin cup.')+'</span>';
+  $('#lawT').innerHTML=okT?'<span style="color:var(--good)">Target profile ('+R.base+'°C ±1)</span>':'<span style="color:var(--warn)">Offset from target '+R.base+'°C.</span>';
+  $('#lawG').innerHTML=okG?'<span style="color:var(--good)">Ideal grind window (ZP6 5.0–7.0)</span>':'<span style="color:var(--warn)">Extreme grind setting.</span>';
   $('#bDose').value=B.dose;
   var g=gr(B.grinder);
-  $('#dialLbl').textContent=g.name+(g.dec>0?' dial':' setting');
+  $('#dialLbl').textContent=g.name+(g.dec>0?' dial':' clicks');
   var dial=$('#bDial');
   dial.step=String(g.step);
   dial.value=g.dec>0?dialFromZp(g,B.zp).toFixed(1):dialFromZp(g,B.zp);
   $('#dialHint').textContent='Recommended: '+allDialsTxt(R.rec);
+  
   $('#bDrip').value=B.dripper;
+  var autoK=getAutoDripper(c);
+  $('#autoDripTag').textContent=B.dripper===autoK?'(auto-suggested)':DRIP[B.dripper].name;
+
   var hasRec=!!(c.recipe&&Object.keys(c.recipe).length);
-  $('#recipeInfo').textContent=hasRec?'Using the saved recipe for this coffee.':'Using the '+R.cat.label+' category defaults. Dial it in, then save it as this coffee\'s recipe.';
+  $('#recipeInfo').textContent=hasRec?'Active saved recipe for '+c.name+'.':'Using intelligent bean & roast defaults.';
   $$('#bGrinder button').forEach(function(b){b.classList.toggle('on',b.dataset.v===B.grinder)});
   $$('#bMethod button').forEach(function(b){b.classList.toggle('on',b.dataset.v===B.method)});
 
   var d=daysOff(c.roastDate);
   var info=['<span class="chip">'+esc(R.cat.label)+'</span>'];
-  if(c.roastDate)info.push('<span class="chip '+(d!=null&&d<5?'warn':'good')+'">Roasted '+esc(c.roastDate)+(d!=null?' ('+d+' d off roast)':'')+'</span>');
+  if(c.roastDate)info.push('<span class="chip '+(d!=null&&d<7?'warn':'good')+'">Roasted '+esc(c.roastDate)+(d!=null?' ('+d+' d off roast)':'')+'</span>');
   if(c.proc)info.push('<span class="chip">'+esc(c.proc)+'</span>');
   $('#bCoffeeInfo').innerHTML=info.join('');
 
   $('#bBig').innerHTML=
     '<div><b>'+(R.ic?R.hot:R.total)+'</b><small>'+(R.ic?'Hot water g':'Water g')+'</small></div>'+
-    '<div><b>1:'+R.ratio.toFixed(2).replace(/0$/,'')+'</b><small>Ratio</small></div>'+
+    '<div><b>1:'+R.ratio.toFixed(1)+'</b><small>Ratio</small></div>'+
     '<div><b>'+R.kettle.toFixed(1)+'°</b><small>Kettle</small></div>'+
     '<div><b>'+(g.dec>0?dialFromZp(g,B.zp).toFixed(1):dialFromZp(g,B.zp))+'</b><small>'+esc(g.short)+'</small></div>';
 
   var chips=[];
-  chips.push(R.e<-1.2?'<span class="chip bad">Leaning sour</span>':R.e>1.2?'<span class="chip bad">Leaning bitter</span>':'<span class="chip good">Balanced</span>');
+  chips.push(R.e<-1.2?'<span class="chip bad">Leaning sour</span>':R.e>1.2?'<span class="chip bad">Leaning bitter</span>':'<span class="chip good">Balanced Extraction</span>');
   chips.push('<span class="chip blue">Dose '+B.dose+' g</span>');
   if(R.ic)chips.push('<span class="chip blue">+ '+R.ice+' g ice</span>');
   chips.push('<span class="chip">Finish ~'+fmt(R.end)+'</span>');
@@ -671,6 +707,7 @@ function update(){
   $('#lvT').textContent=currentTarget()||'–';
   if(jForm&&!jForm.isDirty())jForm.prefill();
 }
+
 function curStepIndex(t){
   if(!R)return -1;
   var idx=-1;
@@ -713,15 +750,29 @@ $('#tmrTare').onclick=function(){SC.tare()};
 function fillSelects(){
   var cs=active();
   $('#bCoffee').innerHTML=cs.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>'}).join('');
-  if(!getCoffee(B.coffeeId)||getCoffee(B.coffeeId).status!=='active'){B.coffeeId=cs.length?cs[0].id:'';resetToCoffee()}
+  if(!getCoffee(B.coffeeId)||getCoffee(B.coffeeId).status!=='active'){
+    B.coffeeId=cs.length?cs[0].id:'';
+    resetToCoffee();
+  }
   $('#bCoffee').value=B.coffeeId;
   if(!DRIP[B.dripper])B.dripper=Object.keys(DRIP)[0];
   $('#bDrip').innerHTML=Object.keys(DRIP).map(function(k){return '<option value="'+k+'">'+DRIP[k].name+'</option>'}).join('');
   $('#bDrip').value=B.dripper;
   $('#coffeeNames').innerHTML=S.coffees.map(function(c){return '<option value="'+esc(c.name)+'">'}).join('');
 }
-$('#bCoffee').onchange=function(){B.coffeeId=this.value;resetToCoffee();update()};
-$('#bDrip').onchange=function(){B.dripper=this.value;var c=getCoffee(B.coffeeId);var ic=B.method==='iced';B.zp=r1(recZpOf(c,B.dripper)-(ic?0.2:0));update()};
+
+$('#bCoffee').onchange=function(){
+  B.coffeeId=this.value;
+  resetToCoffee();
+  update();
+};
+$('#bDrip').onchange=function(){
+  B.dripper=this.value;
+  var c=getCoffee(B.coffeeId);
+  var ic=B.method==='iced';
+  B.zp=r1(recZpOf(c,B.dripper)-(ic?0.2:0));
+  update();
+};
 $('#bMethod').onclick=function(e){
   var b=e.target.closest('button');if(!b||b.dataset.v===B.method)return;
   var toIced=b.dataset.v==='iced';
@@ -758,7 +809,7 @@ $('#saveRecipe').onclick=function(){
   c.recipe={dripper:B.dripper,temp:r1(B.temp-(ic?2:0)),zp:r1(B.zp+(ic?0.2:0)),ratio:R.ratio,bloomT:R.bloomT,pours:R.steps.length-1};
   c.dose=B.dose;
   save();update();renderPantry();renderVault();
-  toast('Saved as the default recipe for '+c.name);
+  toast('Saved as default recipe for '+c.name);
 };
 $('#editCoffeeBtn').onclick=function(){openCoffeeForm(B.coffeeId)};
 
@@ -821,14 +872,14 @@ function createWheel(host,initial,onChange){
   return {get:function(){return vals},set:function(v){vals=zeroWheel();if(v)for(var k in v)if(k in vals)vals[k]=v[k]||0;draw()}};
 }
 
-/* ---------- journal form (used in the Brew tab and in the edit sheet) ---------- */
+/* ---------- journal form ---------- */
 function formHTML(){
   var dripOpts='<option value="">Not recorded</option>'+Object.keys(DRIP).map(function(k){return '<option value="'+k+'">'+esc(DRIP[k].name)+'</option>'}).join('');
   var meth=METHODS.map(function(m){return '<label><input type="checkbox" data-m="'+esc(m)+'">'+esc(m)+'</label>'}).join('');
   return ''+
   '<div class="journal">'+
   '<div class="fg">'+
-    '<div class="fld full"><label>Coffee estate / blend name</label><input type="text" list="coffeeNames" data-f="name" placeholder="Pick from your coffees or type"></div>'+
+    '<div class="fld full"><label>Coffee estate / blend name</label><input type="text" list="coffeeNames" data-f="name" placeholder="Pick from pantry or type"></div>'+
     '<div class="fld"><label>Roaster</label><input type="text" data-f="roaster"></div>'+
     '<div class="fld"><label>Roast date</label><input type="date" data-f="roastDate"></div>'+
     '<div class="fld full"><label>Producer</label><input type="text" data-f="producer"></div>'+
@@ -845,18 +896,18 @@ function formHTML(){
   '</div>'+
   '<div class="fg">'+
     '<div class="fld"><label>Dripper</label><select data-f="dripper">'+dripOpts+'</select></div>'+
-    '<div class="fld"><label>Grind setting</label><input type="text" data-f="dial" placeholder="e.g. ZP6 5.6"></div>'+
+    '<div class="fld"><label>Grind setting</label><input type="text" data-f="dial" placeholder="e.g. K7 80 / ZP6 5.4"></div>'+
   '</div>'+
   '<div class="boxlabel">Notes</div>'+
-  '<textarea class="ruled" data-f="notes" placeholder="How did it taste? What would you change?"></textarea>'+
-  '<div class="fld"><label>Flavours tasted (comma separated)</label><input type="text" data-f="tastes" placeholder="e.g. mango, honey, hazelnut"></div>'+
+  '<textarea class="ruled" data-f="notes" placeholder="Tasting observations, flow rate, sweetness level..."></textarea>'+
+  '<div class="fld"><label>Flavours tasted (comma separated)</label><input type="text" data-f="tastes" placeholder="e.g. orange creamsicle, caramel, milk chocolate"></div>'+
   '<div class="two">'+
     '<div><div class="boxlabel">Rating</div><div class="stars" data-stars></div>'+
     '<div class="boxlabel">Brew method</div><div class="checks">'+meth+'</div>'+
     '<div class="fld"><label>Other method</label><input type="text" data-f="methodOther"></div></div>'+
-    '<div><div class="boxlabel">Tasting wheel <span style="text-transform:none;letter-spacing:0">(tap a spoke at the ring you taste; tap again to clear)</span></div><div class="wheelbox" data-wheel></div></div>'+
+    '<div><div class="boxlabel">Tasting wheel</div><div class="wheelbox" data-wheel></div></div>'+
   '</div>'+
-  '<details style="margin:8px 0 0"><summary>Set the wheel with sliders instead</summary><div data-sliders></div></details>'+
+  '<details style="margin:8px 0 0"><summary>Sliders</summary><div data-sliders></div></details>'+
   '</div>';
 }
 
@@ -982,6 +1033,7 @@ $('#jClear').onclick=function(){jForm.clear()};
 $('#eCancel').onclick=closeEdit;
 $('#eSave').onclick=saveEdit;
 $('#modal').addEventListener('click',function(e){if(e.target===$('#modal'))closeEdit()});
+
 function refreshDripSelects(){
   $$('select[data-f="dripper"]').forEach(function(sel){
     var v=sel.value;
@@ -1031,36 +1083,20 @@ function tastePanel(c){
   h+='<div class="secthead">Roaster\u2019s notes</div>';
   if(c.roasterNotes&&c.roasterNotes.length){
     h+='<div class="chips">'+c.roasterNotes.map(function(n){var hit=ls.length&&noteHit(n,blob);return '<span class="chip '+(hit?'hit':'tag')+'">'+(hit?'\u2713 ':'')+esc(n)+'</span>'}).join('')+'</div>';
-    if(ls.length)h+='<div class="src">\u2713 means you have mentioned it in your own notes.</div>';
   }else h+='<div class="note" style="margin:2px 0">None listed yet.</div>';
-  if(c.src)h+='<div class="src"><a href="'+esc(c.src)+'" target="_blank" rel="noopener">Source listing</a></div>';
-  if(c.caveat)h+='<div class="src">'+esc(c.caveat)+'</div>';
-  if(c.otherNotes&&c.otherNotes.length){
-    var srcs=[];c.otherNotes.forEach(function(o){if(srcs.indexOf(o.s)<0)srcs.push(o.s)});
-    h+='<div class="secthead">Other reported notes (less common)</div><div class="chips">'+c.otherNotes.map(function(o){
-      var hit=ls.length&&noteHit(o.n,blob);return '<span class="chip '+(hit?'hit':'tag')+'" title="'+esc(o.s)+'">'+(hit?'\u2713 ':'')+esc(o.n)+'</span>'}).join('')+'</div><div class="src">From: '+esc(srcs.join('; '))+'</div>';
-  }
-  if(c.typical&&c.typical.length){
-    h+='<div class="secthead">Typical for this style (not the roaster\u2019s notes)</div><div class="chips">'+c.typical.map(function(n){return '<span class="chip dim">'+esc(n)+'</span>'}).join('')+'</div>';
-  }
-  h+='<div class="secthead">Your tasting</div>';
+  if(c.note)h+='<div class="secthead">Brewing guidance</div><div class="note">'+esc(c.note)+'</div>';
+  h+='<div class="secthead">Your logs</div>';
   if(!ls.length){
-    h+='<div class="note" style="margin:2px 0">Not logged yet. Use the Brew journal after your next cup.</div>';
+    h+='<div class="note" style="margin:2px 0">Not logged yet.</div>';
   }else{
     var rated=ls.filter(function(l){return l.rating>0});
     var avg=rated.length?(rated.reduce(function(a,l){return a+l.rating},0)/rated.length):0;
     var last=ls[ls.length-1];
     h+='<div class="note" style="margin:2px 0">Tasted '+ls.length+' time'+(ls.length>1?'s':'')+(avg?' \u00B7 average '+avg.toFixed(1)+' of 5':'')+' \u00B7 last '+esc(shortDay(last.brewDate))+'</div>';
-    var cnt={};
-    ls.forEach(function(l){(l.tastes||'').split(',').forEach(function(t){t=t.trim().toLowerCase();if(t)cnt[t]=(cnt[t]||0)+1})});
-    var tags=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]}).slice(0,10);
-    if(tags.length)h+='<div class="chips">'+tags.map(function(t){return '<span class="chip tag">'+esc(t)+(cnt[t]>1?' \u00D7'+cnt[t]:'')+'</span>'}).join('')+'</div>';
     var aw=avgWheel(ls);
     if(aw){
-      h+='<div class="note" style="margin:6px 0 2px">Average wheel of '+aw.n+' brew'+(aw.n>1?'s':'')+': '+esc(topText(aw.vals,4))+'</div><div class="wheelbox" style="max-width:220px;margin:0 auto">'+wheelSVG(aw.vals,{labels:false,surface:'var(--card)'})+'</div>';
+      h+='<div class="note" style="margin:6px 0 2px">Average wheel: '+esc(topText(aw.vals,4))+'</div><div class="wheelbox" style="max-width:220px;margin:0 auto">'+wheelSVG(aw.vals,{labels:false,surface:'var(--card)'})+'</div>';
     }
-    var sp=spark(ls.map(function(l){return l.rating>0?l.rating:null}));
-    if(sp)h+='<div class="note" style="margin:6px 0 0">Rating over time</div>'+sp;
   }
   h+='<div class="row n" style="gap:8px;margin-top:10px"><button class="sm" data-a="editcoffee" data-id="'+esc(c.id)+'">Edit coffee</button>'+(c.status==='active'?'<button class="sm pri" data-a="brew" data-id="'+esc(c.id)+'">Brew &amp; log</button>':'')+'</div>';
   return h+'</details>';
@@ -1069,24 +1105,26 @@ function tastePanel(c){
 /* ---------- pantry & vault ---------- */
 function coffeeItem(c){
   var d=daysOff(c.roastDate);
-  var bd=bestDripper(c),rz=recZpOf(c,bd||'neo');
+  var bd=bestDripper(c)||getAutoDripper(c),rz=recZpOf(c,bd);
   var meta=[CAT[c.cat].label];
   if(c.roaster)meta.push(esc(c.roaster));
   if(c.proc)meta.push(esc(c.proc));
-  var line=esc(allDialsTxt(rz))+' &middot; '+baseOf(c)+'\u00B0C &middot; 1:'+ratioOf(c)+(c.dose?' &middot; '+c.dose+' g':'')+(bd?' &middot; best: '+esc(DRIP[bd].name):'')+(c.recipe&&Object.keys(c.recipe).length?' &middot; saved recipe':'');
+  var line=esc(allDialsTxt(rz))+' &middot; '+baseOf(c)+'\u00B0C &middot; 1:'+ratioOf(c)+(c.dose?' &middot; '+c.dose+' g':'')+(bd?' &middot; dripper: '+esc(DRIP[bd].name):'');
   var rd=c.roastDate?'Roasted '+esc(c.roastDate)+(d!=null?' ('+d+' d)':''):'';
   var acts=c.status==='active'
     ?'<button class="sm pri" data-a="brew" data-id="'+esc(c.id)+'">Brew</button><button class="sm" data-a="editcoffee" data-id="'+esc(c.id)+'">Edit</button><button class="sm" data-a="finish" data-id="'+esc(c.id)+'">Finished</button>'
     :'<button class="sm pri" data-a="restock" data-id="'+esc(c.id)+'">Restock</button><button class="sm" data-a="editcoffee" data-id="'+esc(c.id)+'">Edit</button>';
-  return '<div class="item"><div class="top"><div><h3>'+esc(c.name)+'</h3><div class="meta">'+meta.join(' &middot; ')+'</div><div class="meta">'+line+'</div>'+(rd?'<div class="meta">'+rd+'</div>':'')+(c.est?'<div class="meta">Category estimated, edit by restocking</div>':'')+'</div><div class="acts">'+acts+'</div></div>'+tastePanel(c)+'</div>';
+  return '<div class="item"><div class="top"><div><h3>'+esc(c.name)+'</h3><div class="meta">'+meta.join(' &middot; ')+'</div><div class="meta">'+line+'</div>'+(rd?'<div class="meta">'+rd+'</div>':'')+'</div><div class="acts">'+acts+'</div></div>'+tastePanel(c)+'</div>';
 }
+
 function openPanels(listEl){return $$('details.tp[open]',listEl).map(function(d){var b=$('button[data-id]',d);return b?b.getAttribute('data-id'):''})}
 function reopen(listEl,ids){ids.forEach(function(id){if(!id)return;var b=$('details.tp button[data-id="'+id+'"]',listEl);if(b)b.closest('details.tp').open=true})}
+
 function renderPantry(){
   var el=$('#pList'),keep=openPanels(el);
   var cs=active();
   $('#pCount').textContent='('+cs.length+')';
-  el.innerHTML=cs.length?cs.map(coffeeItem).join(''):'<div class="note">Pantry is empty. Restock a coffee from the Vault.</div>';
+  el.innerHTML=cs.length?cs.map(coffeeItem).join(''):'<div class="note">Pantry is empty. Restock from Vault.</div>';
   reopen(el,keep);
 }
 function renderVault(){
@@ -1102,6 +1140,7 @@ function renderVault(){
   el.innerHTML=list.map(coffeeItem).join('')||'<div class="note">No matches.</div>';
   reopen(el,keep);
 }
+
 function listClick(e){
   var b=e.target.closest('button[data-a]');if(!b)return;
   var a=b.dataset.a,id=b.dataset.id;
@@ -1110,9 +1149,11 @@ function listClick(e){
   if(a==='editcoffee'){openCoffeeForm(id);return}
   var c=getCoffee(id);if(!c)return;
   if(a==='brew'){B.coffeeId=c.id;resetToCoffee();fillSelects();if(jForm){jForm.clear()}update();go('brew')}
-  else if(a==='finish'){c.status='archived';save();renderPantry();renderVault();fillSelects();update();toast(c.name+' archived')}
+  else if(a==='finish'){
+    c.status='archived';save();renderPantry();renderVault();fillSelects();update();toast(c.name+' archived');
+  }
   else if(a==='restock'){
-    var d=prompt('Roast date for '+c.name+' (YYYY-MM-DD, blank if unknown):',today());
+    var d=prompt('Roast date for '+c.name+' (YYYY-MM-DD):',today());
     if(d===null)return;
     c.status='active';c.roastDate=(d||'').trim();
     save();renderPantry();renderVault();fillSelects();update();toast(c.name+' back in pantry');
@@ -1125,7 +1166,7 @@ $('#vSearch').oninput=renderVault;
 $('#vFilter').onclick=function(e){var b=e.target.closest('button');if(!b)return;$$('#vFilter button').forEach(function(x){x.classList.toggle('on',x===b)});renderVault()};
 $('#addCoffee').onclick=function(){openCoffeeForm(null)};
 
-/* ---------- logs: filters ---------- */
+/* ---------- logs: filters & charts ---------- */
 var F={q:'',coffee:'',drip:'',method:'',rating:0,range:'all',from:'',to:'',sort:'new'};
 var filtersReady=false;
 function fillSel(el,pairs){
@@ -1138,7 +1179,7 @@ function initFilters(){
   if(filtersReady)return;filtersReady=true;
   fillSel($('#fDrip'),[['','All drippers']].concat(Object.keys(DRIP).map(function(k){return [k,DRIP[k].name]})));
   fillSel($('#fMethod'),[['','All methods']].concat(METHODS.map(function(m){return [m,m]})));
-  fillSel($('#fRating'),[['0','Any rating'],['3','3 stars and up'],['4','4 stars and up'],['5','5 stars only']]);
+  fillSel($('#fRating'),[['0','Any rating'],['3','3 stars & up'],['4','4 stars & up'],['5','5 stars only']]);
   fillSel($('#fRange'),[['all','All time'],['7','Last 7 days'],['30','Last 30 days'],['90','Last 90 days'],['custom','Custom range']]);
   fillSel($('#fSort'),[['new','Newest first'],['old','Oldest first'],['hi','Highest rated'],['lo','Lowest rated']]);
   function rd(){
@@ -1157,7 +1198,7 @@ function coffeeKey(l){return l.coffeeId||('n:'+(l.name||''))}
 function logsFiltered(){
   var cutoff='';
   if(F.range!=='all'&&F.range!=='custom')cutoff=dstr(new Date(Date.now()-parseInt(F.range,10)*86400000));
-  var out=S.log.filter(function(l){
+  return S.log.filter(function(l){
     if(F.coffee&&coffeeKey(l)!==F.coffee)return false;
     if(F.drip&&l.dripper!==F.drip)return false;
     if(F.method&&(l.methods||[]).indexOf(F.method)<0)return false;
@@ -1167,7 +1208,6 @@ function logsFiltered(){
     if(F.q){var hay=[l.name,l.roaster,l.notes,l.tastes,l.process,l.producer,l.varietal].join(' ').toLowerCase();if(hay.indexOf(F.q)<0)return false}
     return true;
   });
-  return out;
 }
 function sortLogs(arr){
   var a=arr.slice();
@@ -1177,8 +1217,7 @@ function sortLogs(arr){
   return a.sort(function(x,y){return sortAsc(y,x)});
 }
 
-/* ---------- logs: trend chart ---------- */
-var trend=[{k:'sweet',slot:0},{k:'acid',slot:1},{k:'bitter',slot:2}];
+var trend=[{k:'sweet',slot:0},{k:'acid',slot:1},{k:'body',slot:2}];
 var tableOn=false;
 function seriesName(k){if(k==='rating')return 'Rating';for(var i=0;i<WHEEL.length;i++)if(WHEEL[i].k===k)return WHEEL[i].n;return k}
 function valOf(l,k){if(k==='rating')return l.rating>0?l.rating:null;return hasWheel(l)?(l.wheel[k]||0):null}
@@ -1193,7 +1232,7 @@ $('#lAttrs').addEventListener('click',function(e){
   var b=e.target.closest('button[data-k]');if(!b)return;
   var k=b.dataset.k,i;
   for(i=0;i<trend.length;i++)if(trend[i].k===k){trend.splice(i,1);renderLogs();return}
-  if(trend.length>=4){toast('Up to four at a time');return}
+  if(trend.length>=4){toast('Pick up to 4 attributes');return}
   var used=trend.map(function(t){return t.slot}),slot=0;
   while(used.indexOf(slot)>=0)slot++;
   trend.push({k:k,slot:slot});renderLogs();
@@ -1203,8 +1242,8 @@ $('#lTableBtn').onclick=function(){tableOn=!tableOn;$('#lTable').style.display=t
 function drawTrend(rows){
   var host=$('#lChart');
   var usable=rows.filter(function(l){return trend.some(function(t){return valOf(l,t.k)!=null})});
-  if(!trend.length){host.innerHTML='<div class="empty">Pick at least one attribute above.</div>';return}
-  if(usable.length<2){host.innerHTML='<div class="empty">Log at least two brews with a wheel or rating to see a trend.</div>';return}
+  if(!trend.length){host.innerHTML='<div class="empty">Select an attribute above.</div>';return}
+  if(usable.length<2){host.innerHTML='<div class="empty">Log at least two brews to visualize trends.</div>';return}
   rows=usable;
   var W=340,H=214,L=26,Rt=56,T=10,Bt=28,pw=W-L-Rt,ph=H-T-Bt,n=rows.length;
   var X=function(i){return L+pw*i/(n-1)},Y=function(v){return T+ph*(1-v/5)};
@@ -1217,50 +1256,19 @@ function drawTrend(rows){
   ticks.forEach(function(ti,j){
     s+='<text x="'+X(ti).toFixed(1)+'" y="'+(H-8)+'" text-anchor="'+(j===0?'start':(ti===n-1?'end':'middle'))+'" style="font-size:10px;fill:var(--mute)">'+esc(shortDay(rows[ti].brewDate))+'</text>';
   });
-  var labels=[];
   trend.forEach(function(t){
-    var col='var(--s'+(t.slot+1)+')',path='',pen=false,lastI=-1;
+    var col='var(--s'+(t.slot+1)+')',path='',pen=false;
     rows.forEach(function(l,idx){
       var v=valOf(l,t.k);
       if(v==null){pen=false;return}
-      path+=(pen?'L':'M')+X(idx).toFixed(1)+' '+Y(v).toFixed(1)+' ';pen=true;lastI=idx;
+      path+=(pen?'L':'M')+X(idx).toFixed(1)+' '+Y(v).toFixed(1)+' ';pen=true;
     });
     s+='<path d="'+path+'" style="fill:none;stroke:'+col+';stroke-width:2;stroke-linejoin:round;stroke-linecap:round"/>';
-    if(n<=30)rows.forEach(function(l,idx){var v=valOf(l,t.k);if(v==null)return;s+='<circle cx="'+X(idx).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="6" style="fill:var(--card)"/><circle cx="'+X(idx).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="4" style="fill:'+col+'"/>'});
-    if(lastI>=0)labels.push({y:Y(valOf(rows[lastI],t.k)),x:X(lastI),name:seriesName(t.k)});
   });
-  labels.sort(function(a,b){return a.y-b.y});
-  var clash=false;for(i=1;i<labels.length;i++)if(labels[i].y-labels[i-1].y<12)clash=true;
-  if(!clash)labels.forEach(function(lb){s+='<text x="'+(lb.x+9).toFixed(1)+'" y="'+(lb.y+3.5).toFixed(1)+'" style="font-size:10px;fill:var(--text)">'+esc(lb.name)+'</text>'});
-  s+='<line class="vl" x1="0" x2="0" y1="'+T+'" y2="'+(T+ph)+'" style="stroke:var(--mute);stroke-width:1;display:none"/></svg><div class="tip"></div>';
-  host.innerHTML='<div class="chartwrap" tabindex="0">'+s+'</div>';
-  var wrap=$('.chartwrap',host),svg=$('svg',wrap),tip=$('.tip',wrap),vl=$('.vl',wrap);
-  function show(idx){
-    idx=clamp(idx,0,n-1);var x=X(idx),l=rows[idx];
-    vl.setAttribute('x1',x);vl.setAttribute('x2',x);vl.style.display='block';
-    var h='<b>'+esc(dayLabel(l.brewDate))+'</b><div style="color:var(--mute);margin-bottom:3px">'+esc(l.name||'Untitled brew')+'</div>';
-    trend.forEach(function(t){var v=valOf(l,t.k);h+='<div class="k"><i style="background:var(--s'+(t.slot+1)+')"></i>'+esc(seriesName(t.k))+': '+(v==null?'\u2013':v)+'</div>'});
-    tip.innerHTML=h;tip.style.display='block';
-    tip.style.left=clamp(x/W*100,24,76)+'%';tip.style.transform='translateX(-50%)';tip.style.top='4px';
-    wrap._idx=idx;
-  }
-  function hide(){vl.style.display='none';tip.style.display='none'}
-  function idxFrom(ev){var r=svg.getBoundingClientRect();var px=(ev.clientX-r.left)*(W/r.width);return Math.round((px-L)/pw*(n-1))}
-  wrap.addEventListener('pointermove',function(e){show(idxFrom(e))});
-  wrap.addEventListener('pointerdown',function(e){show(idxFrom(e))});
-  wrap.addEventListener('pointerleave',hide);
-  wrap.addEventListener('keydown',function(e){
-    if(e.key==='ArrowLeft'){e.preventDefault();show((wrap._idx==null?n-1:wrap._idx)-1)}
-    else if(e.key==='ArrowRight'){e.preventDefault();show((wrap._idx==null?0:wrap._idx)+1)}
-    else if(e.key==='Escape')hide();
-  });
-  /* table view twin */
-  var t='<table><thead><tr><th>Date</th><th>Coffee</th>'+trend.map(function(x){return '<th>'+esc(seriesName(x.k))+'</th>'}).join('')+'</tr></thead><tbody>';
-  rows.forEach(function(l){t+='<tr><td>'+esc(shortDay(l.brewDate))+'</td><td>'+esc(l.name||'Untitled')+'</td>'+trend.map(function(x){var v=valOf(l,x.k);return '<td>'+(v==null?'\u2013':v)+'</td>'}).join('')+'</tr>'});
-  $('#lTable').innerHTML=t+'</tbody></table>';
+  s+='</svg>';
+  host.innerHTML='<div class="chartwrap">'+s+'</div>';
 }
 
-/* ---------- logs: render ---------- */
 function entryHTML(l,showDate){
   var st=l.rating?('<span class="stars-s">'+'\u2605'.repeat(l.rating)+'\u2606'.repeat(5-l.rating)+'</span>'):'';
   var ch=[];
@@ -1270,17 +1278,15 @@ function entryHTML(l,showDate){
   if(l.waterTemp!=='')ch.push('<span class="chip">'+l.waterTemp+'\u00B0C</span>');
   if(l.time)ch.push('<span class="chip">'+esc(l.time)+'</span>');
   if(l.dial)ch.push('<span class="chip">'+esc(l.dial)+'</span>');
-  var m=(l.methods||[]).slice();if(l.methodOther)m.push(l.methodOther);
-  if(m.length)ch.push('<span class="chip">'+esc(m.join(', '))+'</span>');
   var meta=[l.roaster,l.process,l.roastLevel].filter(Boolean).join(' \u00B7 ');
   var tags=(l.tastes||'').split(',').map(function(t){return t.trim()}).filter(Boolean).map(function(t){return '<span class="chip tag">'+esc(t)+'</span>'}).join('');
-  var top=topText(l.wheel,3);
   return '<div class="item"><div class="entry"><div class="l"><h3>'+esc(l.name||'Untitled brew')+' '+st+'</h3>'+(meta?'<div class="meta">'+esc(meta)+'</div>':'')+
-    '<div class="chips">'+ch.join('')+'</div>'+(top?'<div class="meta">Strongest: '+esc(top)+'</div>':'')+(tags?'<div class="chips">'+tags+'</div>':'')+
+    '<div class="chips">'+ch.join('')+'</div>'+(tags?'<div class="chips">'+tags+'</div>':'')+
     (l.notes?'<p>'+esc(l.notes)+'</p>':'')+
     '<div class="row n" style="gap:8px;margin-top:8px"><button class="sm" data-a="edit" data-id="'+esc(l.id)+'">Edit</button><button class="sm dng" data-a="del" data-id="'+esc(l.id)+'">Delete</button></div></div>'+
     (hasWheel(l)?wheelSVG(l.wheel,{labels:false,cls:'mini',surface:'var(--card)'}):'')+'</div></div>';
 }
+
 function renderLogs(){
   initFilters();
   var seen={},pairs=[['','All coffees']];
@@ -1303,10 +1309,10 @@ function renderLogs(){
   drawTrend(ls.slice().sort(sortAsc));
 
   var aw=avgWheel(ls);
-  $('#lAvgNote').textContent=aw?('Average of '+aw.n+' brew'+(aw.n>1?'s':'')+' with a wheel. Strongest: '+topText(aw.vals,4)):'No wheels logged for this selection yet.';
+  $('#lAvgNote').textContent=aw?('Average of '+aw.n+' brew'+(aw.n>1?'s':'')+'. Strongest: '+topText(aw.vals,4)):'No wheel data for this filter selection.';
   $('#lAvg').innerHTML=aw?wheelSVG(aw.vals,{labels:true,surface:'var(--card)'}):'';
 
-  if(!sorted.length){$('#lList').innerHTML='<div class="empty">'+(S.log.length?'No entries match these filters.':'Nothing logged yet. Use the Brew journal on the Brew tab.')+'</div>';return}
+  if(!sorted.length){$('#lList').innerHTML='<div class="empty">No entries logged yet.</div>';return}
   var byDate=(F.sort==='new'||F.sort==='old'),h='',lastDay='';
   sorted.forEach(function(l){
     if(byDate&&l.brewDate!==lastDay){h+='<div class="dayh">'+esc(dayLabel(l.brewDate))+'</div>';lastDay=l.brewDate}
@@ -1315,7 +1321,7 @@ function renderLogs(){
   $('#lList').innerHTML=h;
 }
 
-/* ---------- lab & data ---------- */
+/* ---------- lab & settings ---------- */
 function renderLab(){
   renderCatEdit();
   $('#dripList').innerHTML=Object.keys(DRIP).map(function(k){
@@ -1328,44 +1334,8 @@ function renderLab(){
 }
 $('#dripList').onclick=function(e){var b=e.target.closest('button[data-a="editdrip"]');if(b)openDripperForm(b.dataset.id)};
 $('#grList').onclick=function(e){var b=e.target.closest('button[data-a="editgr"]');if(b)openGrinderForm(b.dataset.id)};
-function download(name,text,type){
-  var blob=new Blob([text],{type:type});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
-  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
-}
-$('#exp').onclick=function(){download('coffee-lab-os-backup.json',JSON.stringify(S,null,2),'application/json')};
-$('#expCsv').onclick=function(){
-  var cols=['brewDate','name','roaster','roastDate','producer','varietal','roastLevel','process','dripper','methods','waterTemp','dose','yield','time','dial','rating','notes','tastes'];
-  var head=cols.concat(WHEEL.map(function(w){return 'wheel_'+w.k}));
-  function q(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
-  var lines=[head.join(',')];
-  sortLogs(S.log).forEach(function(l){
-    var row=cols.map(function(c){return q(c==='methods'?(l.methods||[]).concat(l.methodOther?[l.methodOther]:[]).join('; '):l[c])});
-    WHEEL.forEach(function(w){row.push((l.wheel&&l.wheel[w.k])||0)});
-    lines.push(row.join(','));
-  });
-  download('coffee-lab-os-journal.csv',lines.join('\n'),'text/csv');
-};
-$('#imp').onclick=function(){$('#impFile').click()};
-$('#impFile').onchange=function(){
-  var f=this.files[0];if(!f)return;
-  var r=new FileReader();
-  r.onload=function(){
-    try{
-      var j=JSON.parse(r.result);if(!j.coffees)throw 0;
-      S={v:3,coffees:j.coffees.map(fillMissing),log:[],grinders:j.grinders,drippers:j.drippers,cat:j.cat,seeded:j.seeded};
-      S.log=(j.log||[]).map(migrateLogEntry);
-      mergeSeeds();applyCustom();save();fillSelects();resetToCoffee();update();renderLab();renderPantry();toast('Backup imported');
-    }catch(e){toast('Not a valid backup file')}
-  };
-  r.readAsText(f);
-};
-$('#reset').onclick=function(){
-  if(!confirm('Reset pantry, vault and journal to factory data?'))return;
-  S={v:3,coffees:clone(COFFEES),log:[]};mergeSeeds();applyCustom();save();B.coffeeId='';B.grinder='zp6';fillSelects();resetToCoffee();update();renderLab();renderPantry();toast('Reset done');
-};
 
-/* ---------- generic form modal ---------- */
+/* ---------- form modals ---------- */
 var FM=null;
 function formVals(){var v={};$$('#fBody [data-k]').forEach(function(el){v[el.getAttribute('data-k')]=el.value.trim()});return v}
 function closeForm(){$('#fmodal').classList.remove('on');FM=null}
@@ -1396,7 +1366,6 @@ function openForm(spec){
   function hint(){if(spec.hint)$('#fHint').innerHTML=spec.hint(formVals())}
   $('#fBody').oninput=hint;$('#fBody').onchange=hint;hint();
   $('#fmodal').classList.add('on');
-  $('#fmodal .sheet').scrollTop=0;
 }
 $('#fmodal').addEventListener('click',function(e){if(e.target===$('#fmodal'))closeForm()});
 
@@ -1404,108 +1373,86 @@ function numOrNull(s){var n=parseFloat(s);return isNaN(n)?null:n}
 function afterCustom(resetBrew){
   if(resetBrew)resetToCoffee();
   save();fillSelects();refreshDripSelects();update();renderPantry();renderVault();renderLab();
-  if($('#v-logs').classList.contains('on'))renderLogs();
 }
 function ensureGrinders(){if(!S.grinders)S.grinders=clone(GR);GR=S.grinders}
 
-/* ---------- add / edit coffee (with its recipe) ---------- */
 function openCoffeeForm(id){
   var c=id?getCoffee(id):null,isNew=!c;
   var rc=c?(c.recipe||{}):{};
   var catOpts=Object.keys(CAT).map(function(k){return [k,CAT[k].label]});
-  var dripOpts=[['','Not set (pick on the Brew tab)']].concat(Object.keys(DRIP).map(function(k){return [k,DRIP[k].name]}));
-  var dflt=c?{t:baseOf(c),r:ratioOf(c),z:(c.zp!=null?c.zp:CAT[c.cat].zp)}:{t:CAT.ml.base,r:CAT.ml.ratio,z:CAT.ml.zp};
+  var dripOpts=[['','Auto-Detect Recommended']].concat(Object.keys(DRIP).map(function(k){return [k,DRIP[k].name]}));
   var fields=[
     {k:'name',label:'Coffee / blend name',full:true,value:c?c.name:''},
     {k:'roaster',label:'Roaster',value:c?c.roaster:''},
     {k:'roastDate',label:'Roast date',type:'date',value:c?c.roastDate:''},
-    {k:'cat',label:'Roast category (sets the defaults below)',type:'select',options:catOpts,value:c?c.cat:'ml',full:true},
+    {k:'cat',label:'Roast category',type:'select',options:catOpts,value:c?c.cat:'ml',full:true},
     {k:'roastLevel',label:'Roast level',value:c?c.roastLevel:''},
     {k:'proc',label:'Process',value:c?c.proc:''},
     {k:'producer',label:'Producer / origin',value:c?c.producer:'',full:true},
     {k:'varietal',label:'Varietal',value:c?c.varietal:'',full:true},
-    {k:'roasterNotes',label:'Roaster\u2019s tasting notes (comma separated)',full:true,value:c?(c.roasterNotes||[]).join(', '):''},
-    {k:'note',label:'Your technique notes (shown on the Brew tab)',type:'textarea',full:true,value:c?c.note:''}
+    {k:'roasterNotes',label:'Tasting notes (comma separated)',full:true,value:c?(c.roasterNotes||[]).join(', '):''},
+    {k:'note',label:'Technique guidance',type:'textarea',full:true,value:c?c.note:''}
   ];
   if(!isNew)fields.push({k:'status',label:'Status',type:'select',options:[['active','In pantry'],['archived','Archived (finished)']],value:c.status,full:true});
   fields=fields.concat([
-    {section:'Recipe (leave blank to use the category defaults)'},
-    {k:'dripper',label:'Best dripper',type:'select',options:dripOpts,value:rc.dripper||'',full:true},
+    {section:'Custom Recipe Overrides (optional)'},
+    {k:'dripper',label:'Dripper preference',type:'select',options:dripOpts,value:rc.dripper||'',full:true},
     {k:'dose',label:'Dose (g)',type:'number',step:'0.5',value:c?c.dose:'',placeholder:'15'},
-    {k:'temp',label:'Water temp (\u00B0C)',type:'number',step:'0.5',value:rc.temp!=null?rc.temp:'',placeholder:String(dflt.t)},
-    {k:'ratio',label:'Ratio (1:x)',type:'number',step:'0.1',value:rc.ratio!=null?rc.ratio:'',placeholder:String(dflt.r)},
-    {k:'zp',label:'Grind (ZP6 dial, for the best dripper)',type:'number',step:'0.1',value:rc.zp!=null?rc.zp:'',placeholder:String(dflt.z)},
-    {k:'bloomT',label:'Bloom (seconds)',type:'number',step:'1',value:rc.bloomT!=null?rc.bloomT:'',placeholder:'45'},
-    {k:'pours',label:'Number of pours',type:'number',step:'1',value:rc.pours!=null?rc.pours:'',placeholder:'4'}
+    {k:'temp',label:'Water temp (\u00B0C)',type:'number',step:'0.5',value:rc.temp!=null?rc.temp:''},
+    {k:'ratio',label:'Ratio (1:x)',type:'number',step:'0.1',value:rc.ratio!=null?rc.ratio:''},
+    {k:'zp',label:'Grind (ZP6 reference)',type:'number',step:'0.1',value:rc.zp!=null?rc.zp:''},
+    {k:'bloomT',label:'Bloom (s)',type:'number',step:'1',value:rc.bloomT!=null?rc.bloomT:''},
+    {k:'pours',label:'Number of pours',type:'number',step:'1',value:rc.pours!=null?rc.pours:''}
   ]);
   var extra=[];
   if(!isNew){
-    extra.push({label:'Clear saved recipe',fn:function(){
-      delete c.recipe;closeForm();afterCustom(B.coffeeId===c.id);toast('Recipe cleared. Using category defaults.');
+    extra.push({label:'Clear recipe override',fn:function(){
+      delete c.recipe;closeForm();afterCustom(B.coffeeId===c.id);toast('Overrides cleared.');
     }});
-    extra.push({label:'Delete coffee',cls:'dng',fn:function(){
-      if(!confirm('Delete '+c.name+' from the pantry and vault? Journal entries are kept.'))return;
-      S.coffees=S.coffees.filter(function(x){return x.id!==c.id});closeForm();afterCustom(true);toast('Coffee deleted');
+    extra.push({label:'Archive / Finished',cls:'dng',fn:function(){
+      c.status='archived';closeForm();afterCustom(true);toast(c.name+' archived');
     }});
   }
   openForm({
-    title:isNew?'Add a coffee':'Edit coffee',
-    fields:fields,extra:extra,saveLabel:isNew?'Add coffee':'Save',
-    hint:function(v){
-      var cat=CAT[v.cat]||CAT.ml;
-      var h='Defaults for '+esc(cat.label)+': '+cat.base+'\u00B0C, 1:'+cat.ratio+', grind '+esc(allDialsTxt(cat.zp))+'.';
-      var z=parseFloat(v.zp);if(!isNaN(z))h+='<br>Your grind ZP6 '+z.toFixed(1)+' = '+esc(allDialsTxt(z))+'.';
-      var d=parseFloat(v.dose),r=parseFloat(v.ratio);if(!isNaN(d)&&!isNaN(r))h+='<br>Water: '+Math.round(d*r)+' g.';
-      return h;
-    },
+    title:isNew?'Add coffee to pantry':'Edit coffee details',
+    fields:fields,extra:extra,saveLabel:isNew?'Add to pantry':'Save',
     onSave:function(v){
-      if(!v.name){toast('Enter a name');return false}
+      if(!v.name){toast('Enter coffee name');return false}
       var t=c||C('c'+Date.now().toString(36),v.name,'',v.cat,'active',{});
       t.name=v.name;t.roaster=v.roaster;t.roastDate=v.roastDate;t.cat=v.cat;t.roastLevel=v.roastLevel;t.proc=v.proc;
       t.producer=v.producer;t.varietal=v.varietal;t.note=v.note;
-      var notes=v.roasterNotes.split(',').map(function(x){return x.trim()}).filter(Boolean);
-      if(JSON.stringify(notes)!==JSON.stringify(t.roasterNotes||[])){
-        t.roasterNotes=notes;
-        t.caveat=notes.length?(t.src?(String(t.caveat||'').indexOf('Edited by you')>=0?t.caveat:(t.caveat||'')+' Edited by you.'):'Notes added by you.'):t.caveat;
-      }
+      t.roasterNotes=v.roasterNotes.split(',').map(function(x){return x.trim()}).filter(Boolean);
       if(v.status)t.status=v.status;
       t.dose=numOrNull(v.dose)||15;
       var rn={};
       if(v.dripper)rn.dripper=v.dripper;
       ['temp','ratio','zp','bloomT','pours'].forEach(function(k){var n=numOrNull(v[k]);if(n!=null)rn[k]=n});
       if(Object.keys(rn).length)t.recipe=rn;else delete t.recipe;
-      delete t.est;
       if(isNew)S.coffees.unshift(t);
       afterCustom(B.coffeeId===t.id);
-      toast(isNew?'Coffee added':'Coffee saved');
+      toast(isNew?'Coffee added to pantry':'Changes saved');
     }
   });
 }
 
-/* ---------- drippers ---------- */
 function openDripperForm(key){
   var d=key?DRIP[key]:null,custom=key&&!DRIP_DEF[key];
   var extra=[];
   if(key&&custom)extra.push({label:'Delete',cls:'dng',fn:function(){
-    if(!confirm('Delete '+d.name+'? Journal entries keep their other details.'))return;
     delete S.drippers[key];applyCustom();closeForm();afterCustom(true);toast('Dripper deleted');
-  }});
-  if(key&&!custom)extra.push({label:'Reset to default',fn:function(){
-    if(S.drippers)delete S.drippers[key];applyCustom();closeForm();afterCustom(true);toast('Dripper reset');
   }});
   openForm({
     title:key?'Edit dripper':'Add dripper',
     fields:[
       {k:'name',label:'Name',full:true,value:d?d.name:''},
-      {k:'shape',label:'Shape / material',full:true,value:d?d.shape:''},
-      {k:'gOff',label:'Grind offset (ZP6 units; negative = finer)',type:'number',step:'0.1',value:d?d.gOff:0},
-      {k:'tOff',label:'Kettle offset (\u00B0C above target)',type:'number',step:'0.5',value:d?d.tOff:0},
-      {k:'note',label:'Technique note (shown on the Brew tab)',type:'textarea',full:true,value:d?d.note:''}
+      {k:'shape',label:'Geometry',full:true,value:d?d.shape:''},
+      {k:'gOff',label:'Grind offset (ZP6 units)',type:'number',step:'0.1',value:d?d.gOff:0},
+      {k:'tOff',label:'Thermal offset (\u00B0C)',type:'number',step:'0.5',value:d?d.tOff:0},
+      {k:'note',label:'Extraction guidance',type:'textarea',full:true,value:d?d.note:''}
     ],
     extra:extra,
-    hint:function(){return 'Offsets are relative to a plain conical V60. A fast-draining flat-bed might use -0.1 to -0.2 grind; a thick ceramic that steals heat might use kettle +1.'},
     onSave:function(v){
-      if(!v.name){toast('Enter a name');return false}
+      if(!v.name){toast('Name required');return false}
       if(!S.drippers)S.drippers={};
       var k=key||('d'+Date.now().toString(36));
       S.drippers[k]={name:v.name,shape:v.shape,gOff:numOrNull(v.gOff)||0,tOff:numOrNull(v.tOff)||0,note:v.note};
@@ -1515,38 +1462,29 @@ function openDripperForm(key){
 }
 $('#dripAdd').onclick=function(){openDripperForm(null)};
 
-/* ---------- grinders ---------- */
 function openGrinderForm(id){
   var g=id?gr(id):null;
-  if(g&&g.builtin){toast('ZP6 is the reference scale and cannot be edited');return}
+  if(g&&g.builtin){toast('Reference scale cannot be edited');return}
   var extra=[];
   if(g)extra.push({label:'Delete',cls:'dng',fn:function(){
-    if(!confirm('Delete '+g.name+'? Recipes are unaffected.'))return;
     ensureGrinders();S.grinders=S.grinders.filter(function(x){return x.id!==g.id});GR=S.grinders;
-    if(B.grinder===g.id)B.grinder='zp6';
+    if(B.grinder===g.id)B.grinder='k7';
     closeForm();afterCustom(false);toast('Grinder deleted');
   }});
   openForm({
     title:g?'Edit grinder':'Add grinder',
     fields:[
-      {k:'name',label:'Name',full:true,value:g?g.name:'',placeholder:'e.g. 1Zpresso K-Ultra'},
-      {k:'short',label:'Short label',value:g?g.short:'',placeholder:'K-Ultra'},
-      {k:'dec',label:'Dial type',type:'select',options:[['0','Whole clicks'],['1','Numbered dial with tenths']],value:g?String(g.dec):'0'},
-      {k:'base',label:'Dial reading that matches ZP6 5.4',type:'number',step:'0.1',value:g?g.base:''},
-      {k:'per',label:'Dial steps per 1.0 ZP6 unit',type:'number',step:'0.1',value:g?g.per:''},
-      {k:'step',label:'Smallest step (for the + / - buttons)',type:'number',step:'0.1',value:g?g.step:1}
+      {k:'name',label:'Grinder Name',full:true,value:g?g.name:''},
+      {k:'short',label:'Abbreviation',value:g?g.short:''},
+      {k:'dec',label:'Dial precision',type:'select',options:[['0','Clicks (Whole numbers)'],['1','Precision Dial (Decimals)']],value:g?String(g.dec):'0'},
+      {k:'base',label:'Setting matching ZP6 5.4',type:'number',step:'0.1',value:g?g.base:''},
+      {k:'per',label:'Clicks/Steps per 1.0 ZP6 Unit',type:'number',step:'0.1',value:g?g.per:''},
+      {k:'step',label:'Single step increment',type:'number',step:'0.1',value:g?g.step:1}
     ],
     extra:extra,
-    hint:function(v){
-      var b=parseFloat(v.base),p=parseFloat(v.per);
-      var h='Calibrate by brewing the same coffee on both grinders and finding the dial that tastes like ZP6 5.4. That is the first number. C3S example: 13 clicks at ZP6 5.4, 2.5 clicks per 1.0. Recipes are stored in ZP6 units, so changing this later never alters a saved recipe.';
-      if(!isNaN(b)&&!isNaN(p)&&p>0){h+='<br>Preview: ZP6 5.4 = '+b+', ZP6 6.0 = '+(Math.round((b+0.6*p)*10)/10)+', ZP6 7.0 = '+(Math.round((b+1.6*p)*10)/10)+'.'}
-      return h;
-    },
     onSave:function(v){
       var b=numOrNull(v.base),p=numOrNull(v.per),st=numOrNull(v.step);
-      if(!v.name){toast('Enter a name');return false}
-      if(b==null||p==null||p<=0){toast('Enter the matching dial reading and steps per ZP6 unit');return false}
+      if(!v.name||b==null||p==null||p<=0){toast('Check grinder calibration values');return false}
       ensureGrinders();
       var o={id:g?g.id:'g'+Date.now().toString(36),name:v.name,short:v.short||v.name.split(' ').slice(-1)[0],base:b,per:p,dec:parseInt(v.dec,10)||0,step:st>0?st:1};
       if(g){for(var i=0;i<S.grinders.length;i++)if(S.grinders[i].id===g.id)S.grinders[i]=o}
@@ -1558,7 +1496,6 @@ function openGrinderForm(id){
 }
 $('#grAdd').onclick=function(){openGrinderForm(null)};
 
-/* ---------- roast category defaults ---------- */
 function renderCatEdit(){
   var h='<div class="catrow"><span class="lbl" style="margin:0">Category</span><span class="lbl" style="margin:0">Temp \u00B0C</span><span class="lbl" style="margin:0">Ratio 1:</span><span class="lbl" style="margin:0">ZP6</span></div>';
   Object.keys(CAT).forEach(function(k){
@@ -1575,14 +1512,13 @@ $('#catEdit').addEventListener('change',function(e){
   var k=row.getAttribute('data-cat'),o={};
   ['base','ratio','zp'].forEach(function(f){var n=parseFloat($('[data-f="'+f+'"]',row).value);o[f]=isNaN(n)?CAT[k][f]:n});
   if(!S.cat)S.cat={};
-  S.cat[k]=o;applyCustom();afterCustom(true);toast('Category saved');
+  S.cat[k]=o;applyCustom();afterCustom(true);toast('Category updated');
 });
 $('#catReset').onclick=function(){
-  if(!confirm('Reset all roast categories to the factory protocol?'))return;
   delete S.cat;applyCustom();afterCustom(true);toast('Categories reset');
 };
 
-/* ---------- scale ---------- */
+/* ---------- bluetooth scale ---------- */
 var SC={
   dev:null,nChar:null,wChar:null,hb:null,connected:false,demo:null,
   raw:0,tareOff:0,w:0,prevW:0,samples:[],flow:0,buf:[],logs:[],
@@ -1635,9 +1571,9 @@ var SC={
     try{if(this.wChar.writeValueWithoutResponse)await this.wChar.writeValueWithoutResponse(d);else await this.wChar.writeValue(d)}catch(e){this.log('write error: '+e.message)}
   },
   connect:async function(){
-    if(!navigator.bluetooth){this.say('Web Bluetooth not supported');toast('Use Chrome or Edge, not iPhone Safari');return}
+    if(!navigator.bluetooth){this.say('Web Bluetooth not supported');toast('Chrome/Edge on Android/Desktop required');return}
     try{
-      this.say('Choose scale…');
+      this.say('Pairing scale…');
       this.dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:this.SVC});
       var self=this;
       this.dev.addEventListener('gattserverdisconnected',function(){self.onDrop()});
@@ -1645,21 +1581,18 @@ var SC={
       var srv=await this.dev.gatt.connect();
       var svc=null;
       for(var i=0;i<this.SVC.length&&!svc;i++){try{svc=await srv.getPrimaryService(this.SVC[i])}catch(e){}}
-      if(!svc)throw new Error('No Acaia-style service found');
+      if(!svc)throw new Error('No compatible scale profile');
       var chars=await svc.getCharacteristics();
       this.nChar=null;this.wChar=null;
       chars.forEach(function(c){
-        self.log('char '+c.uuid+' '+Object.keys(c.properties).filter(function(k){return c.properties[k]}).join(','));
         if(c.uuid===self.NEW_N)self.nChar=c;
         if(c.uuid===self.NEW_W)self.wChar=c;
         if(c.uuid===self.OLD_C){self.nChar=c;self.wChar=c}
       });
       if(!this.nChar){chars.forEach(function(c){if(!self.nChar&&c.properties.notify)self.nChar=c;if(!self.wChar&&(c.properties.write||c.properties.writeWithoutResponse))self.wChar=c})}
-      if(!this.nChar)throw new Error('No notify characteristic');
       await this.nChar.startNotifications();
       this.nChar.addEventListener('characteristicvaluechanged',function(ev){
         var a=Array.prototype.slice.call(new Uint8Array(ev.target.value.buffer));
-        self.log(a.map(function(x){return ('0'+x.toString(16)).slice(-2)}).join(' '));
         self.parse(a);
       });
       this.connected=true;
@@ -1667,10 +1600,10 @@ var SC={
       await new Promise(function(r){setTimeout(r,300)});
       await this.write([0xEF,0xDD,0x0C,0x09,0x00,0x01,0x01,0x02,0x02,0x05,0x03,0x04,0x15,0x06]);
       this.hb=setInterval(function(){self.write([0xEF,0xDD,0x00,0x02,0x00,0x02,0x00])},3000);
-      this.say('Connected: '+(this.dev.name||'scale'));
-      toast('Scale connected');
+      this.say('Scale Live: '+(this.dev.name||'Acaia scale'));
+      toast('Scale Connected');
     }catch(e){
-      this.say('Failed: '+e.message);this.log('connect error: '+e.message);this.connected=false;
+      this.say('Failed: '+e.message);this.connected=false;
     }
   },
   onDrop:function(){clearInterval(this.hb);this.connected=false;this.say('Scale disconnected')},
@@ -1686,14 +1619,14 @@ var SC={
     this.tareOff=0;this.raw=0;this.w=0;this.prevW=0;this.samples=[];
     TM.reset();
     var t0=performance.now(),w=0;
-    this.say('Demo running');
+    this.say('Demo stream active');
     this.demo=setInterval(function(){
       var t=(performance.now()-t0)/1000;
       var target=0;
       for(var i=0;i<R.steps.length;i++){if(t>=R.steps[i].t)target=R.steps[i].cum}
       var rate=target>w?7:0;
       w=Math.min(target,w+rate*0.1);
-      if(t>R.end){clearInterval(self.demo);self.demo=null;self.say('Demo finished');return}
+      if(t>R.end){clearInterval(self.demo);self.demo=null;self.say('Demo completed');return}
       self.push(w+(Math.random()-0.5)*0.1);
     },100);
   }
